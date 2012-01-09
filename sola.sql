@@ -454,13 +454,13 @@ insert into source.administrative_source_type(code, display_value, status, has_s
 insert into source.administrative_source_type(code, display_value, status, has_status, description) values('courtOrder', 'Court Order::::Ordine Tribunale', 'c', false, 'Extension to LADM');
 insert into source.administrative_source_type(code, display_value, status, has_status, description) values('agreement', 'Agreement::::Accordo', 'c', false, 'Extension to LADM');
 insert into source.administrative_source_type(code, display_value, status, has_status, description) values('contractForSale', 'Contract for Sale::::ITALIANO', 'c', false, 'Extension to LADM');
-insert into source.administrative_source_type(code, display_value, status, has_status, description) values('will', 'Will::::ITALIANO', 'x', false, 'Extension to LADM');
+insert into source.administrative_source_type(code, display_value, status, has_status, description) values('will', 'Will::::ITALIANO', 'c', false, 'Extension to LADM');
 insert into source.administrative_source_type(code, display_value, status, has_status, description) values('powerOfAttorney', 'Power of Attorney::::ITALIANO', 'c', true, 'Extension to LADM');
-insert into source.administrative_source_type(code, display_value, status, has_status, description) values('standardDocument', 'Standard Document::::ITALIANO', 'x', false, 'Extension to LADM');
-insert into source.administrative_source_type(code, display_value, status, has_status, description) values('cadastralMap', 'Cadastral Map::::Mappa Catastale', 'x', false, 'Extension to LADM');
+insert into source.administrative_source_type(code, display_value, status, has_status, description) values('standardDocument', 'Standard Document::::ITALIANO', 'c', false, 'Extension to LADM');
+insert into source.administrative_source_type(code, display_value, status, has_status, description) values('cadastralMap', 'Cadastral Map::::Mappa Catastale', 'c', false, 'Extension to LADM');
 insert into source.administrative_source_type(code, display_value, status, has_status, description) values('cadastralSurvey', 'Cadastral Survey::::Rilevamento Catastale', 'c', false, 'Extension to LADM');
-insert into source.administrative_source_type(code, display_value, status, has_status, description) values('waiver', 'Waiver to Caveat or other requirement', 'x', false, 'Extension to LADM');
-insert into source.administrative_source_type(code, display_value, status, has_status, description) values('idVerification', 'Form of Identification including Personal ID', 'x', false, 'Extension to LADM');
+insert into source.administrative_source_type(code, display_value, status, has_status, description) values('waiver', 'Waiver to Caveat or other requirement', 'c', false, 'Extension to LADM');
+insert into source.administrative_source_type(code, display_value, status, has_status, description) values('idVerification', 'Form of Identification including Personal ID', 'c', false, 'Extension to LADM');
 
 
 
@@ -1015,26 +1015,26 @@ insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is
 insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, status) values('grazing', 'rights', 'Grazing Right::::Diritto di Pascolo', false, true, true, 'x');
 insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, status) values('informalOccupation', 'rights', 'Informal Occupation::::Occupazione informale', false, false, false, 'x');
 insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, status) values('lease', 'rights', 'Lease::::Affitto', false, true, true, 'c');
-insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, status) values('occupation', 'rights', 'Occupation::::Occupazione', false, true, true, 'x');
+insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, status) values('occupation', 'rights', 'Occupation::::Occupazione', false, true, true, 'c');
 insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, status) values('ownership', 'rights', 'Ownership::::Proprieta', true, true, true, 'c');
 insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, status) values('ownershipAssumed', 'rights', 'Ownership Assumed::::Proprieta Assunta', true, true, true, 'x');
 insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, status) values('superficies', 'rights', 'Superficies::::Superficie', false, true, true, 'x');
 insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, status) values('tenancy', 'rights', 'Tenancy::::Locazione', true, true, true, 'x');
-insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, status) values('usufruct', 'rights', 'Usufruct::::Usufrutto', false, true, true, 'x');
-insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, status) values('waterrights', 'rights', 'Water Right::::Servitu di Acqua', false, true, true, 'x');
+insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, status) values('usufruct', 'rights', 'Usufruct::::Usufrutto', false, true, true, 'c');
+insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, status) values('waterrights', 'rights', 'Water Right::::Servitu di Acqua', false, true, true, 'c');
 insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, status) values('adminPublicServitude', 'restrictions', 'Administrative Public Servitude::::Servitu  Amministrazione Pubblica', false, true, true, 'x');
 insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, status) values('monument', 'restrictions', 'Monument::::Monumento', false, true, true, 'x');
 insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, status) values('mortgage', 'restrictions', 'Mortgage::::Ipoteca', false, true, true, 'c');
-insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, status) values('noBuilding', 'restrictions', 'Building Restriction::::Restrizione di Costruzione', false, false, false, 'x');
-insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, status) values('servitude', 'restrictions', 'Servitude::::Servitu', false, false, false, 'x');
+insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, status) values('noBuilding', 'restrictions', 'Building Restriction::::Restrizione di Costruzione', false, false, false, 'c');
+insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, status) values('servitude', 'restrictions', 'Servitude::::Servitu', false, false, false, 'c');
 insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, status) values('monumentMaintenance', 'responsibilities', 'Monument Maintenance::::Mantenimento Monumenti', false, false, false, 'x');
 insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, status) values('waterwayMaintenance', 'responsibilities', 'Waterway Maintenance::::Mantenimento Acqurdotti', false, false, false, 'x');
 insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) values('lifeEstate', 'rights', 'Life Estate::::Patrimonio vita', true, true, true, 'Extension to LADM', 'x');
-insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) values('apartment', 'rights', 'Apartment Ownership::::Proprieta Appartamento', true, true, true, 'Extension to LADM', 'x');
-insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) values('stateOwnership', 'rights', 'State Ownership::::Proprieta di Stato', true, false, false, 'Extension to LADM', 'x');
-insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) values('caveat', 'restrictions', 'Caveat::::Ammonizione', false, false, false, 'Extension to LADM', 'c');
-insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) values('historicPreservation', 'restrictions', 'Historic Preservation::::Conservazione Storica', false, false, false, 'Extension to LADM', 'x');
-insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) values('limitedAccess', 'restrictions', 'Limited Access (to Road)::::Accesso limitato (su strada)', false, false, false, 'Extension to LADM', 'x');
+insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) values('apartment', 'rights', 'Apartment Ownership::::Proprieta Appartamento', true, true, true, 'Extension to LADM', 'c');
+insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) values('stateOwnership', 'rights', 'State Ownership::::Proprieta di Stato', true, false, false, 'Extension to LADM', 'c');
+insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) values('caveat', 'restrictions', 'Caveat::::Ammonizione', false, true, true, 'Extension to LADM', 'c');
+insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) values('historicPreservation', 'restrictions', 'Historic Preservation::::Conservazione Storica', false, false, false, 'Extension to LADM', 'c');
+insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) values('limitedAccess', 'restrictions', 'Limited Access (to Road)::::Accesso limitato (su strada)', false, false, false, 'Extension to LADM', 'c');
 
 
 
@@ -2029,12 +2029,12 @@ insert into application.request_type(code, request_category_code, display_value,
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('redefineCadastre', 'registrationServices', 'Redefine Cadastre::::ITALIANO', 'x', 30, 25.00, 0.10, 0, 1);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('documentCopy', 'registrationServices', 'Document Copy::::Copia Documento', 'x', 1, 0.50, 0.00, 0, 0);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('mortgageCertificate', 'registrationServices', 'Mortgage Certificate::::Certiificato Ipoteca', 'x', 1, 5.00, 0.00, 0, 1, 'Mortgage Certificate issued', 'mortgage', 'vary');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template) values('newFreehold', 'registrationServices', 'New Freehold Title::::Nuovo Titolo', 'x', 5, 5.00, 0.00, 0, 1, 'Fee Simple Estate');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template) values('newFreehold', 'registrationServices', 'New Freehold Title::::Nuovo Titolo', 'c', 5, 5.00, 0.00, 0, 1, 'Fee Simple Estate');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('serviceEnquiry', 'registrationServices', 'Service Enquiry::::Richiesta Servizio', 'x', 1, 0.00, 0.00, 0, 0);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('regnDeeds', 'registrationServices', 'Deed Registration::::Registrazione Atto', 'x', 3, 1.00, 0.00, 0, 0);
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('regnOnTitle', 'registrationServices', 'Registration on Title::::Registrazione di Titolo', 'x', 5, 5.00, 0.00, 0.01, 1);
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('regnOnTitle', 'registrationServices', 'Registration on Title::::Registrazione di Titolo', 'c', 5, 5.00, 0.00, 0.01, 1);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('regnPowerOfAttorney', 'registrationServices', 'Registration of Power of Attorney::::Registrazione di Procura', 'c', 3, 5.00, 0.00, 0, 0);
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('regnStandardDocument', 'registrationServices', 'Registration of Standard Document::::Documento di Documento Standard', 'x', 3, 5.00, 0.00, 0, 0);
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('regnStandardDocument', 'registrationServices', 'Registration of Standard Document::::Documento di Documento Standard', 'c', 3, 5.00, 0.00, 0, 0);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('titleSearch', 'informationServices', 'Title Search::::Ricerca Titolo', 'x', 1, 5.00, 0.00, 0, 1);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('surveyPlanCopy', 'informationServices', 'Survey Plan Copy::::Copia Piano Perizia', 'x', 1, 1.00, 0.00, 0, 0);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('cadastrePrint', 'informationServices', 'Cadastre Print::::Stampa Catastale', 'x', 1, 0.50, 0.00, 0, 0);
@@ -2043,24 +2043,24 @@ insert into application.request_type(code, request_category_code, display_value,
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('registerLease', 'registrationServices', 'Register Lease::::ITALIANO', 'c', 5, 5.00, 0.00, 0.01, 1, 'Lease of nn years to <name>', 'lease', 'new');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template) values('noteOccupation', 'registrationServices', 'Occupation Noted::::ITALIANO', 'x', 5, 5.00, 0.00, 0.01, 1, 'Occupation by <name> recorded');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('newOwnership', 'registrationServices', 'Register New Ownership::::ITALIANO', 'c', 5, 5.00, 0.00, 0.02, 1, 'Transfer to <name>', 'ownership', 'new');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('usufruct', 'registrationServices', 'Register Usufruct::::ITALIANO', 'x', 5, 5.00, 0.00, 0, 1, '<usufruct> right granted to <name>', 'usufruct', 'new');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('waterRights', 'registrationServices', 'Register Water Rights::::ITALIANO''', 'x', 5, 5.00, 0.01, 0, 1, 'Water Rights granted to <name>', 'waterrights', 'new');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('usufruct', 'registrationServices', 'Register Usufruct::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, '<usufruct> right granted to <name>', 'usufruct', 'new');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('waterRights', 'registrationServices', 'Register Water Rights::::ITALIANO''', 'c', 5, 5.00, 0.01, 0, 1, 'Water Rights granted to <name>', 'waterrights', 'new');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('mortgage', 'registrationServices', 'Register Mortgage::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, 'Mortgage to <lender>', 'mortgage', 'new');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('buildingRestriction', 'registrationServices', 'Register Building Restriction::::ITALIANO', 'x', 5, 5.00, 0.00, 0, 1, 'Building Restriction', 'noBuilding', 'new');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('servitude', 'registrationServices', 'Register Servitude::::ITALIANO', 'x', 5, 5.00, 0.00, 0, 1, 'Servitude over <parcel1> in favour of <parcel2>', 'servitude', 'new');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('buildingRestriction', 'registrationServices', 'Register Building Restriction::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, 'Building Restriction', 'noBuilding', 'new');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('servitude', 'registrationServices', 'Register Servitude::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, 'Servitude over <parcel1> in favour of <parcel2>', 'servitude', 'new');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('lifeEstate', 'registrationServices', 'Establish Life Estate::::ITALIANO', 'x', 5, 5.00, 0.00, 0.02, 1, 'Life Estate for <name1> with Remainder Estate in <name2, name3>', 'lifeEstate', 'new');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('newApartment', 'registrationServices', 'New Apartment Title::::Nuovo Titolo', 'x', 5, 5.00, 0.00, 0.02, 1, 'Apartment Estate', 'apartment', 'new');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('newApartment', 'registrationServices', 'New Apartment Title::::Nuovo Titolo', 'c', 5, 5.00, 0.00, 0.02, 1, 'Apartment Estate', 'apartment', 'new');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template) values('newState', 'registrationServices', 'New State Title::::Nuovo Titolo', 'x', 5, 0.00, 0.00, 0, 1, 'State Estate');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('caveat', 'registrationServices', 'Register Caveat::::ITALIANO''', 'x', 5, 50.00, 0.00, 0, 1, 'Caveat in the name of <name>', 'caveat', 'new');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('removeCaveat', 'registrationServices', 'Remove Caveat::::ITALIANO', 'x', 5, 5.00, 0.00, 0, 1, 'Caveat <reference> removed', 'caveat', 'cancel');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('historicOrder', 'registrationServices', 'Register Historic Preservation Order::::ITALIANO', 'x', 5, 5.00, 0.00, 0, 1, 'Historic Preservation Order', 'noBuilding', 'new');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code) values('limitedRoadAccess', 'registrationServices', 'Register Limited Road Access::::ITALIANO', 'x', 5, 5.00, 0.00, 0, 1, 'Limited Road Access', 'limitedAccess');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('caveat', 'registrationServices', 'Register Caveat::::ITALIANO''', 'c', 5, 50.00, 0.00, 0, 1, 'Caveat in the name of <name>', 'caveat', 'new');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('removeCaveat', 'registrationServices', 'Remove Caveat::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, 'Caveat <reference> removed', 'caveat', 'cancel');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('historicOrder', 'registrationServices', 'Register Historic Preservation Order::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, 'Historic Preservation Order', 'noBuilding', 'new');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code) values('limitedRoadAccess', 'registrationServices', 'Register Limited Road Access::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, 'Limited Road Access', 'limitedAccess');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('varyLease', 'registrationServices', 'Vary Lease::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, 'Variation of Lease <reference>', 'lease', 'vary');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_action_code) values('varyRight', 'registrationServices', 'Vary Right (General)::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, 'Variation of <right> <reference>', 'vary');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_action_code) values('removeRight', 'registrationServices', 'Remove Right (General)::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, '<right> <reference> cancelled', 'cancel');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template) values('newDigitalTitle', 'registrationServices', 'New Digital Title::::Nuovo Titolo Digitale', 'c', 5, 0.00, 0.00, 0, 1, 'Title converted to digital format');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('newDigitalProperty', 'registrationServices', 'New Digital Property::::Nuova Proprieta Digitale', 'x', 5, 0.00, 0.00, 0, 1);
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_action_code) values('removeRestriction', 'registrationServices', 'Remove Restriction (General)::::ITALIANO', 'x', 5, 5.00, 0.00, 0, 1, '<restriction> <reference> cancelled', 'cancel');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_action_code) values('removeRestriction', 'registrationServices', 'Remove Restriction (General)::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, '<restriction> <reference> cancelled', 'cancel');
 
 
 
@@ -2089,7 +2089,7 @@ insert into application.request_category_type(code, display_value, status) value
 DROP TABLE IF EXISTS application.service CASCADE;
 CREATE TABLE application.service(
     id varchar(40) NOT NULL,
-    application_id varchar(40) NOT NULL,
+    application_id varchar(40),
     request_type_code varchar(20) NOT NULL,
     service_order integer NOT NULL DEFAULT (0),
     lodging_datetime timestamp NOT NULL DEFAULT (now()),
@@ -2499,18 +2499,19 @@ CREATE TABLE application.application_action_type(
  -- Data for the table application.application_action_type -- 
 insert into application.application_action_type(code, display_value, status_to_set, status, description) values('lodge', 'Lodgement Notice Prepared::::Ricevuta della Registrazione Preparata', 'lodged', 'c', 'Lodgement notice is prepared (action is automatically logged when application details are saved for the first time::::La ricevuta della registrazione pronta');
 insert into application.application_action_type(code, display_value, status, description) values('addDocument', 'Add document::::Documenti scannerizzati allegati alla pratica', 'c', 'Scanned Documents linked to Application (action is automatically logged when a new document is saved)::::Documenti scannerizzati allegati alla pratica');
-insert into application.application_action_type(code, display_value, status_to_set, status, description) values('withdraw', 'Withdraw application::::Pratica Ritirata', 'dead', 'c', 'Application withdrawn by Applicant (action is manually logged)::::Pratica Ritirata dal Richiedente');
-insert into application.application_action_type(code, display_value, status_to_set, status, description) values('cancel', 'Cancel application::::Pratica cancellata', 'dead', 'c', 'Application cancelled by Land Office (action is automatically logged when application is cancelled)::::Pratica cancellata da Ufficio Territoriale');
+insert into application.application_action_type(code, display_value, status_to_set, status, description) values('withdraw', 'Withdraw application::::Pratica Ritirata', 'anulled', 'c', 'Application withdrawn by Applicant (action is manually logged)::::Pratica Ritirata dal Richiedente');
+insert into application.application_action_type(code, display_value, status_to_set, status, description) values('cancel', 'Cancel application::::Pratica cancellata', 'anulled', 'c', 'Application cancelled by Land Office (action is automatically logged when application is cancelled)::::Pratica cancellata da Ufficio Territoriale');
 insert into application.application_action_type(code, display_value, status_to_set, status, description) values('requisition', 'Requisition:::Ulteriori Informazioni domandate dal richiedente', 'requisitioned', 'c', 'Further information requested from applicant (action is manually logged)::::Ulteriori Informazioni domandate dal richiedente');
 insert into application.application_action_type(code, display_value, status, description) values('validateFailed', 'Quality Check Fails::::Controllo Qualita Fallito', 'c', 'Quality check fails (automatically logged when a critical business rule failure occurs)::::Controllo Qualita Fallito');
 insert into application.application_action_type(code, display_value, status, description) values('validatePassed', 'Quality Check Passes::::Controllo Qualita Superato', 'c', 'Quality check passes (automatically logged when business rules are run without any critical failures)::::Controllo Qualita Superato');
 insert into application.application_action_type(code, display_value, status_to_set, status, description) values('approve', 'Approve::::Approvata', 'approved', 'c', 'Application is approved (automatically logged when application is approved successively)::::Pratica approvata');
 insert into application.application_action_type(code, display_value, status_to_set, status, description) values('archive', 'Archive::::Archiviata', 'completed', 'c', 'Paper application records are archived (action is manually logged)::::I fogli della pratica sono stati archiviati');
 insert into application.application_action_type(code, display_value, status, description) values('despatch', 'Despatch::::Inviata', 'c', 'Application documents and new land office products are sent or collected by applicant (action is manually logged)::::I documenti della pratica e i nuovi prodotti da Ufficio Territoriale sono stati spediti o ritirati dal richiedente');
-insert into application.application_action_type(code, display_value, status_to_set, status) values('lapse', 'Lapse::::ITALIANO', 'dead', 'c');
+insert into application.application_action_type(code, display_value, status_to_set, status) values('lapse', 'Lapse::::ITALIANO', 'anulled', 'c');
 insert into application.application_action_type(code, display_value, status) values('assign', 'Assign::::ITALIANO', 'c');
 insert into application.application_action_type(code, display_value, status) values('unAssign', 'Unassign::::ITALIANO', 'c');
 insert into application.application_action_type(code, display_value, status_to_set, status) values('resubmit', 'Resubmit::::ITALIANO', 'lodged', 'c');
+insert into application.application_action_type(code, display_value, status, description) values('validate', 'Validate::::ITALIANO', 'c', 'The action validate does not leave a mark, because validateFailed and validateSucceded will be used instead when the validate is completed.');
 
 
 
@@ -2763,7 +2764,7 @@ CREATE TABLE application.application_status_type(
  -- Data for the table application.application_status_type -- 
 insert into application.application_status_type(code, display_value, status, description) values('lodged', 'Lodged::::Registrata', 'c', 'Application has been lodged and officially received by land office::::La pratica registrata e formalmente ricevuta da ufficio territoriale');
 insert into application.application_status_type(code, display_value, status) values('approved', 'Approved::::ITALIANO', 'c');
-insert into application.application_status_type(code, display_value, status) values('dead', 'Annulled::::ITALIANO', 'c');
+insert into application.application_status_type(code, display_value, status) values('anulled', 'Anulled::::Anullato', 'c');
 insert into application.application_status_type(code, display_value, status) values('completed', 'Completed::::ITALIANO', 'c');
 insert into application.application_status_type(code, display_value, status) values('requisitioned', 'Requisitioned::::ITALIANO', 'c');
 
@@ -2890,24 +2891,36 @@ insert into system.language(code, display_value, active, is_default, item_order)
 DROP TABLE IF EXISTS system.config_map_layer CASCADE;
 CREATE TABLE system.config_map_layer(
     name varchar(50) NOT NULL,
+    title varchar(100) NOT NULL,
     type_code varchar(20) NOT NULL,
     wms_url varchar(500),
     wms_layers varchar(500),
-    pojo_query_name varchar(100),
+    pojo_query_name varchar(100) NOT NULL,
     pojo_structure varchar(500),
-    pojo_query_name_for_select varchar(50),
+    pojo_query_name_for_select varchar(100) NOT NULL,
     shape_location varchar(500),
-    style varchar(100),
-    used_for varchar(20) NOT NULL,
+    style varchar(4000),
     active bool NOT NULL DEFAULT (true),
     item_order integer NOT NULL DEFAULT (0),
 
     -- Internal constraints
     
+    CONSTRAINT config_map_layer_style_required CHECK (case when type_code = 'wms' then wms_url is not null and wms_layers is not null when type_code = 'pojo' then pojo_query_name is not null and pojo_structure is not null and style is not null when type_code = 'shape' then shape_location is not null and style is not null end),
+    CONSTRAINT config_map_layer_title_unique UNIQUE (title),
     CONSTRAINT config_map_layer_pkey PRIMARY KEY (name)
 );
 
     
+ -- Data for the table system.config_map_layer -- 
+insert into system.config_map_layer(name, title, type_code, wms_url, pojo_query_name, pojo_structure, pojo_query_name_for_select, style, active, item_order) values('parcels', 'Parcels::::ITALIANO', 'pojo', '', 'SpatialResult.getParcels', 'theGeom:Polygon,label:""', 'dynamic.informationtool.get_parcel', 'parcel.sld', true, 1);
+insert into system.config_map_layer(name, title, type_code, pojo_query_name, pojo_structure, pojo_query_name_for_select, style, active, item_order) values('pending-parcels', 'Pending parcels::::ITALIANO', 'pojo', 'SpatialResult.getParcelsPending', 'theGeom:Polygon,label:""', 'dynamic.informationtool.get_parcel_pending', 'pending_parcels.sld', true, 2);
+insert into system.config_map_layer(name, title, type_code, pojo_query_name, pojo_structure, pojo_query_name_for_select, style, active, item_order) values('roads', 'Roads::::ITALIANO', 'pojo', 'SpatialResult.getRoads', 'theGeom:MultiPolygon,label:""', 'dynamic.informationtool.get_road', 'road.sld', true, 3);
+insert into system.config_map_layer(name, title, type_code, pojo_query_name, pojo_structure, pojo_query_name_for_select, style, active, item_order) values('survey-controls', 'Survey controls::::ITALIANO', 'pojo', 'SpatialResult.getSurveyControls', 'theGeom:Point,label:""', 'dynamic.informationtool.get_survey_control', 'survey_control.sld', true, 4);
+insert into system.config_map_layer(name, title, type_code, pojo_query_name, pojo_structure, pojo_query_name_for_select, style, active, item_order) values('place-names', 'Places names::::ITALIANO', 'pojo', 'SpatialResult.getPlaceNames', 'theGeom:Point,label:""', 'dynamic.informationtool.get_place_name', 'place_name.sld', true, 5);
+insert into system.config_map_layer(name, title, type_code, pojo_query_name, pojo_structure, pojo_query_name_for_select, style, active, item_order) values('applications', 'Applications::::ITALIANO', 'pojo', 'SpatialResult.getApplications', 'theGeom:MultiPoint,label:""', 'dynamic.informationtool.get_application', 'application.sld', true, 6);
+
+
+
 --Table system.config_map_layer_type ----
 DROP TABLE IF EXISTS system.config_map_layer_type CASCADE;
 CREATE TABLE system.config_map_layer_type(
@@ -2927,29 +2940,6 @@ CREATE TABLE system.config_map_layer_type(
 insert into system.config_map_layer_type(code, display_value, status) values('wms', 'WMS server with layers::::Server WMS con layer', 'c');
 insert into system.config_map_layer_type(code, display_value, status) values('shape', 'Shapefile::::Shapefile', 'c');
 insert into system.config_map_layer_type(code, display_value, status) values('pojo', 'Pojo layer::::Pojo layer', 'c');
-
-
-
---Table system.config_map_layer_usage_type ----
-DROP TABLE IF EXISTS system.config_map_layer_usage_type CASCADE;
-CREATE TABLE system.config_map_layer_usage_type(
-    code varchar(20) NOT NULL,
-    display_value varchar(250) NOT NULL,
-    status char(1) NOT NULL,
-    description varchar(555),
-
-    -- Internal constraints
-    
-    CONSTRAINT config_map_layer_usage_type_display_value_unique UNIQUE (display_value),
-    CONSTRAINT config_map_layer_usage_type_pkey PRIMARY KEY (code)
-);
-
-    
- -- Data for the table system.config_map_layer_usage_type -- 
-insert into system.config_map_layer_usage_type(code, display_value, status) values('background', 'Background::::Sfondo', 'c');
-insert into system.config_map_layer_usage_type(code, display_value, status) values('applicationLocation', 'Application location::::Locazione Pratica', 'c');
-insert into system.config_map_layer_usage_type(code, display_value, status) values('parcel', 'Parcel::::Particella', 'c');
-insert into system.config_map_layer_usage_type(code, display_value, status) values('parcelPending', 'Pending parcels::::ITALIANO', 'c');
 
 
 
@@ -2992,12 +2982,15 @@ insert into transaction.reg_status_type(code, display_value, status) values('pre
 DROP TABLE IF EXISTS system.br CASCADE;
 CREATE TABLE system.br(
     id varchar(100) NOT NULL,
+    display_name varchar(250) NOT NULL DEFAULT (uuid_generate_v1()),
     technical_type_code varchar(20) NOT NULL,
     feedback varchar(2000),
-    description varchar(555),
+    description varchar(1000),
+    technical_description varchar(1000),
 
     -- Internal constraints
     
+    CONSTRAINT br_display_name_unique UNIQUE (display_name),
     CONSTRAINT br_pkey PRIMARY KEY (id)
 );
 
@@ -3039,7 +3032,7 @@ CREATE TABLE system.br_validation(
 
     -- Internal constraints
     
-    CONSTRAINT br_validation_service_request_type_valid CHECK (target_request_type_code is null or (target_request_type_code is not null and target_code = 'service')),
+    CONSTRAINT br_validation_service_request_type_valid CHECK (target_request_type_code is null or (target_request_type_code is not null and target_code != 'application')),
     CONSTRAINT br_validation_rrr_rrr_type_valid CHECK (target_rrr_type_code is null or (target_rrr_type_code is not null and target_code = 'rrr')),
     CONSTRAINT br_validation_app_moment_unique UNIQUE (br_id, target_code, target_application_moment),
     CONSTRAINT br_validation_service_moment_unique UNIQUE (br_id, target_code, target_service_moment),
@@ -3103,12 +3096,12 @@ CREATE TABLE system.br_validation_target_type(
 
     
  -- Data for the table system.br_validation_target_type -- 
-insert into system.br_validation_target_type(code, display_value, status, description) values('application', 'Application::::ITALIANO', 'c', 'The target of the validation is the application. It accepts one parameter {id} which is the application id. Moments that are valid are: start, approve, none.');
-insert into system.br_validation_target_type(code, display_value, status, description) values('service', 'Service::::ITALIANO', 'c', 'The target of the validation is the service. It accepts one parameter {id} which is the service id.Moments that are valid are: start, complete, none.');
-insert into system.br_validation_target_type(code, display_value, status, description) values('rrr', 'Right or Restriction::::ITALIANO', 'c', 'The target of the validation is the rrr. It accepts one parameter {id} which is the rrr id. Moments that are valid are: pending, approve, none.');
-insert into system.br_validation_target_type(code, display_value, status, description) values('ba_unit', 'Administrative Unit::::ITALIANO', 'c', 'The target of the validation is the ba_unit. It accepts one parameter {id} which is the ba_unit id.Moments that are valid are: pending, approve, none.');
-insert into system.br_validation_target_type(code, display_value, status, description) values('source', 'Source::::ITALIANO', 'c', 'The target of the validation is the source. It accepts one parameter {id} which is the source id.Moments that are valid are: pending, approve, none.');
-insert into system.br_validation_target_type(code, display_value, status, description) values('cadastre_object', 'Cadastre Object::::ITALIANO', 'c', 'The target of the validation is the transaction related with the cadastre change. It accepts one parameter {id} which is the transaction id.Moments that are valid are: pending, approve, none.');
+insert into system.br_validation_target_type(code, display_value, status, description) values('application', 'Application::::ITALIANO', 'c', 'The target of the validation is the application. It accepts one parameter {id} which is the application id.');
+insert into system.br_validation_target_type(code, display_value, status, description) values('service', 'Service::::ITALIANO', 'c', 'The target of the validation is the service. It accepts one parameter {id} which is the service id.');
+insert into system.br_validation_target_type(code, display_value, status, description) values('rrr', 'Right or Restriction::::ITALIANO', 'c', 'The target of the validation is the rrr. It accepts one parameter {id} which is the rrr id. ');
+insert into system.br_validation_target_type(code, display_value, status, description) values('ba_unit', 'Administrative Unit::::ITALIANO', 'c', 'The target of the validation is the ba_unit. It accepts one parameter {id} which is the ba_unit id.');
+insert into system.br_validation_target_type(code, display_value, status, description) values('source', 'Source::::ITALIANO', 'c', 'The target of the validation is the source. It accepts one parameter {id} which is the source id.');
+insert into system.br_validation_target_type(code, display_value, status, description) values('cadastre_object', 'Cadastre Object::::ITALIANO', 'c', 'The target of the validation is the transaction related with the cadastre change. It accepts one parameter {id} which is the transaction id.');
 
 
 
@@ -3641,9 +3634,9 @@ CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
    ON cadastre.survey_point FOR EACH ROW
    EXECUTE PROCEDURE f_for_trg_track_history();
     
---Table cadastre.transaction_source ----
-DROP TABLE IF EXISTS cadastre.transaction_source CASCADE;
-CREATE TABLE cadastre.transaction_source(
+--Table transaction.transaction_source ----
+DROP TABLE IF EXISTS transaction.transaction_source CASCADE;
+CREATE TABLE transaction.transaction_source(
     transaction_id varchar(40) NOT NULL,
     source_id varchar(40) NOT NULL,
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
@@ -3658,18 +3651,18 @@ CREATE TABLE cadastre.transaction_source(
 );
 
 
-CREATE INDEX transaction_source_index_on_rowidentifier ON cadastre.transaction_source (rowidentifier);
+CREATE INDEX transaction_source_index_on_rowidentifier ON transaction.transaction_source (rowidentifier);
 
     
-DROP TRIGGER IF EXISTS __track_changes ON cadastre.transaction_source CASCADE;
+DROP TRIGGER IF EXISTS __track_changes ON transaction.transaction_source CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
-   ON cadastre.transaction_source FOR EACH ROW
+   ON transaction.transaction_source FOR EACH ROW
    EXECUTE PROCEDURE f_for_trg_track_changes();
     
 
-----Table cadastre.transaction_source_historic used for the history of data of table cadastre.transaction_source ---
-DROP TABLE IF EXISTS cadastre.transaction_source_historic CASCADE;
-CREATE TABLE cadastre.transaction_source_historic
+----Table transaction.transaction_source_historic used for the history of data of table transaction.transaction_source ---
+DROP TABLE IF EXISTS transaction.transaction_source_historic CASCADE;
+CREATE TABLE transaction.transaction_source_historic
 (
     transaction_id varchar(40),
     source_id varchar(40),
@@ -3681,12 +3674,12 @@ CREATE TABLE cadastre.transaction_source_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-CREATE INDEX transaction_source_historic_index_on_rowidentifier ON cadastre.transaction_source_historic (rowidentifier);
+CREATE INDEX transaction_source_historic_index_on_rowidentifier ON transaction.transaction_source_historic (rowidentifier);
 
 
-DROP TRIGGER IF EXISTS __track_history ON cadastre.transaction_source CASCADE;
+DROP TRIGGER IF EXISTS __track_history ON transaction.transaction_source CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
-   ON cadastre.transaction_source FOR EACH ROW
+   ON transaction.transaction_source FOR EACH ROW
    EXECUTE PROCEDURE f_for_trg_track_history();
     
 --Table system.approle ----
@@ -3747,6 +3740,7 @@ insert into system.approle(code, display_value, status, description) values('Man
 insert into system.approle(code, display_value, status, description) values('ManageRefdata', 'Manage reference data', 'c', 'Manage reference data');
 insert into system.approle(code, display_value, status, description) values('ManageSettings', 'Manage system settings', 'c', 'Manage system settings');
 insert into system.approle(code, display_value, status, description) values('ApplnEdit', 'Application Edit', 'c', 'Allows editing of Applications');
+insert into system.approle(code, display_value, status, description) values('ManageBR', 'Manage business rules', 'c', 'Allows to manage business rules');
 
 
 
@@ -3809,6 +3803,76 @@ CREATE TABLE system.appuser_appgroup(
     
  -- Data for the table system.appuser_appgroup -- 
 insert into system.appuser_appgroup(appuser_id, appgroup_id) values('test-id', 'super-group-id');
+
+
+
+--Table system.query ----
+DROP TABLE IF EXISTS system.query CASCADE;
+CREATE TABLE system.query(
+    name varchar(100) NOT NULL,
+    sql varchar(4000) NOT NULL,
+    description varchar(1000),
+
+    -- Internal constraints
+    
+    CONSTRAINT query_pkey PRIMARY KEY (name)
+);
+
+    
+ -- Data for the table system.query -- 
+insert into system.query(name, sql) values('SpatialResult.getParcels', 'select co.id, co.name_firstpart || ''/'' || co.name_lastpart as label,  st_asewkb(co.geom_polygon) as the_geom from cadastre.cadastre_object co where type_code= ''parcel'' and status_code= ''current'' and ST_Intersects(co.geom_polygon, SetSRID(ST_MakeBox3D(ST_Point(#{minx}, #{miny}),ST_Point(#{maxx}, #{maxy})), #{srid}))');
+insert into system.query(name, sql) values('SpatialResult.getParcelsPending', 'select co.id, co.name_firstpart || ''/'' || co.name_lastpart as label,  st_asewkb(co.geom_polygon) as the_geom from cadastre.cadastre_object co where type_code= ''parcel'' and status_code= ''pending'' and ST_Intersects(co.geom_polygon, SetSRID(ST_MakeBox3D(ST_Point(#{minx}, #{miny}),ST_Point(#{maxx}, #{maxy})), #{srid}))');
+insert into system.query(name, sql) values('SpatialResult.getSurveyControls', 'select id, label, st_asewkb(geom) as the_geom from cadastre.survey_control  where ST_Intersects(geom, SetSRID(ST_MakeBox3D(ST_Point(#{minx}, #{miny}),ST_Point(#{maxx}, #{maxy})), #{srid}))');
+insert into system.query(name, sql) values('SpatialResult.getRoads', 'select id, label, st_asewkb(geom) as the_geom from cadastre.road where ST_Intersects(geom, SetSRID(ST_MakeBox3D(ST_Point(#{minx}, #{miny}),ST_Point(#{maxx}, #{maxy})), #{srid}))');
+insert into system.query(name, sql) values('SpatialResult.getPlaceNames', 'select id, label, st_asewkb(geom) as the_geom from cadastre.place_name where ST_Intersects(geom, SetSRID(ST_MakeBox3D(ST_Point(#{minx}, #{miny}),ST_Point(#{maxx}, #{maxy})), #{srid}))');
+insert into system.query(name, sql) values('SpatialResult.getApplications', 'select id, nr as label, st_asewkb(location) as the_geom from application.application where ST_Intersects(location, SetSRID(ST_MakeBox3D(ST_Point(#{minx}, #{miny}),ST_Point(#{maxx}, #{maxy})), #{srid}))');
+insert into system.query(name, sql) values('dynamic.informationtool.get_parcel', 'select co.id, co.name_firstpart || ''/'' || co.name_lastpart as parcel_nr,      (select string_agg(ba.name_firstpart || ''/'' || ba.name_lastpart, '','')      from administrative.ba_unit_contains_spatial_unit bas, administrative.ba_unit ba      where spatial_unit_id= co.id and bas.ba_unit_id= ba.id) as ba_units,      ( SELECT spatial_value_area.size FROM cadastre.spatial_value_area      WHERE spatial_value_area.type_code=''officialArea'' and spatial_value_area.spatial_unit_id = co.id) AS area_official_sqm,       st_asewkb(co.geom_polygon) as the_geom      from cadastre.cadastre_object co      where type_code= ''parcel'' and status_code= ''current''      and ST_Intersects(co.geom_polygon, ST_SetSRID(ST_GeomFromWKB(#{wkb_geom}), #{srid}))');
+insert into system.query(name, sql) values('dynamic.informationtool.get_parcel_pending', 'select co.id, co.name_firstpart || ''/'' || co.name_lastpart as parcel_nr,      ( SELECT spatial_value_area.size FROM cadastre.spatial_value_area      WHERE spatial_value_area.type_code=''officialArea'' and spatial_value_area.spatial_unit_id = co.id) AS area_official_sqm,       st_asewkb(co.geom_polygon) as the_geom      from cadastre.cadastre_object co      where type_code= ''parcel'' and status_code= ''pending''     and ST_Intersects(co.geom_polygon, ST_SetSRID(ST_GeomFromWKB(#{wkb_geom}), #{srid}))');
+insert into system.query(name, sql) values('dynamic.informationtool.get_place_name', 'select id, label,  st_asewkb(geom) as the_geom from cadastre.place_name where ST_Intersects(geom, ST_SetSRID(ST_GeomFromWKB(#{wkb_geom}), #{srid}))');
+insert into system.query(name, sql) values('dynamic.informationtool.get_road', 'select id, label,  st_asewkb(geom) as the_geom from cadastre.road where ST_Intersects(geom, ST_SetSRID(ST_GeomFromWKB(#{wkb_geom}), #{srid}))');
+insert into system.query(name, sql) values('dynamic.informationtool.get_application', 'select id, nr,  st_asewkb(location) as the_geom from application.application where ST_Intersects(location, ST_SetSRID(ST_GeomFromWKB(#{wkb_geom}), #{srid}))');
+insert into system.query(name, sql) values('dynamic.informationtool.get_survey_control', 'select id, label,  st_asewkb(geom) as the_geom from cadastre.survey_control where ST_Intersects(geom, ST_SetSRID(ST_GeomFromWKB(#{wkb_geom}), #{srid}))');
+
+
+
+--Table system.query_field ----
+DROP TABLE IF EXISTS system.query_field CASCADE;
+CREATE TABLE system.query_field(
+    query_name varchar(100) NOT NULL,
+    index_in_query integer NOT NULL,
+    name varchar(100) NOT NULL,
+    display_value varchar(200),
+
+    -- Internal constraints
+    
+    CONSTRAINT query_field_display_value UNIQUE (query_name, display_value),
+    CONSTRAINT query_field_name UNIQUE (query_name, name),
+    CONSTRAINT query_field_pkey PRIMARY KEY (query_name,index_in_query)
+);
+
+    
+ -- Data for the table system.query_field -- 
+insert into system.query_field(query_name, index_in_query, name, display_value) values('dynamic.informationtool.get_parcel', 1, 'parcel_nr', 'Parcel number::::ITALIANO');
+insert into system.query_field(query_name, index_in_query, name, display_value) values('dynamic.informationtool.get_parcel', 2, 'ba_units', 'Properties::::ITALIANO');
+insert into system.query_field(query_name, index_in_query, name, display_value) values('dynamic.informationtool.get_parcel', 3, 'area_official_sqm', 'Official area (m2)::::ITALIANO');
+insert into system.query_field(query_name, index_in_query, name) values('dynamic.informationtool.get_parcel', 0, 'id');
+insert into system.query_field(query_name, index_in_query, name) values('dynamic.informationtool.get_parcel', 4, 'the_geom');
+insert into system.query_field(query_name, index_in_query, name) values('dynamic.informationtool.get_parcel_pending', 0, 'id');
+insert into system.query_field(query_name, index_in_query, name, display_value) values('dynamic.informationtool.get_parcel_pending', 1, 'parcel_nr', 'Parcel number::::ITALIANO');
+insert into system.query_field(query_name, index_in_query, name, display_value) values('dynamic.informationtool.get_parcel_pending', 2, 'area_official_sqm', 'Official area (m2)::::ITALIANO');
+insert into system.query_field(query_name, index_in_query, name) values('dynamic.informationtool.get_parcel_pending', 3, 'the_geom');
+insert into system.query_field(query_name, index_in_query, name) values('dynamic.informationtool.get_place_name', 0, 'id');
+insert into system.query_field(query_name, index_in_query, name, display_value) values('dynamic.informationtool.get_place_name', 1, 'label', 'Name::::Nome');
+insert into system.query_field(query_name, index_in_query, name) values('dynamic.informationtool.get_place_name', 2, 'the_geom');
+insert into system.query_field(query_name, index_in_query, name) values('dynamic.informationtool.get_road', 0, 'id');
+insert into system.query_field(query_name, index_in_query, name, display_value) values('dynamic.informationtool.get_road', 1, 'label', 'Name::::Nome');
+insert into system.query_field(query_name, index_in_query, name) values('dynamic.informationtool.get_road', 2, 'the_geom');
+insert into system.query_field(query_name, index_in_query, name) values('dynamic.informationtool.get_application', 0, 'id');
+insert into system.query_field(query_name, index_in_query, name, display_value) values('dynamic.informationtool.get_application', 1, 'nr', 'Number::::Numero');
+insert into system.query_field(query_name, index_in_query, name) values('dynamic.informationtool.get_application', 2, 'the_geom');
+insert into system.query_field(query_name, index_in_query, name) values('dynamic.informationtool.get_survey_control', 0, 'id');
+insert into system.query_field(query_name, index_in_query, name, display_value) values('dynamic.informationtool.get_survey_control', 1, 'label', 'Label::::ITALIANO');
+insert into system.query_field(query_name, index_in_query, name) values('dynamic.informationtool.get_survey_control', 2, 'the_geom');
 
 
 
@@ -4053,269 +4117,249 @@ ALTER TABLE system.config_map_layer ADD CONSTRAINT config_map_layer_type_code_fk
             FOREIGN KEY (type_code) REFERENCES system.config_map_layer_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
 CREATE INDEX config_map_layer_type_code_fk59_ind ON system.config_map_layer (type_code);
 
-ALTER TABLE system.config_map_layer ADD CONSTRAINT config_map_layer_used_for_fk60 
-            FOREIGN KEY (used_for) REFERENCES system.config_map_layer_usage_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX config_map_layer_used_for_fk60_ind ON system.config_map_layer (used_for);
-
-ALTER TABLE administrative.ba_unit_as_party ADD CONSTRAINT ba_unit_as_party_party_id_fk61 
+ALTER TABLE administrative.ba_unit_as_party ADD CONSTRAINT ba_unit_as_party_party_id_fk60 
             FOREIGN KEY (party_id) REFERENCES party.party(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX ba_unit_as_party_party_id_fk61_ind ON administrative.ba_unit_as_party (party_id);
+CREATE INDEX ba_unit_as_party_party_id_fk60_ind ON administrative.ba_unit_as_party (party_id);
 
-ALTER TABLE administrative.ba_unit_as_party ADD CONSTRAINT ba_unit_as_party_ba_unit_id_fk62 
+ALTER TABLE administrative.ba_unit_as_party ADD CONSTRAINT ba_unit_as_party_ba_unit_id_fk61 
             FOREIGN KEY (ba_unit_id) REFERENCES administrative.ba_unit(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX ba_unit_as_party_ba_unit_id_fk62_ind ON administrative.ba_unit_as_party (ba_unit_id);
+CREATE INDEX ba_unit_as_party_ba_unit_id_fk61_ind ON administrative.ba_unit_as_party (ba_unit_id);
 
-ALTER TABLE system.br ADD CONSTRAINT br_technical_type_code_fk63 
+ALTER TABLE system.br ADD CONSTRAINT br_technical_type_code_fk62 
             FOREIGN KEY (technical_type_code) REFERENCES system.br_technical_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX br_technical_type_code_fk63_ind ON system.br (technical_type_code);
+CREATE INDEX br_technical_type_code_fk62_ind ON system.br (technical_type_code);
 
-ALTER TABLE system.br_validation ADD CONSTRAINT br_validation_br_id_fk64 
+ALTER TABLE system.br_validation ADD CONSTRAINT br_validation_br_id_fk63 
             FOREIGN KEY (br_id) REFERENCES system.br(id) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX br_validation_br_id_fk64_ind ON system.br_validation (br_id);
+CREATE INDEX br_validation_br_id_fk63_ind ON system.br_validation (br_id);
 
-ALTER TABLE system.br_definition ADD CONSTRAINT br_definition_br_id_fk65 
+ALTER TABLE system.br_definition ADD CONSTRAINT br_definition_br_id_fk64 
             FOREIGN KEY (br_id) REFERENCES system.br(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX br_definition_br_id_fk65_ind ON system.br_definition (br_id);
+CREATE INDEX br_definition_br_id_fk64_ind ON system.br_definition (br_id);
 
-ALTER TABLE system.br_validation ADD CONSTRAINT br_validation_severity_code_fk66 
+ALTER TABLE system.br_validation ADD CONSTRAINT br_validation_severity_code_fk65 
             FOREIGN KEY (severity_code) REFERENCES system.br_severity_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX br_validation_severity_code_fk66_ind ON system.br_validation (severity_code);
+CREATE INDEX br_validation_severity_code_fk65_ind ON system.br_validation (severity_code);
 
-ALTER TABLE system.br_validation ADD CONSTRAINT br_validation_target_code_fk67 
+ALTER TABLE system.br_validation ADD CONSTRAINT br_validation_target_code_fk66 
             FOREIGN KEY (target_code) REFERENCES system.br_validation_target_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX br_validation_target_code_fk67_ind ON system.br_validation (target_code);
+CREATE INDEX br_validation_target_code_fk66_ind ON system.br_validation (target_code);
 
-ALTER TABLE system.br_validation ADD CONSTRAINT br_validation_target_request_type_code_fk68 
+ALTER TABLE system.br_validation ADD CONSTRAINT br_validation_target_request_type_code_fk67 
             FOREIGN KEY (target_request_type_code) REFERENCES application.request_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX br_validation_target_request_type_code_fk68_ind ON system.br_validation (target_request_type_code);
+CREATE INDEX br_validation_target_request_type_code_fk67_ind ON system.br_validation (target_request_type_code);
 
-ALTER TABLE system.br_validation ADD CONSTRAINT br_validation_target_rrr_type_code_fk69 
+ALTER TABLE system.br_validation ADD CONSTRAINT br_validation_target_rrr_type_code_fk68 
             FOREIGN KEY (target_rrr_type_code) REFERENCES administrative.rrr_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX br_validation_target_rrr_type_code_fk69_ind ON system.br_validation (target_rrr_type_code);
+CREATE INDEX br_validation_target_rrr_type_code_fk68_ind ON system.br_validation (target_rrr_type_code);
 
-ALTER TABLE administrative.mortgage_isbased_in_rrr ADD CONSTRAINT mortgage_isbased_in_rrr_rrr_id_fk70 
+ALTER TABLE administrative.mortgage_isbased_in_rrr ADD CONSTRAINT mortgage_isbased_in_rrr_rrr_id_fk69 
             FOREIGN KEY (rrr_id) REFERENCES administrative.rrr(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX mortgage_isbased_in_rrr_rrr_id_fk70_ind ON administrative.mortgage_isbased_in_rrr (rrr_id);
+CREATE INDEX mortgage_isbased_in_rrr_rrr_id_fk69_ind ON administrative.mortgage_isbased_in_rrr (rrr_id);
 
-ALTER TABLE administrative.mortgage_isbased_in_rrr ADD CONSTRAINT mortgage_isbased_in_rrr_mortgage_id_fk71 
+ALTER TABLE administrative.mortgage_isbased_in_rrr ADD CONSTRAINT mortgage_isbased_in_rrr_mortgage_id_fk70 
             FOREIGN KEY (mortgage_id) REFERENCES administrative.rrr(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX mortgage_isbased_in_rrr_mortgage_id_fk71_ind ON administrative.mortgage_isbased_in_rrr (mortgage_id);
+CREATE INDEX mortgage_isbased_in_rrr_mortgage_id_fk70_ind ON administrative.mortgage_isbased_in_rrr (mortgage_id);
 
-ALTER TABLE administrative.rrr ADD CONSTRAINT rrr_status_code_fk72 
+ALTER TABLE administrative.rrr ADD CONSTRAINT rrr_status_code_fk71 
             FOREIGN KEY (status_code) REFERENCES transaction.reg_status_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX rrr_status_code_fk72_ind ON administrative.rrr (status_code);
+CREATE INDEX rrr_status_code_fk71_ind ON administrative.rrr (status_code);
 
-ALTER TABLE administrative.ba_unit ADD CONSTRAINT ba_unit_status_code_fk73 
+ALTER TABLE administrative.ba_unit ADD CONSTRAINT ba_unit_status_code_fk72 
             FOREIGN KEY (status_code) REFERENCES transaction.reg_status_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX ba_unit_status_code_fk73_ind ON administrative.ba_unit (status_code);
+CREATE INDEX ba_unit_status_code_fk72_ind ON administrative.ba_unit (status_code);
 
-ALTER TABLE cadastre.cadastre_object ADD CONSTRAINT cadastre_object_id_fk74 
+ALTER TABLE cadastre.cadastre_object ADD CONSTRAINT cadastre_object_id_fk73 
             FOREIGN KEY (id) REFERENCES cadastre.spatial_unit(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX cadastre_object_id_fk74_ind ON cadastre.cadastre_object (id);
+CREATE INDEX cadastre_object_id_fk73_ind ON cadastre.cadastre_object (id);
 
-ALTER TABLE cadastre.cadastre_object ADD CONSTRAINT cadastre_object_status_code_fk75 
+ALTER TABLE cadastre.cadastre_object ADD CONSTRAINT cadastre_object_status_code_fk74 
             FOREIGN KEY (status_code) REFERENCES transaction.reg_status_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX cadastre_object_status_code_fk75_ind ON cadastre.cadastre_object (status_code);
+CREATE INDEX cadastre_object_status_code_fk74_ind ON cadastre.cadastre_object (status_code);
 
-ALTER TABLE cadastre.cadastre_object ADD CONSTRAINT cadastre_object_type_code_fk76 
+ALTER TABLE cadastre.cadastre_object ADD CONSTRAINT cadastre_object_type_code_fk75 
             FOREIGN KEY (type_code) REFERENCES cadastre.cadastre_object_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX cadastre_object_type_code_fk76_ind ON cadastre.cadastre_object (type_code);
+CREATE INDEX cadastre_object_type_code_fk75_ind ON cadastre.cadastre_object (type_code);
 
-ALTER TABLE cadastre.legal_space_utility_network ADD CONSTRAINT legal_space_utility_network_id_fk77 
+ALTER TABLE cadastre.legal_space_utility_network ADD CONSTRAINT legal_space_utility_network_id_fk76 
             FOREIGN KEY (id) REFERENCES cadastre.cadastre_object(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX legal_space_utility_network_id_fk77_ind ON cadastre.legal_space_utility_network (id);
+CREATE INDEX legal_space_utility_network_id_fk76_ind ON cadastre.legal_space_utility_network (id);
 
-ALTER TABLE administrative.source_describes_ba_unit ADD CONSTRAINT source_describes_ba_unit_source_id_fk78 
+ALTER TABLE administrative.source_describes_ba_unit ADD CONSTRAINT source_describes_ba_unit_source_id_fk77 
             FOREIGN KEY (source_id) REFERENCES source.source(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX source_describes_ba_unit_source_id_fk78_ind ON administrative.source_describes_ba_unit (source_id);
+CREATE INDEX source_describes_ba_unit_source_id_fk77_ind ON administrative.source_describes_ba_unit (source_id);
 
-ALTER TABLE administrative.required_relationship_baunit ADD CONSTRAINT required_relationship_baunit_relation_code_fk79 
+ALTER TABLE administrative.required_relationship_baunit ADD CONSTRAINT required_relationship_baunit_relation_code_fk78 
             FOREIGN KEY (relation_code) REFERENCES administrative.ba_unit_rel_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX required_relationship_baunit_relation_code_fk79_ind ON administrative.required_relationship_baunit (relation_code);
+CREATE INDEX required_relationship_baunit_relation_code_fk78_ind ON administrative.required_relationship_baunit (relation_code);
 
-ALTER TABLE administrative.ba_unit_contains_spatial_unit ADD CONSTRAINT ba_unit_contains_spatial_unit_spatial_unit_id_fk80 
+ALTER TABLE administrative.ba_unit_contains_spatial_unit ADD CONSTRAINT ba_unit_contains_spatial_unit_spatial_unit_id_fk79 
             FOREIGN KEY (spatial_unit_id) REFERENCES cadastre.cadastre_object(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX ba_unit_contains_spatial_unit_spatial_unit_id_fk80_ind ON administrative.ba_unit_contains_spatial_unit (spatial_unit_id);
+CREATE INDEX ba_unit_contains_spatial_unit_spatial_unit_id_fk79_ind ON administrative.ba_unit_contains_spatial_unit (spatial_unit_id);
 
-ALTER TABLE administrative.notation ADD CONSTRAINT notation_status_code_fk81 
+ALTER TABLE administrative.notation ADD CONSTRAINT notation_status_code_fk80 
             FOREIGN KEY (status_code) REFERENCES transaction.reg_status_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX notation_status_code_fk81_ind ON administrative.notation (status_code);
+CREATE INDEX notation_status_code_fk80_ind ON administrative.notation (status_code);
 
-ALTER TABLE administrative.notation ADD CONSTRAINT notation_ba_unit_id_fk82 
+ALTER TABLE administrative.notation ADD CONSTRAINT notation_ba_unit_id_fk81 
             FOREIGN KEY (ba_unit_id) REFERENCES administrative.ba_unit(id) ON UPDATE CASCADE ON DELETE Cascade;
-CREATE INDEX notation_ba_unit_id_fk82_ind ON administrative.notation (ba_unit_id);
+CREATE INDEX notation_ba_unit_id_fk81_ind ON administrative.notation (ba_unit_id);
 
-ALTER TABLE administrative.ba_unit_area ADD CONSTRAINT ba_unit_area_type_code_fk83 
+ALTER TABLE administrative.ba_unit_area ADD CONSTRAINT ba_unit_area_type_code_fk82 
             FOREIGN KEY (type_code) REFERENCES cadastre.area_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX ba_unit_area_type_code_fk83_ind ON administrative.ba_unit_area (type_code);
+CREATE INDEX ba_unit_area_type_code_fk82_ind ON administrative.ba_unit_area (type_code);
 
-ALTER TABLE administrative.ba_unit_area ADD CONSTRAINT ba_unit_area_ba_unit_id_fk84 
+ALTER TABLE administrative.ba_unit_area ADD CONSTRAINT ba_unit_area_ba_unit_id_fk83 
             FOREIGN KEY (ba_unit_id) REFERENCES administrative.ba_unit(id) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX ba_unit_area_ba_unit_id_fk84_ind ON administrative.ba_unit_area (ba_unit_id);
+CREATE INDEX ba_unit_area_ba_unit_id_fk83_ind ON administrative.ba_unit_area (ba_unit_id);
 
-ALTER TABLE administrative.rrr_share ADD CONSTRAINT rrr_share_rrr_id_fk85 
+ALTER TABLE administrative.rrr_share ADD CONSTRAINT rrr_share_rrr_id_fk84 
             FOREIGN KEY (rrr_id) REFERENCES administrative.rrr(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX rrr_share_rrr_id_fk85_ind ON administrative.rrr_share (rrr_id);
+CREATE INDEX rrr_share_rrr_id_fk84_ind ON administrative.rrr_share (rrr_id);
 
-ALTER TABLE administrative.party_for_rrr ADD CONSTRAINT party_for_rrr_rrr_id_fk86 
+ALTER TABLE administrative.party_for_rrr ADD CONSTRAINT party_for_rrr_rrr_id_fk85 
             FOREIGN KEY (rrr_id,share_id) REFERENCES administrative.rrr_share(rrr_id,id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX party_for_rrr_rrr_id_fk86_ind ON administrative.party_for_rrr (rrr_id,share_id);
+CREATE INDEX party_for_rrr_rrr_id_fk85_ind ON administrative.party_for_rrr (rrr_id,share_id);
 
-ALTER TABLE transaction.transaction ADD CONSTRAINT transaction_from_service_id_fk87 
+ALTER TABLE transaction.transaction ADD CONSTRAINT transaction_from_service_id_fk86 
             FOREIGN KEY (from_service_id) REFERENCES application.service(id) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX transaction_from_service_id_fk87_ind ON transaction.transaction (from_service_id);
+CREATE INDEX transaction_from_service_id_fk86_ind ON transaction.transaction (from_service_id);
 
-ALTER TABLE administrative.notation ADD CONSTRAINT notation_transaction_id_fk88 
+ALTER TABLE administrative.notation ADD CONSTRAINT notation_transaction_id_fk87 
             FOREIGN KEY (transaction_id) REFERENCES transaction.transaction(id) ON UPDATE CASCADE ON DELETE Cascade;
-CREATE INDEX notation_transaction_id_fk88_ind ON administrative.notation (transaction_id);
+CREATE INDEX notation_transaction_id_fk87_ind ON administrative.notation (transaction_id);
 
-ALTER TABLE administrative.source_describes_rrr ADD CONSTRAINT source_describes_rrr_source_id_fk89 
+ALTER TABLE administrative.source_describes_rrr ADD CONSTRAINT source_describes_rrr_source_id_fk88 
             FOREIGN KEY (source_id) REFERENCES source.source(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX source_describes_rrr_source_id_fk89_ind ON administrative.source_describes_rrr (source_id);
+CREATE INDEX source_describes_rrr_source_id_fk88_ind ON administrative.source_describes_rrr (source_id);
 
-ALTER TABLE administrative.party_for_rrr ADD CONSTRAINT party_for_rrr_party_id_fk90 
+ALTER TABLE administrative.party_for_rrr ADD CONSTRAINT party_for_rrr_party_id_fk89 
             FOREIGN KEY (party_id) REFERENCES party.party(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX party_for_rrr_party_id_fk90_ind ON administrative.party_for_rrr (party_id);
+CREATE INDEX party_for_rrr_party_id_fk89_ind ON administrative.party_for_rrr (party_id);
 
-ALTER TABLE transaction.transaction ADD CONSTRAINT transaction_status_code_fk91 
+ALTER TABLE transaction.transaction ADD CONSTRAINT transaction_status_code_fk90 
             FOREIGN KEY (status_code) REFERENCES transaction.transaction_status_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX transaction_status_code_fk91_ind ON transaction.transaction (status_code);
+CREATE INDEX transaction_status_code_fk90_ind ON transaction.transaction (status_code);
 
-ALTER TABLE application.request_type ADD CONSTRAINT request_type_rrr_type_code_fk92 
+ALTER TABLE application.request_type ADD CONSTRAINT request_type_rrr_type_code_fk91 
             FOREIGN KEY (rrr_type_code) REFERENCES administrative.rrr_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX request_type_rrr_type_code_fk92_ind ON application.request_type (rrr_type_code);
+CREATE INDEX request_type_rrr_type_code_fk91_ind ON application.request_type (rrr_type_code);
 
-ALTER TABLE application.request_type ADD CONSTRAINT request_type_rrr_type_action_code_fk93 
+ALTER TABLE application.request_type ADD CONSTRAINT request_type_rrr_type_action_code_fk92 
             FOREIGN KEY (rrr_type_action_code) REFERENCES application.rrr_type_action(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX request_type_rrr_type_action_code_fk93_ind ON application.request_type (rrr_type_action_code);
+CREATE INDEX request_type_rrr_type_action_code_fk92_ind ON application.request_type (rrr_type_action_code);
 
-ALTER TABLE administrative.rrr ADD CONSTRAINT rrr_mortgage_type_code_fk94 
+ALTER TABLE administrative.rrr ADD CONSTRAINT rrr_mortgage_type_code_fk93 
             FOREIGN KEY (mortgage_type_code) REFERENCES administrative.mortgage_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX rrr_mortgage_type_code_fk94_ind ON administrative.rrr (mortgage_type_code);
+CREATE INDEX rrr_mortgage_type_code_fk93_ind ON administrative.rrr (mortgage_type_code);
 
-ALTER TABLE administrative.rrr ADD CONSTRAINT rrr_transaction_id_fk95 
+ALTER TABLE administrative.rrr ADD CONSTRAINT rrr_transaction_id_fk94 
             FOREIGN KEY (transaction_id) REFERENCES transaction.transaction(id) ON UPDATE CASCADE ON DELETE Cascade;
-CREATE INDEX rrr_transaction_id_fk95_ind ON administrative.rrr (transaction_id);
+CREATE INDEX rrr_transaction_id_fk94_ind ON administrative.rrr (transaction_id);
 
-ALTER TABLE administrative.ba_unit ADD CONSTRAINT ba_unit_transaction_id_fk96 
+ALTER TABLE administrative.ba_unit ADD CONSTRAINT ba_unit_transaction_id_fk95 
             FOREIGN KEY (transaction_id) REFERENCES transaction.transaction(id) ON UPDATE CASCADE ON DELETE Cascade;
-CREATE INDEX ba_unit_transaction_id_fk96_ind ON administrative.ba_unit (transaction_id);
+CREATE INDEX ba_unit_transaction_id_fk95_ind ON administrative.ba_unit (transaction_id);
 
-ALTER TABLE administrative.party_for_rrr ADD CONSTRAINT party_for_rrr_rrr_id_fk97 
+ALTER TABLE administrative.party_for_rrr ADD CONSTRAINT party_for_rrr_rrr_id_fk96 
             FOREIGN KEY (rrr_id) REFERENCES administrative.rrr(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX party_for_rrr_rrr_id_fk97_ind ON administrative.party_for_rrr (rrr_id);
+CREATE INDEX party_for_rrr_rrr_id_fk96_ind ON administrative.party_for_rrr (rrr_id);
 
-ALTER TABLE administrative.notation ADD CONSTRAINT notation_rrr_id_fk98 
+ALTER TABLE administrative.notation ADD CONSTRAINT notation_rrr_id_fk97 
             FOREIGN KEY (rrr_id) REFERENCES administrative.rrr(id) ON UPDATE CASCADE ON DELETE Cascade;
-CREATE INDEX notation_rrr_id_fk98_ind ON administrative.notation (rrr_id);
+CREATE INDEX notation_rrr_id_fk97_ind ON administrative.notation (rrr_id);
 
-ALTER TABLE source.source ADD CONSTRAINT source_transaction_id_fk99 
+ALTER TABLE source.source ADD CONSTRAINT source_transaction_id_fk98 
             FOREIGN KEY (transaction_id) REFERENCES transaction.transaction(id) ON UPDATE CASCADE ON DELETE Cascade;
-CREATE INDEX source_transaction_id_fk99_ind ON source.source (transaction_id);
+CREATE INDEX source_transaction_id_fk98_ind ON source.source (transaction_id);
 
-ALTER TABLE source.source ADD CONSTRAINT source_status_code_fk100 
+ALTER TABLE source.source ADD CONSTRAINT source_status_code_fk99 
             FOREIGN KEY (status_code) REFERENCES transaction.reg_status_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX source_status_code_fk100_ind ON source.source (status_code);
+CREATE INDEX source_status_code_fk99_ind ON source.source (status_code);
 
-ALTER TABLE cadastre.cadastre_object ADD CONSTRAINT cadastre_object_building_unit_type_code_fk101 
+ALTER TABLE cadastre.cadastre_object ADD CONSTRAINT cadastre_object_building_unit_type_code_fk100 
             FOREIGN KEY (building_unit_type_code) REFERENCES cadastre.building_unit_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX cadastre_object_building_unit_type_code_fk101_ind ON cadastre.cadastre_object (building_unit_type_code);
+CREATE INDEX cadastre_object_building_unit_type_code_fk100_ind ON cadastre.cadastre_object (building_unit_type_code);
 
-ALTER TABLE cadastre.cadastre_object ADD CONSTRAINT cadastre_object_transaction_id_fk102 
+ALTER TABLE cadastre.cadastre_object ADD CONSTRAINT cadastre_object_transaction_id_fk101 
             FOREIGN KEY (transaction_id) REFERENCES transaction.transaction(id) ON UPDATE CASCADE ON DELETE Cascade;
-CREATE INDEX cadastre_object_transaction_id_fk102_ind ON cadastre.cadastre_object (transaction_id);
+CREATE INDEX cadastre_object_transaction_id_fk101_ind ON cadastre.cadastre_object (transaction_id);
 
-ALTER TABLE cadastre.cadastre_object_target ADD CONSTRAINT cadastre_object_target_cadastre_object_id_fk103 
+ALTER TABLE cadastre.cadastre_object_target ADD CONSTRAINT cadastre_object_target_cadastre_object_id_fk102 
             FOREIGN KEY (cadastre_object_id) REFERENCES cadastre.cadastre_object(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX cadastre_object_target_cadastre_object_id_fk103_ind ON cadastre.cadastre_object_target (cadastre_object_id);
+CREATE INDEX cadastre_object_target_cadastre_object_id_fk102_ind ON cadastre.cadastre_object_target (cadastre_object_id);
 
-ALTER TABLE party.party ADD CONSTRAINT party_gender_code_fk104 
+ALTER TABLE party.party ADD CONSTRAINT party_gender_code_fk103 
             FOREIGN KEY (gender_code) REFERENCES party.gender_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX party_gender_code_fk104_ind ON party.party (gender_code);
+CREATE INDEX party_gender_code_fk103_ind ON party.party (gender_code);
 
-ALTER TABLE cadastre.survey_point ADD CONSTRAINT survey_point_transaction_id_fk105 
+ALTER TABLE cadastre.survey_point ADD CONSTRAINT survey_point_transaction_id_fk104 
             FOREIGN KEY (transaction_id) REFERENCES transaction.transaction(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX survey_point_transaction_id_fk105_ind ON cadastre.survey_point (transaction_id);
+CREATE INDEX survey_point_transaction_id_fk104_ind ON cadastre.survey_point (transaction_id);
 
-ALTER TABLE cadastre.cadastre_object_target ADD CONSTRAINT cadastre_object_target_transaction_id_fk106 
+ALTER TABLE cadastre.cadastre_object_target ADD CONSTRAINT cadastre_object_target_transaction_id_fk105 
             FOREIGN KEY (transaction_id) REFERENCES transaction.transaction(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX cadastre_object_target_transaction_id_fk106_ind ON cadastre.cadastre_object_target (transaction_id);
+CREATE INDEX cadastre_object_target_transaction_id_fk105_ind ON cadastre.cadastre_object_target (transaction_id);
 
-ALTER TABLE cadastre.transaction_source ADD CONSTRAINT transaction_source_transaction_id_fk107 
+ALTER TABLE transaction.transaction_source ADD CONSTRAINT transaction_source_transaction_id_fk106 
             FOREIGN KEY (transaction_id) REFERENCES transaction.transaction(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX transaction_source_transaction_id_fk107_ind ON cadastre.transaction_source (transaction_id);
+CREATE INDEX transaction_source_transaction_id_fk106_ind ON transaction.transaction_source (transaction_id);
 
-ALTER TABLE cadastre.transaction_source ADD CONSTRAINT transaction_source_source_id_fk108 
+ALTER TABLE transaction.transaction_source ADD CONSTRAINT transaction_source_source_id_fk107 
             FOREIGN KEY (source_id) REFERENCES source.source(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX transaction_source_source_id_fk108_ind ON cadastre.transaction_source (source_id);
+CREATE INDEX transaction_source_source_id_fk107_ind ON transaction.transaction_source (source_id);
 
-ALTER TABLE system.appuser_appgroup ADD CONSTRAINT appuser_appgroup_appuser_id_fk109 
+ALTER TABLE system.appuser_appgroup ADD CONSTRAINT appuser_appgroup_appuser_id_fk108 
             FOREIGN KEY (appuser_id) REFERENCES system.appuser(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX appuser_appgroup_appuser_id_fk109_ind ON system.appuser_appgroup (appuser_id);
+CREATE INDEX appuser_appgroup_appuser_id_fk108_ind ON system.appuser_appgroup (appuser_id);
 
-ALTER TABLE system.appuser_appgroup ADD CONSTRAINT appuser_appgroup_appgroup_id_fk110 
+ALTER TABLE system.appuser_appgroup ADD CONSTRAINT appuser_appgroup_appgroup_id_fk109 
             FOREIGN KEY (appgroup_id) REFERENCES system.appgroup(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX appuser_appgroup_appgroup_id_fk110_ind ON system.appuser_appgroup (appgroup_id);
+CREATE INDEX appuser_appgroup_appgroup_id_fk109_ind ON system.appuser_appgroup (appgroup_id);
 
-ALTER TABLE system.approle_appgroup ADD CONSTRAINT approle_appgroup_approle_code_fk111 
+ALTER TABLE system.approle_appgroup ADD CONSTRAINT approle_appgroup_approle_code_fk110 
             FOREIGN KEY (approle_code) REFERENCES system.approle(code) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX approle_appgroup_approle_code_fk111_ind ON system.approle_appgroup (approle_code);
+CREATE INDEX approle_appgroup_approle_code_fk110_ind ON system.approle_appgroup (approle_code);
 
-ALTER TABLE system.approle_appgroup ADD CONSTRAINT approle_appgroup_appgroup_id_fk112 
+ALTER TABLE system.approle_appgroup ADD CONSTRAINT approle_appgroup_appgroup_id_fk111 
             FOREIGN KEY (appgroup_id) REFERENCES system.appgroup(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX approle_appgroup_appgroup_id_fk112_ind ON system.approle_appgroup (appgroup_id);
+CREATE INDEX approle_appgroup_appgroup_id_fk111_ind ON system.approle_appgroup (appgroup_id);
 
-ALTER TABLE application.service_action_type ADD CONSTRAINT service_action_type_status_to_set_fk113 
+ALTER TABLE application.service_action_type ADD CONSTRAINT service_action_type_status_to_set_fk112 
             FOREIGN KEY (status_to_set) REFERENCES application.service_status_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX service_action_type_status_to_set_fk113_ind ON application.service_action_type (status_to_set);
+CREATE INDEX service_action_type_status_to_set_fk112_ind ON application.service_action_type (status_to_set);
 
-ALTER TABLE application.application_action_type ADD CONSTRAINT application_action_type_status_to_set_fk114 
+ALTER TABLE application.application_action_type ADD CONSTRAINT application_action_type_status_to_set_fk113 
             FOREIGN KEY (status_to_set) REFERENCES application.application_status_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX application_action_type_status_to_set_fk114_ind ON application.application_action_type (status_to_set);
+CREATE INDEX application_action_type_status_to_set_fk113_ind ON application.application_action_type (status_to_set);
 
-ALTER TABLE system.br_validation ADD CONSTRAINT br_validation_target_application_moment_fk115 
+ALTER TABLE system.br_validation ADD CONSTRAINT br_validation_target_application_moment_fk114 
             FOREIGN KEY (target_application_moment) REFERENCES application.application_action_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX br_validation_target_application_moment_fk115_ind ON system.br_validation (target_application_moment);
+CREATE INDEX br_validation_target_application_moment_fk114_ind ON system.br_validation (target_application_moment);
 
-ALTER TABLE system.br_validation ADD CONSTRAINT br_validation_target_service_moment_fk116 
+ALTER TABLE system.br_validation ADD CONSTRAINT br_validation_target_service_moment_fk115 
             FOREIGN KEY (target_service_moment) REFERENCES application.service_action_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX br_validation_target_service_moment_fk116_ind ON system.br_validation (target_service_moment);
+CREATE INDEX br_validation_target_service_moment_fk115_ind ON system.br_validation (target_service_moment);
 
-ALTER TABLE system.br_validation ADD CONSTRAINT br_validation_target_reg_moment_fk117 
+ALTER TABLE system.br_validation ADD CONSTRAINT br_validation_target_reg_moment_fk116 
             FOREIGN KEY (target_reg_moment) REFERENCES transaction.reg_status_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX br_validation_target_reg_moment_fk117_ind ON system.br_validation (target_reg_moment);
+CREATE INDEX br_validation_target_reg_moment_fk116_ind ON system.br_validation (target_reg_moment);
+
+ALTER TABLE system.query_field ADD CONSTRAINT query_field_query_name_fk117 
+            FOREIGN KEY (query_name) REFERENCES system.query(name) ON UPDATE CASCADE ON DELETE CASCADE;
+CREATE INDEX query_field_query_name_fk117_ind ON system.query_field (query_name);
+
+ALTER TABLE system.config_map_layer ADD CONSTRAINT config_map_layer_pojo_query_name_fk118 
+            FOREIGN KEY (pojo_query_name) REFERENCES system.query(name) ON UPDATE CASCADE ON DELETE RESTRICT;
+CREATE INDEX config_map_layer_pojo_query_name_fk118_ind ON system.config_map_layer (pojo_query_name);
+
+ALTER TABLE system.config_map_layer ADD CONSTRAINT config_map_layer_pojo_query_name_for_select_fk119 
+            FOREIGN KEY (pojo_query_name_for_select) REFERENCES system.query(name) ON UPDATE CASCADE ON DELETE RESTRICT;
+CREATE INDEX config_map_layer_pojo_query_name_for_select_fk119_ind ON system.config_map_layer (pojo_query_name_for_select);
 --Generate triggers for tables --
 -- triggers for table source.source -- 
 
  
-
-CREATE OR REPLACE FUNCTION source.f_for_tbl_source_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.availability_status_code is null then 
-    new.availability_status_code = 'available';
-  end if;
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON source.source CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON source.source FOR EACH ROW
-   EXECUTE PROCEDURE source.f_for_tbl_source_trg__treat_default_values();
-    
 
 CREATE OR REPLACE FUNCTION source.f_for_tbl_source_trg_change_of_status() RETURNS TRIGGER 
 AS $$
@@ -4333,322 +4377,9 @@ CREATE TRIGGER trg_change_of_status before update
    ON source.source FOR EACH ROW
    EXECUTE PROCEDURE source.f_for_tbl_source_trg_change_of_status();
     
--- triggers for table source.availability_status_type -- 
-
- 
-
-CREATE OR REPLACE FUNCTION source.f_for_tbl_availability_status_type_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.status is null then 
-    new.status = 'c';
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON source.availability_status_type CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON source.availability_status_type FOR EACH ROW
-   EXECUTE PROCEDURE source.f_for_tbl_availability_status_type_trg__treat_default_values();
-    
--- triggers for table source.administrative_source_type -- 
-
- 
-
-CREATE OR REPLACE FUNCTION source.f_for_tbl_administrative_source_type_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.has_status is null then 
-    new.has_status = false;
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON source.administrative_source_type CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON source.administrative_source_type FOR EACH ROW
-   EXECUTE PROCEDURE source.f_for_tbl_administrative_source_type_trg__treat_default_values();
-    
--- triggers for table source.spatial_source -- 
-
- 
-
-CREATE OR REPLACE FUNCTION source.f_for_tbl_spatial_source_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON source.spatial_source CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON source.spatial_source FOR EACH ROW
-   EXECUTE PROCEDURE source.f_for_tbl_spatial_source_trg__treat_default_values();
-    
--- triggers for table source.spatial_source_type -- 
-
- 
-
-CREATE OR REPLACE FUNCTION source.f_for_tbl_spatial_source_type_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.status is null then 
-    new.status = 't';
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON source.spatial_source_type CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON source.spatial_source_type FOR EACH ROW
-   EXECUTE PROCEDURE source.f_for_tbl_spatial_source_type_trg__treat_default_values();
-    
--- triggers for table source.spatial_source_measurement -- 
-
- 
-
-CREATE OR REPLACE FUNCTION source.f_for_tbl_spatial_source_measurement_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON source.spatial_source_measurement CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON source.spatial_source_measurement FOR EACH ROW
-   EXECUTE PROCEDURE source.f_for_tbl_spatial_source_measurement_trg__treat_default_values();
-    
--- triggers for table party.party -- 
-
- 
-
-CREATE OR REPLACE FUNCTION party.f_for_tbl_party_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON party.party CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON party.party FOR EACH ROW
-   EXECUTE PROCEDURE party.f_for_tbl_party_trg__treat_default_values();
-    
--- triggers for table party.party_type -- 
-
- 
-
-CREATE OR REPLACE FUNCTION party.f_for_tbl_party_type_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.status is null then 
-    new.status = 't';
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON party.party_type CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON party.party_type FOR EACH ROW
-   EXECUTE PROCEDURE party.f_for_tbl_party_type_trg__treat_default_values();
-    
--- triggers for table party.group_party -- 
-
- 
-
-CREATE OR REPLACE FUNCTION party.f_for_tbl_group_party_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON party.group_party CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON party.group_party FOR EACH ROW
-   EXECUTE PROCEDURE party.f_for_tbl_group_party_trg__treat_default_values();
-    
--- triggers for table party.group_party_type -- 
-
- 
-
-CREATE OR REPLACE FUNCTION party.f_for_tbl_group_party_type_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.status is null then 
-    new.status = 't';
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON party.group_party_type CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON party.group_party_type FOR EACH ROW
-   EXECUTE PROCEDURE party.f_for_tbl_group_party_type_trg__treat_default_values();
-    
--- triggers for table party.party_member -- 
-
- 
-
-CREATE OR REPLACE FUNCTION party.f_for_tbl_party_member_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON party.party_member CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON party.party_member FOR EACH ROW
-   EXECUTE PROCEDURE party.f_for_tbl_party_member_trg__treat_default_values();
-    
--- triggers for table administrative.ba_unit -- 
-
- 
-
-CREATE OR REPLACE FUNCTION administrative.f_for_tbl_ba_unit_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON administrative.ba_unit CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON administrative.ba_unit FOR EACH ROW
-   EXECUTE PROCEDURE administrative.f_for_tbl_ba_unit_trg__treat_default_values();
-    
--- triggers for table administrative.ba_unit_type -- 
-
- 
-
-CREATE OR REPLACE FUNCTION administrative.f_for_tbl_ba_unit_type_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.status is null then 
-    new.status = 't';
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON administrative.ba_unit_type CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON administrative.ba_unit_type FOR EACH ROW
-   EXECUTE PROCEDURE administrative.f_for_tbl_ba_unit_type_trg__treat_default_values();
-    
 -- triggers for table administrative.rrr -- 
 
  
-
-CREATE OR REPLACE FUNCTION administrative.f_for_tbl_rrr_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.status_code is null then 
-    new.status_code = 'pending';
-  end if;
-  if new.is_primary is null then 
-    new.is_primary = false;
-  end if;
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON administrative.rrr CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON administrative.rrr FOR EACH ROW
-   EXECUTE PROCEDURE administrative.f_for_tbl_rrr_trg__treat_default_values();
-    
 
 CREATE OR REPLACE FUNCTION administrative.f_for_tbl_rrr_trg_change_from_pending() RETURNS TRIGGER 
 AS $$
@@ -4666,1186 +4397,9 @@ CREATE TRIGGER trg_change_from_pending before update
    ON administrative.rrr FOR EACH ROW
    EXECUTE PROCEDURE administrative.f_for_tbl_rrr_trg_change_from_pending();
     
--- triggers for table administrative.rrr_type -- 
-
- 
-
-CREATE OR REPLACE FUNCTION administrative.f_for_tbl_rrr_type_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.is_primary is null then 
-    new.is_primary = false;
-  end if;
-  if new.status is null then 
-    new.status = 't';
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON administrative.rrr_type CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON administrative.rrr_type FOR EACH ROW
-   EXECUTE PROCEDURE administrative.f_for_tbl_rrr_type_trg__treat_default_values();
-    
--- triggers for table administrative.mortgage_isbased_in_rrr -- 
-
- 
-
-CREATE OR REPLACE FUNCTION administrative.f_for_tbl_mortgage_isbased_in_rrr_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON administrative.mortgage_isbased_in_rrr CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON administrative.mortgage_isbased_in_rrr FOR EACH ROW
-   EXECUTE PROCEDURE administrative.f_for_tbl_mortgage_isbased_in_rrr_trg__treat_default_values();
-    
--- triggers for table administrative.source_describes_rrr -- 
-
- 
-
-CREATE OR REPLACE FUNCTION administrative.f_for_tbl_source_describes_rrr_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON administrative.source_describes_rrr CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON administrative.source_describes_rrr FOR EACH ROW
-   EXECUTE PROCEDURE administrative.f_for_tbl_source_describes_rrr_trg__treat_default_values();
-    
--- triggers for table administrative.source_describes_ba_unit -- 
-
- 
-
-CREATE OR REPLACE FUNCTION administrative.f_for_tbl_source_describes_ba_unit_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON administrative.source_describes_ba_unit CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON administrative.source_describes_ba_unit FOR EACH ROW
-   EXECUTE PROCEDURE administrative.f_for_tbl_source_describes_ba_unit_trg__treat_default_values();
-    
--- triggers for table administrative.required_relationship_baunit -- 
-
- 
-
-CREATE OR REPLACE FUNCTION administrative.f_for_tbl_required_relationship_baunit_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON administrative.required_relationship_baunit CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON administrative.required_relationship_baunit FOR EACH ROW
-   EXECUTE PROCEDURE administrative.f_for_tbl_required_relationship_baunit_trg__treat_default_values();
-    
--- triggers for table cadastre.spatial_unit -- 
-
- 
-
-CREATE OR REPLACE FUNCTION cadastre.f_for_tbl_spatial_unit_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.dimension_code is null then 
-    new.dimension_code = '2D';
-  end if;
-  if new.surface_relation_code is null then 
-    new.surface_relation_code = 'onSurface';
-  end if;
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON cadastre.spatial_unit CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON cadastre.spatial_unit FOR EACH ROW
-   EXECUTE PROCEDURE cadastre.f_for_tbl_spatial_unit_trg__treat_default_values();
-    
--- triggers for table cadastre.spatial_value_area -- 
-
- 
-
-CREATE OR REPLACE FUNCTION cadastre.f_for_tbl_spatial_value_area_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON cadastre.spatial_value_area CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON cadastre.spatial_value_area FOR EACH ROW
-   EXECUTE PROCEDURE cadastre.f_for_tbl_spatial_value_area_trg__treat_default_values();
-    
--- triggers for table cadastre.area_type -- 
-
- 
-
-CREATE OR REPLACE FUNCTION cadastre.f_for_tbl_area_type_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.status is null then 
-    new.status = 'c';
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON cadastre.area_type CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON cadastre.area_type FOR EACH ROW
-   EXECUTE PROCEDURE cadastre.f_for_tbl_area_type_trg__treat_default_values();
-    
--- triggers for table cadastre.spatial_unit_address -- 
-
- 
-
-CREATE OR REPLACE FUNCTION cadastre.f_for_tbl_spatial_unit_address_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON cadastre.spatial_unit_address CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON cadastre.spatial_unit_address FOR EACH ROW
-   EXECUTE PROCEDURE cadastre.f_for_tbl_spatial_unit_address_trg__treat_default_values();
-    
--- triggers for table cadastre.surface_relation_type -- 
-
- 
-
-CREATE OR REPLACE FUNCTION cadastre.f_for_tbl_surface_relation_type_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.status is null then 
-    new.status = 't';
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON cadastre.surface_relation_type CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON cadastre.surface_relation_type FOR EACH ROW
-   EXECUTE PROCEDURE cadastre.f_for_tbl_surface_relation_type_trg__treat_default_values();
-    
--- triggers for table cadastre.level -- 
-
- 
-
-CREATE OR REPLACE FUNCTION cadastre.f_for_tbl_level_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON cadastre.level CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON cadastre.level FOR EACH ROW
-   EXECUTE PROCEDURE cadastre.f_for_tbl_level_trg__treat_default_values();
-    
--- triggers for table cadastre.structure_type -- 
-
- 
-
-CREATE OR REPLACE FUNCTION cadastre.f_for_tbl_structure_type_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.status is null then 
-    new.status = 't';
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON cadastre.structure_type CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON cadastre.structure_type FOR EACH ROW
-   EXECUTE PROCEDURE cadastre.f_for_tbl_structure_type_trg__treat_default_values();
-    
--- triggers for table cadastre.level_content_type -- 
-
- 
-
-CREATE OR REPLACE FUNCTION cadastre.f_for_tbl_level_content_type_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.status is null then 
-    new.status = 't';
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON cadastre.level_content_type CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON cadastre.level_content_type FOR EACH ROW
-   EXECUTE PROCEDURE cadastre.f_for_tbl_level_content_type_trg__treat_default_values();
-    
--- triggers for table cadastre.spatial_unit_group -- 
-
- 
-
-CREATE OR REPLACE FUNCTION cadastre.f_for_tbl_spatial_unit_group_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON cadastre.spatial_unit_group CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON cadastre.spatial_unit_group FOR EACH ROW
-   EXECUTE PROCEDURE cadastre.f_for_tbl_spatial_unit_group_trg__treat_default_values();
-    
--- triggers for table cadastre.spatial_unit_in_group -- 
-
- 
-
-CREATE OR REPLACE FUNCTION cadastre.f_for_tbl_spatial_unit_in_group_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON cadastre.spatial_unit_in_group CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON cadastre.spatial_unit_in_group FOR EACH ROW
-   EXECUTE PROCEDURE cadastre.f_for_tbl_spatial_unit_in_group_trg__treat_default_values();
-    
--- triggers for table administrative.ba_unit_contains_spatial_unit -- 
-
- 
-
-CREATE OR REPLACE FUNCTION administrative.f_for_tbl_ba_unit_contains_spatial_unit_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON administrative.ba_unit_contains_spatial_unit CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON administrative.ba_unit_contains_spatial_unit FOR EACH ROW
-   EXECUTE PROCEDURE administrative.f_for_tbl_ba_unit_contains_spatial_unit_trg__treat_default_values();
-    
--- triggers for table cadastre.legal_space_utility_network -- 
-
- 
-
-CREATE OR REPLACE FUNCTION cadastre.f_for_tbl_legal_space_utility_network_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON cadastre.legal_space_utility_network CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON cadastre.legal_space_utility_network FOR EACH ROW
-   EXECUTE PROCEDURE cadastre.f_for_tbl_legal_space_utility_network_trg__treat_default_values();
-    
--- triggers for table cadastre.building_unit_type -- 
-
- 
-
-CREATE OR REPLACE FUNCTION cadastre.f_for_tbl_building_unit_type_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.status is null then 
-    new.status = 't';
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON cadastre.building_unit_type CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON cadastre.building_unit_type FOR EACH ROW
-   EXECUTE PROCEDURE cadastre.f_for_tbl_building_unit_type_trg__treat_default_values();
-    
--- triggers for table cadastre.utility_network_status_type -- 
-
- 
-
-CREATE OR REPLACE FUNCTION cadastre.f_for_tbl_utility_network_status_type_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.status is null then 
-    new.status = 't';
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON cadastre.utility_network_status_type CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON cadastre.utility_network_status_type FOR EACH ROW
-   EXECUTE PROCEDURE cadastre.f_for_tbl_utility_network_status_type_trg__treat_default_values();
-    
--- triggers for table application.application -- 
-
- 
-
-CREATE OR REPLACE FUNCTION application.f_for_tbl_application_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.lodging_datetime is null then 
-    new.lodging_datetime = now();
-  end if;
-  if new.expected_completion_date is null then 
-    new.expected_completion_date = now();
-  end if;
-  if new.services_fee is null then 
-    new.services_fee = 0;
-  end if;
-  if new.tax is null then 
-    new.tax = 0;
-  end if;
-  if new.total_fee is null then 
-    new.total_fee = 0;
-  end if;
-  if new.total_amount_paid is null then 
-    new.total_amount_paid = 0;
-  end if;
-  if new.fee_paid is null then 
-    new.fee_paid = false;
-  end if;
-  if new.action_code is null then 
-    new.action_code = 'lodge';
-  end if;
-  if new.status_code is null then 
-    new.status_code = 'lodged';
-  end if;
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON application.application CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON application.application FOR EACH ROW
-   EXECUTE PROCEDURE application.f_for_tbl_application_trg__treat_default_values();
-    
--- triggers for table application.request_type -- 
-
- 
-
-CREATE OR REPLACE FUNCTION application.f_for_tbl_request_type_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.status is null then 
-    new.status = 't';
-  end if;
-  if new.nr_days_to_complete is null then 
-    new.nr_days_to_complete = 0;
-  end if;
-  if new.base_fee is null then 
-    new.base_fee = 0;
-  end if;
-  if new.area_base_fee is null then 
-    new.area_base_fee = 0;
-  end if;
-  if new.value_base_fee is null then 
-    new.value_base_fee = 0;
-  end if;
-  if new.nr_properties_required is null then 
-    new.nr_properties_required = 0;
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON application.request_type CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON application.request_type FOR EACH ROW
-   EXECUTE PROCEDURE application.f_for_tbl_request_type_trg__treat_default_values();
-    
--- triggers for table application.request_category_type -- 
-
- 
-
-CREATE OR REPLACE FUNCTION application.f_for_tbl_request_category_type_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.status is null then 
-    new.status = 't';
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON application.request_category_type CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON application.request_category_type FOR EACH ROW
-   EXECUTE PROCEDURE application.f_for_tbl_request_category_type_trg__treat_default_values();
-    
--- triggers for table application.service -- 
-
- 
-
-CREATE OR REPLACE FUNCTION application.f_for_tbl_service_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.service_order is null then 
-    new.service_order = 0;
-  end if;
-  if new.lodging_datetime is null then 
-    new.lodging_datetime = now();
-  end if;
-  if new.status_code is null then 
-    new.status_code = 'lodged';
-  end if;
-  if new.action_code is null then 
-    new.action_code = 'lodge';
-  end if;
-  if new.base_fee is null then 
-    new.base_fee = 0;
-  end if;
-  if new.area_fee is null then 
-    new.area_fee = 0;
-  end if;
-  if new.value_fee is null then 
-    new.value_fee = 0;
-  end if;
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON application.service CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON application.service FOR EACH ROW
-   EXECUTE PROCEDURE application.f_for_tbl_service_trg__treat_default_values();
-    
--- triggers for table party.party_role -- 
-
- 
-
-CREATE OR REPLACE FUNCTION party.f_for_tbl_party_role_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON party.party_role CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON party.party_role FOR EACH ROW
-   EXECUTE PROCEDURE party.f_for_tbl_party_role_trg__treat_default_values();
-    
--- triggers for table party.party_role_type -- 
-
- 
-
-CREATE OR REPLACE FUNCTION party.f_for_tbl_party_role_type_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.status is null then 
-    new.status = 't';
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON party.party_role_type CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON party.party_role_type FOR EACH ROW
-   EXECUTE PROCEDURE party.f_for_tbl_party_role_type_trg__treat_default_values();
-    
--- triggers for table address.address -- 
-
- 
-
-CREATE OR REPLACE FUNCTION address.f_for_tbl_address_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON address.address CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON address.address FOR EACH ROW
-   EXECUTE PROCEDURE address.f_for_tbl_address_trg__treat_default_values();
-    
--- triggers for table system.appuser -- 
-
- 
-
-CREATE OR REPLACE FUNCTION system.f_for_tbl_appuser_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.passwd is null then 
-    new.passwd = uuid_generate_v1();
-  end if;
-  if new.active is null then 
-    new.active = true;
-  end if;
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON system.appuser CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON system.appuser FOR EACH ROW
-   EXECUTE PROCEDURE system.f_for_tbl_appuser_trg__treat_default_values();
-    
--- triggers for table cadastre.dimension_type -- 
-
- 
-
-CREATE OR REPLACE FUNCTION cadastre.f_for_tbl_dimension_type_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.status is null then 
-    new.status = 't';
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON cadastre.dimension_type CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON cadastre.dimension_type FOR EACH ROW
-   EXECUTE PROCEDURE cadastre.f_for_tbl_dimension_type_trg__treat_default_values();
-    
--- triggers for table party.communication_type -- 
-
- 
-
-CREATE OR REPLACE FUNCTION party.f_for_tbl_communication_type_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.status is null then 
-    new.status = 't';
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON party.communication_type CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON party.communication_type FOR EACH ROW
-   EXECUTE PROCEDURE party.f_for_tbl_communication_type_trg__treat_default_values();
-    
--- triggers for table source.presentation_form_type -- 
-
- 
-
-CREATE OR REPLACE FUNCTION source.f_for_tbl_presentation_form_type_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.status is null then 
-    new.status = 't';
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON source.presentation_form_type CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON source.presentation_form_type FOR EACH ROW
-   EXECUTE PROCEDURE source.f_for_tbl_presentation_form_type_trg__treat_default_values();
-    
--- triggers for table source.archive -- 
-
- 
-
-CREATE OR REPLACE FUNCTION source.f_for_tbl_archive_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON source.archive CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON source.archive FOR EACH ROW
-   EXECUTE PROCEDURE source.f_for_tbl_archive_trg__treat_default_values();
-    
--- triggers for table application.application_action_type -- 
-
- 
-
-CREATE OR REPLACE FUNCTION application.f_for_tbl_application_action_type_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.status is null then 
-    new.status = 't';
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON application.application_action_type CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON application.application_action_type FOR EACH ROW
-   EXECUTE PROCEDURE application.f_for_tbl_application_action_type_trg__treat_default_values();
-    
--- triggers for table application.service_status_type -- 
-
- 
-
-CREATE OR REPLACE FUNCTION application.f_for_tbl_service_status_type_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.status is null then 
-    new.status = 't';
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON application.service_status_type CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON application.service_status_type FOR EACH ROW
-   EXECUTE PROCEDURE application.f_for_tbl_service_status_type_trg__treat_default_values();
-    
--- triggers for table party.id_type -- 
-
- 
-
-CREATE OR REPLACE FUNCTION party.f_for_tbl_id_type_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.status is null then 
-    new.status = 't';
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON party.id_type CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON party.id_type FOR EACH ROW
-   EXECUTE PROCEDURE party.f_for_tbl_id_type_trg__treat_default_values();
-    
--- triggers for table application.service_action_type -- 
-
- 
-
-CREATE OR REPLACE FUNCTION application.f_for_tbl_service_action_type_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.status is null then 
-    new.status = 't';
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON application.service_action_type CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON application.service_action_type FOR EACH ROW
-   EXECUTE PROCEDURE application.f_for_tbl_service_action_type_trg__treat_default_values();
-    
--- triggers for table application.application_property -- 
-
- 
-
-CREATE OR REPLACE FUNCTION application.f_for_tbl_application_property_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.area is null then 
-    new.area = 0;
-  end if;
-  if new.total_value is null then 
-    new.total_value = 0;
-  end if;
-  if new.verified_exists is null then 
-    new.verified_exists = false;
-  end if;
-  if new.verified_location is null then 
-    new.verified_location = false;
-  end if;
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON application.application_property CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON application.application_property FOR EACH ROW
-   EXECUTE PROCEDURE application.f_for_tbl_application_property_trg__treat_default_values();
-    
--- triggers for table application.application_uses_source -- 
-
- 
-
-CREATE OR REPLACE FUNCTION application.f_for_tbl_application_uses_source_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON application.application_uses_source CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON application.application_uses_source FOR EACH ROW
-   EXECUTE PROCEDURE application.f_for_tbl_application_uses_source_trg__treat_default_values();
-    
--- triggers for table application.application_status_type -- 
-
- 
-
-CREATE OR REPLACE FUNCTION application.f_for_tbl_application_status_type_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.status is null then 
-    new.status = 't';
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON application.application_status_type CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON application.application_status_type FOR EACH ROW
-   EXECUTE PROCEDURE application.f_for_tbl_application_status_type_trg__treat_default_values();
-    
--- triggers for table document.document -- 
-
- 
-
-CREATE OR REPLACE FUNCTION document.f_for_tbl_document_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON document.document CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON document.document FOR EACH ROW
-   EXECUTE PROCEDURE document.f_for_tbl_document_trg__treat_default_values();
-    
--- triggers for table system.setting -- 
-
- 
-
-CREATE OR REPLACE FUNCTION system.f_for_tbl_setting_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.active is null then 
-    new.active = true;
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON system.setting CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON system.setting FOR EACH ROW
-   EXECUTE PROCEDURE system.f_for_tbl_setting_trg__treat_default_values();
-    
--- triggers for table system.appuser_setting -- 
-
- 
-
-CREATE OR REPLACE FUNCTION system.f_for_tbl_appuser_setting_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.active is null then 
-    new.active = true;
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON system.appuser_setting CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON system.appuser_setting FOR EACH ROW
-   EXECUTE PROCEDURE system.f_for_tbl_appuser_setting_trg__treat_default_values();
-    
--- triggers for table system.language -- 
-
- 
-
-CREATE OR REPLACE FUNCTION system.f_for_tbl_language_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.active is null then 
-    new.active = true;
-  end if;
-  if new.is_default is null then 
-    new.is_default = false;
-  end if;
-  if new.item_order is null then 
-    new.item_order = 1;
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON system.language CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON system.language FOR EACH ROW
-   EXECUTE PROCEDURE system.f_for_tbl_language_trg__treat_default_values();
-    
--- triggers for table system.config_map_layer -- 
-
- 
-
-CREATE OR REPLACE FUNCTION system.f_for_tbl_config_map_layer_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.active is null then 
-    new.active = true;
-  end if;
-  if new.item_order is null then 
-    new.item_order = 0;
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON system.config_map_layer CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON system.config_map_layer FOR EACH ROW
-   EXECUTE PROCEDURE system.f_for_tbl_config_map_layer_trg__treat_default_values();
-    
--- triggers for table system.br_validation -- 
-
- 
-
-CREATE OR REPLACE FUNCTION system.f_for_tbl_br_validation_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.id is null then 
-    new.id = uuid_generate_v1();
-  end if;
-  if new.order_of_execution is null then 
-    new.order_of_execution = 0;
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON system.br_validation CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON system.br_validation FOR EACH ROW
-   EXECUTE PROCEDURE system.f_for_tbl_br_validation_trg__treat_default_values();
-    
--- triggers for table system.br_definition -- 
-
- 
-
-CREATE OR REPLACE FUNCTION system.f_for_tbl_br_definition_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.active_until is null then 
-    new.active_until = 'infinity';
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON system.br_definition CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON system.br_definition FOR EACH ROW
-   EXECUTE PROCEDURE system.f_for_tbl_br_definition_trg__treat_default_values();
-    
 -- triggers for table cadastre.cadastre_object -- 
 
  
-
-CREATE OR REPLACE FUNCTION cadastre.f_for_tbl_cadastre_object_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.type_code is null then 
-    new.type_code = 'parcel';
-  end if;
-  if new.status_code is null then 
-    new.status_code = 'pending';
-  end if;
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON cadastre.cadastre_object CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON cadastre.cadastre_object FOR EACH ROW
-   EXECUTE PROCEDURE cadastre.f_for_tbl_cadastre_object_trg__treat_default_values();
-    
 
 CREATE OR REPLACE FUNCTION cadastre.f_for_tbl_cadastre_object_trg_remove() RETURNS TRIGGER 
 AS $$
@@ -5929,249 +4483,6 @@ CREATE TRIGGER trg_geommodify before insert or update
    ON cadastre.cadastre_object FOR EACH ROW
    EXECUTE PROCEDURE cadastre.f_for_tbl_cadastre_object_trg_geommodify();
     
--- triggers for table administrative.notation -- 
-
- 
-
-CREATE OR REPLACE FUNCTION administrative.f_for_tbl_notation_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.status_code is null then 
-    new.status_code = 'pending';
-  end if;
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON administrative.notation CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON administrative.notation FOR EACH ROW
-   EXECUTE PROCEDURE administrative.f_for_tbl_notation_trg__treat_default_values();
-    
--- triggers for table administrative.rrr_share -- 
-
- 
-
-CREATE OR REPLACE FUNCTION administrative.f_for_tbl_rrr_share_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON administrative.rrr_share CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON administrative.rrr_share FOR EACH ROW
-   EXECUTE PROCEDURE administrative.f_for_tbl_rrr_share_trg__treat_default_values();
-    
--- triggers for table administrative.party_for_rrr -- 
-
- 
-
-CREATE OR REPLACE FUNCTION administrative.f_for_tbl_party_for_rrr_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON administrative.party_for_rrr CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON administrative.party_for_rrr FOR EACH ROW
-   EXECUTE PROCEDURE administrative.f_for_tbl_party_for_rrr_trg__treat_default_values();
-    
--- triggers for table transaction.transaction -- 
-
- 
-
-CREATE OR REPLACE FUNCTION transaction.f_for_tbl_transaction_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.status_code is null then 
-    new.status_code = 'pending';
-  end if;
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON transaction.transaction CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON transaction.transaction FOR EACH ROW
-   EXECUTE PROCEDURE transaction.f_for_tbl_transaction_trg__treat_default_values();
-    
--- triggers for table application.rrr_type_action -- 
-
- 
-
-CREATE OR REPLACE FUNCTION application.f_for_tbl_rrr_type_action_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.status is null then 
-    new.status = 't';
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON application.rrr_type_action CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON application.rrr_type_action FOR EACH ROW
-   EXECUTE PROCEDURE application.f_for_tbl_rrr_type_action_trg__treat_default_values();
-    
--- triggers for table cadastre.cadastre_object_target -- 
-
- 
-
-CREATE OR REPLACE FUNCTION cadastre.f_for_tbl_cadastre_object_target_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON cadastre.cadastre_object_target CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON cadastre.cadastre_object_target FOR EACH ROW
-   EXECUTE PROCEDURE cadastre.f_for_tbl_cadastre_object_target_trg__treat_default_values();
-    
--- triggers for table party.gender_type -- 
-
- 
-
-CREATE OR REPLACE FUNCTION party.f_for_tbl_gender_type_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.status is null then 
-    new.status = 't';
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON party.gender_type CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON party.gender_type FOR EACH ROW
-   EXECUTE PROCEDURE party.f_for_tbl_gender_type_trg__treat_default_values();
-    
--- triggers for table cadastre.survey_point -- 
-
- 
-
-CREATE OR REPLACE FUNCTION cadastre.f_for_tbl_survey_point_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.boundary is null then 
-    new.boundary = true;
-  end if;
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON cadastre.survey_point CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON cadastre.survey_point FOR EACH ROW
-   EXECUTE PROCEDURE cadastre.f_for_tbl_survey_point_trg__treat_default_values();
-    
--- triggers for table cadastre.transaction_source -- 
-
- 
-
-CREATE OR REPLACE FUNCTION cadastre.f_for_tbl_transaction_source_trg__treat_default_values() RETURNS TRIGGER 
-AS $$
-BEGIN
-
-  if new.rowidentifier is null then 
-    new.rowidentifier = uuid_generate_v1();
-  end if;
-  if new.rowversion is null then 
-    new.rowversion = 0;
-  end if;
-  if new.change_action is null then 
-    new.change_action = 'i';
-  end if;
-  if new.change_time is null then 
-    new.change_time = now();
-  end if;
-  return NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trg__treat_default_values ON cadastre.transaction_source CASCADE;
-CREATE TRIGGER trg__treat_default_values BEFORE INSERT
-   ON cadastre.transaction_source FOR EACH ROW
-   EXECUTE PROCEDURE cadastre.f_for_tbl_transaction_source_trg__treat_default_values();
-    
 
 --Extra modifications added to the script that cannot be generated --
 
@@ -6243,6 +4554,16 @@ BEGIN
 END;
 $BODY$
   LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION party.is_rightholder(id character varying)
+  RETURNS boolean AS
+$BODY$
+BEGIN
+  return (SELECT (CASE (SELECT COUNT(1) FROM administrative.party_for_rrr ap WHERE ap.party_id = id) WHEN 0 THEN false ELSE true END));
+END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
 
 insert into system.approle_appgroup (approle_code, appgroup_id)
 SELECT r.code, 'super-group-id' FROM system.approle r 
