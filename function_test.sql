@@ -1,4 +1,5 @@
-﻿create or replace function snap_geometry_to_geometry(
+﻿-- Kot
+create or replace function snap_geometry_to_geometry(
   inout geom_to_snap geometry, -- Geometry that has to be snapped. It can be point, linestring or polygon
   inout target_geom geometry, -- Geometry that will be the target to used for snapping
   snap_distance float, -- The snap distance in meters
