@@ -1,2 +1,4 @@
 # Override the default project settings to include pdf files 
 !*.pdf
+#Ingore temporary vpp files
+*.vpp~*
