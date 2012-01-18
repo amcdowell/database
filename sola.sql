@@ -128,20 +128,21 @@ $BODY$
 -- FROM snap_geometry_to_geometry(geomfromtext('POLYGON((0.1 0, 0.1 5.7, 4 3, 0.1 0))'), 
 --    geomfromtext('POLYGON((0 0, 0 6, 6 6, 6 0, 0 0),(1 1, 3 5, 4 5, 1 1))'), 1, true)
 
-create or replace function snap_geometry_to_geometry(
+CREATE OR REPLACE FUNCTION snap_geometry_to_geometry(
   inout geom_to_snap geometry, -- Geometry that has to be snapped. It can be point, linestring or polygon
   inout target_geom geometry, -- Geometry that will be the target to used for snapping
   snap_distance float, -- The snap distance in meters
   change_target_if_needed boolean, -- It gives if it is allowed to change target during snapping
   out snapped boolean, -- An output value showing if the geometry is snapped. If it is a linestring or polygon, even if one point of them is snapped it returns true.
   out target_is_changed boolean -- It shows if the target changed during the snapping process
-  ) 
-returns record as
+)
+  RETURNS record AS
 $BODY$
 DECLARE
   i integer;
   nr_elements integer;
   rec record;
+  rec2 record;
   point_location float;
   rings geometry[];
   
@@ -210,7 +211,17 @@ BEGIN
         snapped = true;
       end if;
       i = i+1;
-    end loop;    
+    end loop;
+    -- For each point of the target checks if it can snap to the geom_to_snap
+    for rec in select * from ST_DumpPoints(target_geom) t 
+      where st_dwithin(geom_to_snap, t.geom, snap_distance) loop
+      select t.* into rec2
+        from snap_geometry_to_geometry(rec.geom, geom_to_snap, snap_distance, true) t;
+      if rec2.target_is_changed then
+        geom_to_snap = rec2.target_geom;
+        snapped = true;
+      end if;
+    end loop;
   elseif st_geometrytype(geom_to_snap) = 'ST_Polygon' then
     select  array_agg(ST_ExteriorRing(geom)) into rings from ST_DumpRings(geom_to_snap);
     nr_elements = array_upper(rings,1);
@@ -236,7 +247,7 @@ BEGIN
 END;
 $BODY$
   LANGUAGE plpgsql;
-
+  
 -- This function assigns a srid found in the settings to the geometry passed as parameter  
 CREATE OR REPLACE FUNCTION get_geometry_with_srid(geom geometry)
   RETURNS geometry AS
@@ -2912,12 +2923,12 @@ CREATE TABLE system.config_map_layer(
 
     
  -- Data for the table system.config_map_layer -- 
-insert into system.config_map_layer(name, title, type_code, wms_url, pojo_query_name, pojo_structure, pojo_query_name_for_select, style, active, item_order) values('parcels', 'Parcels::::ITALIANO', 'pojo', '', 'SpatialResult.getParcels', 'theGeom:Polygon,label:""', 'dynamic.informationtool.get_parcel', 'parcel.sld', true, 1);
-insert into system.config_map_layer(name, title, type_code, pojo_query_name, pojo_structure, pojo_query_name_for_select, style, active, item_order) values('pending-parcels', 'Pending parcels::::ITALIANO', 'pojo', 'SpatialResult.getParcelsPending', 'theGeom:Polygon,label:""', 'dynamic.informationtool.get_parcel_pending', 'pending_parcels.sld', true, 2);
-insert into system.config_map_layer(name, title, type_code, pojo_query_name, pojo_structure, pojo_query_name_for_select, style, active, item_order) values('roads', 'Roads::::ITALIANO', 'pojo', 'SpatialResult.getRoads', 'theGeom:MultiPolygon,label:""', 'dynamic.informationtool.get_road', 'road.sld', true, 3);
-insert into system.config_map_layer(name, title, type_code, pojo_query_name, pojo_structure, pojo_query_name_for_select, style, active, item_order) values('survey-controls', 'Survey controls::::ITALIANO', 'pojo', 'SpatialResult.getSurveyControls', 'theGeom:Point,label:""', 'dynamic.informationtool.get_survey_control', 'survey_control.sld', true, 4);
-insert into system.config_map_layer(name, title, type_code, pojo_query_name, pojo_structure, pojo_query_name_for_select, style, active, item_order) values('place-names', 'Places names::::ITALIANO', 'pojo', 'SpatialResult.getPlaceNames', 'theGeom:Point,label:""', 'dynamic.informationtool.get_place_name', 'place_name.sld', true, 5);
-insert into system.config_map_layer(name, title, type_code, pojo_query_name, pojo_structure, pojo_query_name_for_select, style, active, item_order) values('applications', 'Applications::::ITALIANO', 'pojo', 'SpatialResult.getApplications', 'theGeom:MultiPoint,label:""', 'dynamic.informationtool.get_application', 'application.sld', true, 6);
+insert into system.config_map_layer(name, title, type_code, pojo_query_name, pojo_structure, pojo_query_name_for_select, style, active, item_order) values('parcels', 'Parcels::::ITALIANO', 'pojo', 'SpatialResult.getParcels', 'theGeom:Polygon,label:""', 'dynamic.informationtool.get_parcel', 'parcel.xml', true, 1);
+insert into system.config_map_layer(name, title, type_code, pojo_query_name, pojo_structure, pojo_query_name_for_select, style, active, item_order) values('pending-parcels', 'Pending parcels::::ITALIANO', 'pojo', 'SpatialResult.getParcelsPending', 'theGeom:Polygon,label:""', 'dynamic.informationtool.get_parcel_pending', 'pending_parcels.xml', true, 2);
+insert into system.config_map_layer(name, title, type_code, pojo_query_name, pojo_structure, pojo_query_name_for_select, style, active, item_order) values('roads', 'Roads::::ITALIANO', 'pojo', 'SpatialResult.getRoads', 'theGeom:MultiPolygon,label:""', 'dynamic.informationtool.get_road', 'road.xml', true, 3);
+insert into system.config_map_layer(name, title, type_code, pojo_query_name, pojo_structure, pojo_query_name_for_select, style, active, item_order) values('survey-controls', 'Survey controls::::ITALIANO', 'pojo', 'SpatialResult.getSurveyControls', 'theGeom:Point,label:""', 'dynamic.informationtool.get_survey_control', 'survey_control.xml', true, 4);
+insert into system.config_map_layer(name, title, type_code, pojo_query_name, pojo_structure, pojo_query_name_for_select, style, active, item_order) values('place-names', 'Places names::::ITALIANO', 'pojo', 'SpatialResult.getPlaceNames', 'theGeom:Point,label:""', 'dynamic.informationtool.get_place_name', 'place_name.xml', true, 5);
+insert into system.config_map_layer(name, title, type_code, pojo_query_name, pojo_structure, pojo_query_name_for_select, style, active, item_order) values('applications', 'Applications::::ITALIANO', 'pojo', 'SpatialResult.getApplications', 'theGeom:MultiPoint,label:""', 'dynamic.informationtool.get_application', 'application.xml', true, 6);
 
 
 
@@ -4442,39 +4453,21 @@ begin
   snapping_tolerance = coalesce((select cast(vl as float) from system.setting where name='map-tolerance'), 0.01);
   geom_is_modified = (tg_op = 'INSERT' and new.geom_polygon is not null);
   if tg_op= 'UPDATE' and new.geom_polygon is not null then
-    geom_is_modified = (not st_equals(new.geom_polygon, old.geom_polygon) and old.status_code = 'pending')
-      or (old.status_code = 'pending' and new.status_code='current');
+    geom_is_modified = not st_equals(new.geom_polygon, old.geom_polygon);
   end if;
   if not geom_is_modified then
     return new;
   end if;
-  if new.status_code='current' then
-    for rec in select co.id, co.name_firstpart, co.geom_polygon from cadastre.cadastre_object co where  co.id != new.id 
-                                        and co.geom_polygon is not null and co.status_code='current' 
-                                        and st_dwithin(new.geom_polygon, co.geom_polygon, snapping_tolerance) 
-                                        and co.id not in (select cadastre_object_id 
-                                                from cadastre.cadastre_object_target target 
-                                                where transaction_id= new.transaction_id)
-    loop
-      select * into rec_snap 
-        from snap_geometry_to_geometry(new.geom_polygon, rec.geom_polygon, snapping_tolerance, true);
-      new.geom_polygon = rec_snap.geom_to_snap;
-      if rec_snap.target_is_changed then
-        update cadastre.cadastre_object set geom_polygon= rec_snap.target_geom where id= rec.id and status_code='current';
-      end if;
-    end loop;
-  else
-    for rec in select co.id, co.name_firstpart, co.geom_polygon from cadastre.cadastre_object co where
-                                        st_dwithin(new.geom_polygon, co.geom_polygon, snapping_tolerance) 
-                                        and co.id in (select cadastre_object_id 
-                                                from cadastre.cadastre_object_target target 
-                                                where transaction_id= new.transaction_id)
-    loop
-      select * into rec_snap 
+  for rec in select co.id, co.geom_polygon 
+                 from cadastre.cadastre_object co 
+                 where  co.id != new.id 
+                     and co.geom_polygon is not null 
+                     and st_dwithin(new.geom_polygon, co.geom_polygon, snapping_tolerance)
+  loop
+    select * into rec_snap 
         from snap_geometry_to_geometry(new.geom_polygon, rec.geom_polygon, snapping_tolerance, false);
       new.geom_polygon = rec_snap.geom_to_snap;
-    end loop;
-  end if;
+  end loop;
   return new;
 end;
 $$ LANGUAGE plpgsql;
@@ -4564,6 +4557,33 @@ END;
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
+
+create or replace function system.get_setting(setting_name varchar) returns varchar
+as
+$BODY$
+begin
+  return (select vl from system.setting where name= setting_name);
+end;
+$BODY$
+LANGUAGE plpgsql;
+
+CREATE SEQUENCE administrative.ba_unit_first_name_part_seq
+  INCREMENT 1
+  MINVALUE 1
+  MAXVALUE 9999999
+  START 1
+  CACHE 1
+  CYCLE;
+COMMENT ON SEQUENCE administrative.ba_unit_first_name_part_seq IS 'Allocates numbers 1 to 9999999 for ba unit first name part';
+
+CREATE SEQUENCE administrative.ba_unit_last_name_part_seq
+  INCREMENT 1
+  MINVALUE 1
+  MAXVALUE 9999999
+  START 1
+  CACHE 1
+  CYCLE;
+COMMENT ON SEQUENCE administrative.ba_unit_last_name_part_seq IS 'Allocates numbers 1 to 9999999 for ba unit last name part';
 
 insert into system.approle_appgroup (approle_code, appgroup_id)
 SELECT r.code, 'super-group-id' FROM system.approle r 

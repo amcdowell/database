@@ -30,6 +30,13 @@ values('generate-source-nr', now(), 'infinity',
 'SELECT to_char(now(), ''yymmdd'') || ''-'' || trim(to_char(nextval(''source.source_la_nr_seq''), ''000000000'')) AS vl');
 
 ----------------------------------------------------------------------------------------------------
+insert into system.br(id, technical_type_code) values('generate-baunit-nr', 'sql');
+
+insert into system.br_definition(br_id, active_from, active_until, body) 
+values('generate-baunit-nr', now(), 'infinity', 'SELECT to_char(now(), ''yymm'') || trim(to_char(nextval(''administrative.ba_unit_first_name_part_seq''), ''0000000''))
+|| ''/'' || || trim(to_char(nextval(''administrative.ba_unit_last_name_part_seq''), || ''0000000'')) AS vl');
+
+----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code) values('calculate-application-expected_date', 'sql');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
