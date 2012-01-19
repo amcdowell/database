@@ -3899,9 +3899,9 @@ insert into system.query_field(query_name, index_in_query, name) values('dynamic
 
 
 
---Table cadastre.cadastre_object_node ----
-DROP TABLE IF EXISTS cadastre.cadastre_object_node CASCADE;
-CREATE TABLE cadastre.cadastre_object_node(
+--Table cadastre.cadastre_object_node_target ----
+DROP TABLE IF EXISTS cadastre.cadastre_object_node_target CASCADE;
+CREATE TABLE cadastre.cadastre_object_node_target(
     transaction_id varchar(40) NOT NULL,
     node_id varchar(40) NOT NULL,
     geom GEOMETRY NOT NULL,
@@ -3909,15 +3909,55 @@ CREATE TABLE cadastre.cadastre_object_node(
     
             CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
     CONSTRAINT enforce_geotype_geom CHECK (geometrytype(geom) = 'POINT'::text OR geom IS NULL),
+    rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
+    rowversion integer NOT NULL DEFAULT (0),
+    change_action char(1) NOT NULL DEFAULT ('i'),
+    change_user varchar(50),
+    change_time timestamp NOT NULL DEFAULT (now()),
 
     -- Internal constraints
     
-    CONSTRAINT cadastre_object_node_pkey PRIMARY KEY (transaction_id,node_id)
+    CONSTRAINT cadastre_object_node_target_pkey PRIMARY KEY (transaction_id,node_id)
 );
 
 
-CREATE INDEX cadastre_object_node_index_on_geom ON cadastre.cadastre_object_node USING gist (geom);
+CREATE INDEX cadastre_object_node_target_index_on_rowidentifier ON cadastre.cadastre_object_node_target (rowidentifier);
+CREATE INDEX cadastre_object_node_target_index_on_geom ON cadastre.cadastre_object_node_target USING gist (geom);
 
+    
+DROP TRIGGER IF EXISTS __track_changes ON cadastre.cadastre_object_node_target CASCADE;
+CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
+   ON cadastre.cadastre_object_node_target FOR EACH ROW
+   EXECUTE PROCEDURE f_for_trg_track_changes();
+    
+
+----Table cadastre.cadastre_object_node_target_historic used for the history of data of table cadastre.cadastre_object_node_target ---
+DROP TABLE IF EXISTS cadastre.cadastre_object_node_target_historic CASCADE;
+CREATE TABLE cadastre.cadastre_object_node_target_historic
+(
+    transaction_id varchar(40),
+    node_id varchar(40),
+    geom GEOMETRY,
+    CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
+    
+            CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
+    CONSTRAINT enforce_geotype_geom CHECK (geometrytype(geom) = 'POINT'::text OR geom IS NULL),
+    rowidentifier varchar(40),
+    rowversion integer,
+    change_action char(1),
+    change_user varchar(50),
+    change_time timestamp,
+    change_time_valid_until TIMESTAMP NOT NULL default NOW()
+);
+
+CREATE INDEX cadastre_object_node_target_historic_index_on_rowidentifier ON cadastre.cadastre_object_node_target_historic (rowidentifier);
+CREATE INDEX cadastre_object_node_target_historic_index_on_geom ON cadastre.cadastre_object_node_target_historic USING gist (geom);
+
+
+DROP TRIGGER IF EXISTS __track_history ON cadastre.cadastre_object_node_target CASCADE;
+CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
+   ON cadastre.cadastre_object_node_target FOR EACH ROW
+   EXECUTE PROCEDURE f_for_trg_track_history();
     
 
 ALTER TABLE source.spatial_source ADD CONSTRAINT spatial_source_type_code_fk0 
@@ -4400,9 +4440,9 @@ ALTER TABLE system.config_map_layer ADD CONSTRAINT config_map_layer_pojo_query_n
             FOREIGN KEY (pojo_query_name_for_select) REFERENCES system.query(name) ON UPDATE CASCADE ON DELETE RESTRICT;
 CREATE INDEX config_map_layer_pojo_query_name_for_select_fk119_ind ON system.config_map_layer (pojo_query_name_for_select);
 
-ALTER TABLE cadastre.cadastre_object_node ADD CONSTRAINT cadastre_object_node_transaction_id_fk120 
+ALTER TABLE cadastre.cadastre_object_node_target ADD CONSTRAINT cadastre_object_node_target_transaction_id_fk120 
             FOREIGN KEY (transaction_id) REFERENCES transaction.transaction(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX cadastre_object_node_transaction_id_fk120_ind ON cadastre.cadastre_object_node (transaction_id);
+CREATE INDEX cadastre_object_node_target_transaction_id_fk120_ind ON cadastre.cadastre_object_node_target (transaction_id);
 --Generate triggers for tables --
 -- triggers for table source.source -- 
 
