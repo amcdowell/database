@@ -2038,17 +2038,17 @@ CREATE TABLE application.request_type(
  -- Data for the table application.request_type -- 
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('cadastreChange', 'registrationServices', 'Change to Cadastre::::Cambio del Catasto', 'c', 30, 25.00, 0.10, 0, 1);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('redefineCadastre', 'registrationServices', 'Redefine Cadastre::::ITALIANO', 'x', 30, 25.00, 0.10, 0, 1);
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('documentCopy', 'registrationServices', 'Document Copy::::Copia Documento', 'x', 1, 0.50, 0.00, 0, 0);
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('documentCopy', 'informationServices', 'Document Copy::::Copia Documento', 'c', 1, 0.50, 0.00, 0, 0);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('mortgageCertificate', 'registrationServices', 'Mortgage Certificate::::Certiificato Ipoteca', 'x', 1, 5.00, 0.00, 0, 1, 'Mortgage Certificate issued', 'mortgage', 'vary');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template) values('newFreehold', 'registrationServices', 'New Freehold Title::::Nuovo Titolo', 'c', 5, 5.00, 0.00, 0, 1, 'Fee Simple Estate');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('serviceEnquiry', 'registrationServices', 'Service Enquiry::::Richiesta Servizio', 'x', 1, 0.00, 0.00, 0, 0);
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('serviceEnquiry', 'informationServices', 'Service Enquiry::::Richiesta Servizio', 'c', 1, 0.00, 0.00, 0, 0);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('regnDeeds', 'registrationServices', 'Deed Registration::::Registrazione Atto', 'x', 3, 1.00, 0.00, 0, 0);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('regnOnTitle', 'registrationServices', 'Registration on Title::::Registrazione di Titolo', 'c', 5, 5.00, 0.00, 0.01, 1);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('regnPowerOfAttorney', 'registrationServices', 'Registration of Power of Attorney::::Registrazione di Procura', 'c', 3, 5.00, 0.00, 0, 0);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('regnStandardDocument', 'registrationServices', 'Registration of Standard Document::::Documento di Documento Standard', 'c', 3, 5.00, 0.00, 0, 0);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('titleSearch', 'informationServices', 'Title Search::::Ricerca Titolo', 'x', 1, 5.00, 0.00, 0, 1);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('surveyPlanCopy', 'informationServices', 'Survey Plan Copy::::Copia Piano Perizia', 'x', 1, 1.00, 0.00, 0, 0);
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('cadastrePrint', 'informationServices', 'Cadastre Print::::Stampa Catastale', 'x', 1, 0.50, 0.00, 0, 0);
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('cadastrePrint', 'informationServices', 'Cadastre Print::::Stampa Catastale', 'c', 1, 0.50, 0.00, 0, 0);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('cadastreExport', 'informationServices', 'Cadastre Export::::Export Catastale', 'x', 1, 0.00, 0.10, 0, 0);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('cadastreBulk', 'informationServices', 'Cadastre Bulk Export::::Export Carico Catastale', 'x', 5, 5.00, 0.10, 0, 0);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('registerLease', 'registrationServices', 'Register Lease::::ITALIANO', 'c', 5, 5.00, 0.00, 0.01, 1, 'Lease of nn years to <name>', 'lease', 'new');
@@ -3505,8 +3505,13 @@ insert into application.rrr_type_action(code, display_value, status) values('can
 --Table cadastre.cadastre_object_target ----
 DROP TABLE IF EXISTS cadastre.cadastre_object_target CASCADE;
 CREATE TABLE cadastre.cadastre_object_target(
-    cadastre_object_id varchar(40) NOT NULL,
     transaction_id varchar(40) NOT NULL,
+    cadastre_object_id varchar(40) NOT NULL,
+    geom_polygon GEOMETRY,
+    CONSTRAINT enforce_dims_geom_polygon CHECK (st_ndims(geom_polygon) = 2),
+    
+            CONSTRAINT enforce_srid_geom_polygon CHECK (st_srid(geom_polygon) = 2193),
+    CONSTRAINT enforce_geotype_geom_polygon CHECK (geometrytype(geom_polygon) = 'POLYGON'::text OR geom_polygon IS NULL),
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
     rowversion integer NOT NULL DEFAULT (0),
     change_action char(1) NOT NULL DEFAULT ('i'),
@@ -3515,11 +3520,12 @@ CREATE TABLE cadastre.cadastre_object_target(
 
     -- Internal constraints
     
-    CONSTRAINT cadastre_object_target_pkey PRIMARY KEY (cadastre_object_id,transaction_id)
+    CONSTRAINT cadastre_object_target_pkey PRIMARY KEY (transaction_id,cadastre_object_id)
 );
 
 
 CREATE INDEX cadastre_object_target_index_on_rowidentifier ON cadastre.cadastre_object_target (rowidentifier);
+CREATE INDEX cadastre_object_target_index_on_geom_polygon ON cadastre.cadastre_object_target USING gist (geom_polygon);
 
     
 DROP TRIGGER IF EXISTS __track_changes ON cadastre.cadastre_object_target CASCADE;
@@ -3532,8 +3538,13 @@ CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
 DROP TABLE IF EXISTS cadastre.cadastre_object_target_historic CASCADE;
 CREATE TABLE cadastre.cadastre_object_target_historic
 (
-    cadastre_object_id varchar(40),
     transaction_id varchar(40),
+    cadastre_object_id varchar(40),
+    geom_polygon GEOMETRY,
+    CONSTRAINT enforce_dims_geom_polygon CHECK (st_ndims(geom_polygon) = 2),
+    
+            CONSTRAINT enforce_srid_geom_polygon CHECK (st_srid(geom_polygon) = 2193),
+    CONSTRAINT enforce_geotype_geom_polygon CHECK (geometrytype(geom_polygon) = 'POLYGON'::text OR geom_polygon IS NULL),
     rowidentifier varchar(40),
     rowversion integer,
     change_action char(1),
@@ -3543,6 +3554,7 @@ CREATE TABLE cadastre.cadastre_object_target_historic
 );
 
 CREATE INDEX cadastre_object_target_historic_index_on_rowidentifier ON cadastre.cadastre_object_target_historic (rowidentifier);
+CREATE INDEX cadastre_object_target_historic_index_on_geom_polygon ON cadastre.cadastre_object_target_historic USING gist (geom_polygon);
 
 
 DROP TRIGGER IF EXISTS __track_history ON cadastre.cadastre_object_target CASCADE;
@@ -3887,6 +3899,26 @@ insert into system.query_field(query_name, index_in_query, name) values('dynamic
 
 
 
+--Table cadastre.cadastre_object_node ----
+DROP TABLE IF EXISTS cadastre.cadastre_object_node CASCADE;
+CREATE TABLE cadastre.cadastre_object_node(
+    transaction_id varchar(40) NOT NULL,
+    node_id varchar(40) NOT NULL,
+    geom GEOMETRY NOT NULL,
+    CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
+    
+            CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
+    CONSTRAINT enforce_geotype_geom CHECK (geometrytype(geom) = 'POINT'::text OR geom IS NULL),
+
+    -- Internal constraints
+    
+    CONSTRAINT cadastre_object_node_pkey PRIMARY KEY (transaction_id,node_id)
+);
+
+
+CREATE INDEX cadastre_object_node_index_on_geom ON cadastre.cadastre_object_node USING gist (geom);
+
+    
 
 ALTER TABLE source.spatial_source ADD CONSTRAINT spatial_source_type_code_fk0 
             FOREIGN KEY (type_code) REFERENCES source.spatial_source_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
@@ -4367,6 +4399,10 @@ CREATE INDEX config_map_layer_pojo_query_name_fk118_ind ON system.config_map_lay
 ALTER TABLE system.config_map_layer ADD CONSTRAINT config_map_layer_pojo_query_name_for_select_fk119 
             FOREIGN KEY (pojo_query_name_for_select) REFERENCES system.query(name) ON UPDATE CASCADE ON DELETE RESTRICT;
 CREATE INDEX config_map_layer_pojo_query_name_for_select_fk119_ind ON system.config_map_layer (pojo_query_name_for_select);
+
+ALTER TABLE cadastre.cadastre_object_node ADD CONSTRAINT cadastre_object_node_transaction_id_fk120 
+            FOREIGN KEY (transaction_id) REFERENCES transaction.transaction(id) ON UPDATE CASCADE ON DELETE CASCADE;
+CREATE INDEX cadastre_object_node_transaction_id_fk120_ind ON cadastre.cadastre_object_node (transaction_id);
 --Generate triggers for tables --
 -- triggers for table source.source -- 
 
