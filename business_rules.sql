@@ -32,11 +32,8 @@ values('generate-source-nr', now(), 'infinity',
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code) values('generate-baunit-nr', 'sql');
 
-insert into system.br_definition(br_id, active_from, active_until, body) 
-values('generate-baunit-nr', now(), 'infinity', 'SELECT to_char(now(), ''yymm'') || trim(to_char(nextval(''administrative.ba_unit_first_name_part_seq''), ''0000000''))
-|| ''/'' || || trim(to_char(nextval(''administrative.ba_unit_last_name_part_seq''), || ''0000000'')) AS vl');
-
-----------------------------------------------------------------------------------------------------
+insert into system.br_definition(br_id, active_from, active_until, body) values('generate-baunit-nr', now(), 'infinity', 'SELECT to_char(now(), ''yymm'') || trim(to_char(nextval(''administrative.ba_unit_first_name_part_seq''), ''0000000''))
+|| ''/'' || trim(to_char(nextval(''administrative.ba_unit_last_name_part_seq''), ''0000000'')) AS vl');----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code) values('calculate-application-expected_date', 'sql');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -239,7 +236,8 @@ from cadastre.cadastre_object_target co_target, cadastre.cadastre_object_target 
 where co_target.transaction_id = #{id}
 and co_target.transaction_id != co_target_also.transaction_id
 and co_target.cadastre_object_id = co_target_also.cadastre_object_id
-and co_target_also.transaction_id  in (select transaction_id from cadastre.cadastre_object where status_code = ''pending'')
+and co_target_also.transaction_id  in (select id from transaction.transaction 
+                                        where status_code not in (''approved''))
  ');
 
 --------------Check the union of target co is the same as the union of the new co
@@ -840,6 +838,28 @@ WHERE application.application_property.application_id = #{id}
 	AND TO_NUMBER(SUBSTRING(cadastre.cadastre_object.name_firstpart from 5 for (CHAR_LENGTH(cadastre.cadastre_object.name_firstpart) - 4)), ''999'') > 0
 	AND TO_NUMBER(SUBSTRING(cadastre.cadastre_object.name_lastpart from 4 for POSITION('' '' IN SUBSTRING(cadastre.cadastre_object.name_lastpart from 4 for (CHAR_LENGTH(cadastre.cadastre_object.name_lastpart) - 4)))), ''9999'') > 0');	   		   
 -------------End application business rules - Neil 18 November 2011-------------------------
+
+----Business rules that are used for the cadastre redefinition--------------------------------------
+----------------------------------------------------------------------------------------------------
+insert into system.br(id, technical_type_code, feedback, description) 
+values('cadastre-redefinition-union-old-new-the-same', 'sql', 
+    'The union of the new polygons must be the same with the union of the old polygons::::ITALIANO',
+ '#{id} is the parameter asked. It is the transaction id.');
+
+insert into system.br_definition(br_id, active_from, active_until, body) 
+values('cadastre-redefinition-union-old-new-the-same', now(), 'infinity', 
+'select coalesce(st_equals(geom_to_snap,target_geom), true) as vl
+from snap_geometry_to_geometry(
+(select st_union(co.geom_polygon) 
+from cadastre.cadastre_object co 
+where id in (select cadastre_object_id from cadastre.cadastre_object_target co_t 
+              where transaction_id = #{id}))
+, (select st_union(co_t.geom_polygon)
+from cadastre.cadastre_object_target co_t 
+where transaction_id = #{id}), 
+  coalesce(system.get_setting(''map-tolerance'')::double precision, 0.01), true)');
+
+----End - Business rules that are used for the cadastre redefinition--------------------------------
 ----------------------------------------------------------------------------------------------------
 insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
 values('application-br8-check-has-services', 'critical', 'validate', 'application', 1);
@@ -891,7 +911,36 @@ values('source-attach-in-transaction-no-pendings', 'critical', 'pending', 'sourc
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
 values('source-attach-in-transaction-allowed-type', 'critical', 'pending', 'source', 2);
 
------------Cadastre Change [Floss 634 (subtask of Floss 555)]-----------------------------------------------------------------------------------------
+-----------Cadastre Transactions common-----------------------------------------------------------------------------------------
+insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
+values('target-parcels-present', 'warning', 'pending', 'cadastre_object', 2);
+
+----Check there are no pending changes that overlap the union of the target parcels (CRITICAL)
+insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
+values('target-parcels-check-nopending', 'critical', 'pending', 'cadastre_object', 3);
+
+insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
+values('documents-present', 'warning', 'pending', 'cadastre_object', 5);
+
+
+insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
+values('target-parcels-present', 'warning', 'current', 'cadastre_object', 2);
+
+insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
+values('target-parcels-check-nopending', 'critical', 'current', 'cadastre_object', 3);
+
+insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
+values('documents-present', 'warning', 'current', 'cadastre_object', 5);
+
+-----------Cadastre Redefinition -------------------------------------------------------------------
+
+insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
+values('cadastre-redefinition-union-old-new-the-same', 'warning', 'pending', 'cadastre_object', 'redefineCadastre', 1);
+
+insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
+values('cadastre-redefinition-union-old-new-the-same', 'critical', 'current', 'cadastre_object', 'redefineCadastre', 1);
+
+-----------Cadastre Change [Floss 634 (subtask of Floss 555)]---------------------------------------
 --- TBVD -----------------
 
 insert into system.br_validation(br_id, severity_code, target_service_moment, target_code, target_request_type_code, order_of_execution) 
@@ -904,19 +953,9 @@ values('application-baunit-check-area', 'warning', null, 'service', 'cadastreCha
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
 values('survey-points-present', 'warning', 'pending', 'cadastre_object', 'cadastreChange', 1);
 
-insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
-values('target-parcels-present', 'warning', 'pending', 'cadastre_object', 'cadastreChange', 2);
-
-----Check there are no pending changes that overlap the union of the target parcels (CRITICAL)
-insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
-values('target-parcels-check-nopending', 'critical', 'pending', 'cadastre_object', 'cadastreChange', 3);
-
 ----the union of target parcels is a polygon (not a multipolygon) (CRITICAL)
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
 values('target-parcels-check-isapolygon', 'critical', 'pending', 'cadastre_object', 'cadastreChange', 4);
-
-insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
-values('documents-present', 'warning', 'pending', 'cadastre_object', 'cadastreChange', 5);
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
 values('new-cadastre-objects-present', 'warning', 'pending', 'cadastre_object', 'cadastreChange', 6);
@@ -941,16 +980,7 @@ insert into system.br_validation(br_id, severity_code, target_reg_moment, target
 values('survey-points-present', 'critical', 'current', 'cadastre_object', 'cadastreChange', 1);
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
-values('target-parcels-present', 'warning', 'current', 'cadastre_object', 'cadastreChange', 2);
-
-insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
-values('target-parcels-check-nopending', 'critical', 'current', 'cadastre_object', 'cadastreChange', 3);
-
-insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
 values('target-parcels-check-isapolygon', 'critical', 'current', 'cadastre_object', 'cadastreChange', 4);
-
-insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
-values('documents-present', 'warning', 'current', 'cadastre_object', 'cadastreChange', 5);
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
 values('new-cadastre-objects-present', 'critical', 'current', 'cadastre_object', 'cadastreChange', 6);
