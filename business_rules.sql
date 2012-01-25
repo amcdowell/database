@@ -859,6 +859,17 @@ from cadastre.cadastre_object_target co_t
 where transaction_id = #{id}), 
   coalesce(system.get_setting(''map-tolerance'')::double precision, 0.01), true)');
 
+----------------------------------------------------------------------------------------------------
+insert into system.br(id, technical_type_code, feedback, description) 
+values('cadastre-redefinition-target-geometries-dont-overlap', 'sql', 
+    'New polygons do not overlap with each other.::::ITALIANO',
+ '#{id} is the parameter asked. It is the transaction id.');
+
+insert into system.br_definition(br_id, active_from, active_until, body) 
+values('cadastre-redefinition-target-geometries-dont-overlap', now(), 'infinity', 
+'select coalesce(st_area(st_union(co.geom_polygon)) = sum(st_area(co.geom_polygon)), true) as vl
+from cadastre.cadastre_object_target co where transaction_id = #{id}');
+
 ----End - Business rules that are used for the cadastre redefinition--------------------------------
 ----------------------------------------------------------------------------------------------------
 insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
@@ -939,6 +950,12 @@ values('cadastre-redefinition-union-old-new-the-same', 'warning', 'pending', 'ca
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
 values('cadastre-redefinition-union-old-new-the-same', 'critical', 'current', 'cadastre_object', 'redefineCadastre', 1);
+
+insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
+values('cadastre-redefinition-target-geometries-dont-overlap', 'critical', 'current', 'cadastre_object', 'redefineCadastre', 1);
+
+insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
+values('cadastre-redefinition-target-geometries-dont-overlap', 'warning', 'pending', 'cadastre_object', 'redefineCadastre', 1);
 
 -----------Cadastre Change [Floss 634 (subtask of Floss 555)]---------------------------------------
 --- TBVD -----------------
@@ -1068,7 +1085,7 @@ insert into system.br_validation(br_id, severity_code, target_application_moment
 values('app-has-title-several-mortgages-with-same-rank', 'critical', null, 'application', 19);
 
 insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-values('app-title-has-primary-right', 'critical', 'validate', 'application', 1);
+values('app-title-has-primary-right', 'critical', null, 'application', 1);
 
 insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
 values('app-area-comparison', 'medium', 'validate', 'application', 25);
