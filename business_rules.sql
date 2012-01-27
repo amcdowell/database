@@ -1173,8 +1173,8 @@ values('area-check-percentage-newareas-oldareas', 'warning', 'current', 'cadastr
 
 -----------END  Cadastre Change [Floss 634 (subtask of Floss 555)]-----------------------------------------------------------------------------------------
 -------------Start ba_unit and other business Validation Rules - Neil 01 November 2011-------------------------
-insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-values('baunit-check-name', 'medium', 'validate', 'application', 9);
+--insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
+--values('baunit-check-name', 'medium', 'validate', 'application', 9);
 
 insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
 values('application-check-no-previous-digital-title-service', 'warning', 'validate', 'application', 10);
