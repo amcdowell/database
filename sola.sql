@@ -2026,7 +2026,7 @@ CREATE TABLE application.request_type(
     nr_properties_required integer NOT NULL DEFAULT (0),
     notation_template varchar(1000),
     rrr_type_code varchar(20),
-    rrr_type_action_code varchar(20),
+    type_action_code varchar(20),
 
     -- Internal constraints
     
@@ -2039,7 +2039,7 @@ CREATE TABLE application.request_type(
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('cadastreChange', 'registrationServices', 'Change to Cadastre::::Cambio del Catasto', 'c', 30, 25.00, 0.10, 0, 1);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('redefineCadastre', 'registrationServices', 'Redefine Cadastre::::ITALIANO', 'x', 30, 25.00, 0.10, 0, 1);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('documentCopy', 'informationServices', 'Document Copy::::Copia Documento', 'c', 1, 0.50, 0.00, 0, 0);
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('mortgageCertificate', 'registrationServices', 'Mortgage Certificate::::Certiificato Ipoteca', 'x', 1, 5.00, 0.00, 0, 1, 'Mortgage Certificate issued', 'mortgage', 'vary');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('mortgageCertificate', 'registrationServices', 'Mortgage Certificate::::Certiificato Ipoteca', 'x', 1, 5.00, 0.00, 0, 1, 'Mortgage Certificate issued', 'mortgage', 'vary');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template) values('newFreehold', 'registrationServices', 'New Freehold Title::::Nuovo Titolo', 'c', 5, 5.00, 0.00, 0, 1, 'Fee Simple Estate');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('serviceEnquiry', 'informationServices', 'Service Enquiry::::Richiesta Servizio', 'c', 1, 0.00, 0.00, 0, 0);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('regnDeeds', 'registrationServices', 'Deed Registration::::Registrazione Atto', 'x', 3, 1.00, 0.00, 0, 0);
@@ -2051,27 +2051,27 @@ insert into application.request_type(code, request_category_code, display_value,
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('cadastrePrint', 'informationServices', 'Cadastre Print::::Stampa Catastale', 'c', 1, 0.50, 0.00, 0, 0);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('cadastreExport', 'informationServices', 'Cadastre Export::::Export Catastale', 'x', 1, 0.00, 0.10, 0, 0);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('cadastreBulk', 'informationServices', 'Cadastre Bulk Export::::Export Carico Catastale', 'x', 5, 5.00, 0.10, 0, 0);
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('registerLease', 'registrationServices', 'Register Lease::::ITALIANO', 'c', 5, 5.00, 0.00, 0.01, 1, 'Lease of nn years to <name>', 'lease', 'new');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('registerLease', 'registrationServices', 'Register Lease::::ITALIANO', 'c', 5, 5.00, 0.00, 0.01, 1, 'Lease of nn years to <name>', 'lease', 'new');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template) values('noteOccupation', 'registrationServices', 'Occupation Noted::::ITALIANO', 'x', 5, 5.00, 0.00, 0.01, 1, 'Occupation by <name> recorded');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('newOwnership', 'registrationServices', 'Register New Ownership::::ITALIANO', 'c', 5, 5.00, 0.00, 0.02, 1, 'Transfer to <name>', 'ownership', 'new');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('usufruct', 'registrationServices', 'Register Usufruct::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, '<usufruct> right granted to <name>', 'usufruct', 'new');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('waterRights', 'registrationServices', 'Register Water Rights::::ITALIANO''', 'c', 5, 5.00, 0.01, 0, 1, 'Water Rights granted to <name>', 'waterrights', 'new');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('mortgage', 'registrationServices', 'Register Mortgage::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, 'Mortgage to <lender>', 'mortgage', 'new');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('buildingRestriction', 'registrationServices', 'Register Building Restriction::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, 'Building Restriction', 'noBuilding', 'new');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('servitude', 'registrationServices', 'Register Servitude::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, 'Servitude over <parcel1> in favour of <parcel2>', 'servitude', 'new');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('lifeEstate', 'registrationServices', 'Establish Life Estate::::ITALIANO', 'x', 5, 5.00, 0.00, 0.02, 1, 'Life Estate for <name1> with Remainder Estate in <name2, name3>', 'lifeEstate', 'new');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('newApartment', 'registrationServices', 'New Apartment Title::::Nuovo Titolo', 'c', 5, 5.00, 0.00, 0.02, 1, 'Apartment Estate', 'apartment', 'new');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('newOwnership', 'registrationServices', 'Register New Ownership::::ITALIANO', 'c', 5, 5.00, 0.00, 0.02, 1, 'Transfer to <name>', 'ownership', 'new');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('usufruct', 'registrationServices', 'Register Usufruct::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, '<usufruct> right granted to <name>', 'usufruct', 'new');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('waterRights', 'registrationServices', 'Register Water Rights::::ITALIANO''', 'c', 5, 5.00, 0.01, 0, 1, 'Water Rights granted to <name>', 'waterrights', 'new');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('mortgage', 'registrationServices', 'Register Mortgage::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, 'Mortgage to <lender>', 'mortgage', 'new');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('buildingRestriction', 'registrationServices', 'Register Building Restriction::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, 'Building Restriction', 'noBuilding', 'new');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('servitude', 'registrationServices', 'Register Servitude::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, 'Servitude over <parcel1> in favour of <parcel2>', 'servitude', 'new');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('lifeEstate', 'registrationServices', 'Establish Life Estate::::ITALIANO', 'x', 5, 5.00, 0.00, 0.02, 1, 'Life Estate for <name1> with Remainder Estate in <name2, name3>', 'lifeEstate', 'new');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('newApartment', 'registrationServices', 'New Apartment Title::::Nuovo Titolo', 'c', 5, 5.00, 0.00, 0.02, 1, 'Apartment Estate', 'apartment', 'new');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template) values('newState', 'registrationServices', 'New State Title::::Nuovo Titolo', 'x', 5, 0.00, 0.00, 0, 1, 'State Estate');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('caveat', 'registrationServices', 'Register Caveat::::ITALIANO''', 'c', 5, 50.00, 0.00, 0, 1, 'Caveat in the name of <name>', 'caveat', 'new');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('removeCaveat', 'registrationServices', 'Remove Caveat::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, 'Caveat <reference> removed', 'caveat', 'cancel');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('historicOrder', 'registrationServices', 'Register Historic Preservation Order::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, 'Historic Preservation Order', 'noBuilding', 'new');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('caveat', 'registrationServices', 'Register Caveat::::ITALIANO''', 'c', 5, 50.00, 0.00, 0, 1, 'Caveat in the name of <name>', 'caveat', 'new');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('removeCaveat', 'registrationServices', 'Remove Caveat::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, 'Caveat <reference> removed', 'caveat', 'cancel');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('historicOrder', 'registrationServices', 'Register Historic Preservation Order::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, 'Historic Preservation Order', 'noBuilding', 'new');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code) values('limitedRoadAccess', 'registrationServices', 'Register Limited Road Access::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, 'Limited Road Access', 'limitedAccess');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, rrr_type_action_code) values('varyLease', 'registrationServices', 'Vary Lease::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, 'Variation of Lease <reference>', 'lease', 'vary');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_action_code) values('varyRight', 'registrationServices', 'Vary Right (General)::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, 'Variation of <right> <reference>', 'vary');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_action_code) values('removeRight', 'registrationServices', 'Remove Right (General)::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, '<right> <reference> cancelled', 'cancel');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('varyLease', 'registrationServices', 'Vary Lease::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, 'Variation of Lease <reference>', 'lease', 'vary');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, type_action_code) values('varyRight', 'registrationServices', 'Vary Right (General)::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, 'Variation of <right> <reference>', 'vary');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, type_action_code) values('removeRight', 'registrationServices', 'Remove Right (General)::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, '<right> <reference> cancelled', 'cancel');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template) values('newDigitalTitle', 'registrationServices', 'New Digital Title::::Nuovo Titolo Digitale', 'c', 5, 0.00, 0.00, 0, 1, 'Title converted to digital format');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('newDigitalProperty', 'registrationServices', 'New Digital Property::::Nuova Proprieta Digitale', 'x', 5, 0.00, 0.00, 0, 1);
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_action_code) values('removeRestriction', 'registrationServices', 'Remove Restriction (General)::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, '<restriction> <reference> cancelled', 'cancel');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, type_action_code) values('removeRestriction', 'registrationServices', 'Remove Restriction (General)::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, '<restriction> <reference> cancelled', 'cancel');
 
 
 
@@ -3480,9 +3480,9 @@ insert into transaction.transaction_status_type(code, display_value, status) val
 
 
 
---Table application.rrr_type_action ----
-DROP TABLE IF EXISTS application.rrr_type_action CASCADE;
-CREATE TABLE application.rrr_type_action(
+--Table application.type_action ----
+DROP TABLE IF EXISTS application.type_action CASCADE;
+CREATE TABLE application.type_action(
     code varchar(20) NOT NULL,
     display_value varchar(250) NOT NULL,
     description varchar(555),
@@ -3490,15 +3490,15 @@ CREATE TABLE application.rrr_type_action(
 
     -- Internal constraints
     
-    CONSTRAINT rrr_type_action_display_value_unique UNIQUE (display_value),
-    CONSTRAINT rrr_type_action_pkey PRIMARY KEY (code)
+    CONSTRAINT type_action_display_value_unique UNIQUE (display_value),
+    CONSTRAINT type_action_pkey PRIMARY KEY (code)
 );
 
     
- -- Data for the table application.rrr_type_action -- 
-insert into application.rrr_type_action(code, display_value, status) values('new', 'New::::ITALIANO', 'c');
-insert into application.rrr_type_action(code, display_value, status) values('vary', 'Vary::::ITALIANO', 'c');
-insert into application.rrr_type_action(code, display_value, status) values('cancel', 'Cancel::::ITALIANO', 'c');
+ -- Data for the table application.type_action -- 
+insert into application.type_action(code, display_value, status) values('new', 'New::::ITALIANO', 'c');
+insert into application.type_action(code, display_value, status) values('vary', 'Vary::::ITALIANO', 'c');
+insert into application.type_action(code, display_value, status) values('cancel', 'Cancel::::ITALIANO', 'c');
 
 
 
@@ -3959,6 +3959,54 @@ CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
    ON cadastre.cadastre_object_node_target FOR EACH ROW
    EXECUTE PROCEDURE f_for_trg_track_history();
     
+--Table administrative.ba_unit_target ----
+DROP TABLE IF EXISTS administrative.ba_unit_target CASCADE;
+CREATE TABLE administrative.ba_unit_target(
+    ba_unit_id varchar(40) NOT NULL,
+    transaction_id varchar(40) NOT NULL,
+    rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
+    rowversion integer NOT NULL DEFAULT (0),
+    change_action char(1) NOT NULL DEFAULT ('i'),
+    change_user varchar(50),
+    change_time timestamp NOT NULL DEFAULT (now()),
+
+    -- Internal constraints
+    
+    CONSTRAINT ba_unit_target_pkey PRIMARY KEY (ba_unit_id,transaction_id)
+);
+
+
+CREATE INDEX ba_unit_target_index_on_rowidentifier ON administrative.ba_unit_target (rowidentifier);
+
+    
+DROP TRIGGER IF EXISTS __track_changes ON administrative.ba_unit_target CASCADE;
+CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
+   ON administrative.ba_unit_target FOR EACH ROW
+   EXECUTE PROCEDURE f_for_trg_track_changes();
+    
+
+----Table administrative.ba_unit_target_historic used for the history of data of table administrative.ba_unit_target ---
+DROP TABLE IF EXISTS administrative.ba_unit_target_historic CASCADE;
+CREATE TABLE administrative.ba_unit_target_historic
+(
+    ba_unit_id varchar(40),
+    transaction_id varchar(40),
+    rowidentifier varchar(40),
+    rowversion integer,
+    change_action char(1),
+    change_user varchar(50),
+    change_time timestamp,
+    change_time_valid_until TIMESTAMP NOT NULL default NOW()
+);
+
+CREATE INDEX ba_unit_target_historic_index_on_rowidentifier ON administrative.ba_unit_target_historic (rowidentifier);
+
+
+DROP TRIGGER IF EXISTS __track_history ON administrative.ba_unit_target CASCADE;
+CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
+   ON administrative.ba_unit_target FOR EACH ROW
+   EXECUTE PROCEDURE f_for_trg_track_history();
+    
 
 ALTER TABLE source.spatial_source ADD CONSTRAINT spatial_source_type_code_fk0 
             FOREIGN KEY (type_code) REFERENCES source.spatial_source_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
@@ -4328,9 +4376,9 @@ ALTER TABLE application.request_type ADD CONSTRAINT request_type_rrr_type_code_f
             FOREIGN KEY (rrr_type_code) REFERENCES administrative.rrr_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
 CREATE INDEX request_type_rrr_type_code_fk91_ind ON application.request_type (rrr_type_code);
 
-ALTER TABLE application.request_type ADD CONSTRAINT request_type_rrr_type_action_code_fk92 
-            FOREIGN KEY (rrr_type_action_code) REFERENCES application.rrr_type_action(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX request_type_rrr_type_action_code_fk92_ind ON application.request_type (rrr_type_action_code);
+ALTER TABLE application.request_type ADD CONSTRAINT request_type_type_action_code_fk92 
+            FOREIGN KEY (type_action_code) REFERENCES application.type_action(code) ON UPDATE CASCADE ON DELETE RESTRICT;
+CREATE INDEX request_type_type_action_code_fk92_ind ON application.request_type (type_action_code);
 
 ALTER TABLE administrative.rrr ADD CONSTRAINT rrr_mortgage_type_code_fk93 
             FOREIGN KEY (mortgage_type_code) REFERENCES administrative.mortgage_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
@@ -4443,6 +4491,14 @@ CREATE INDEX config_map_layer_pojo_query_name_for_select_fk119_ind ON system.con
 ALTER TABLE cadastre.cadastre_object_node_target ADD CONSTRAINT cadastre_object_node_target_transaction_id_fk120 
             FOREIGN KEY (transaction_id) REFERENCES transaction.transaction(id) ON UPDATE CASCADE ON DELETE CASCADE;
 CREATE INDEX cadastre_object_node_target_transaction_id_fk120_ind ON cadastre.cadastre_object_node_target (transaction_id);
+
+ALTER TABLE administrative.ba_unit_target ADD CONSTRAINT ba_unit_target_ba_unit_id_fk121 
+            FOREIGN KEY (ba_unit_id) REFERENCES administrative.ba_unit(id) ON UPDATE CASCADE ON DELETE CASCADE;
+CREATE INDEX ba_unit_target_ba_unit_id_fk121_ind ON administrative.ba_unit_target (ba_unit_id);
+
+ALTER TABLE administrative.ba_unit_target ADD CONSTRAINT ba_unit_target_transaction_id_fk122 
+            FOREIGN KEY (transaction_id) REFERENCES transaction.transaction(id) ON UPDATE CASCADE ON DELETE CASCADE;
+CREATE INDEX ba_unit_target_transaction_id_fk122_ind ON administrative.ba_unit_target (transaction_id);
 --Generate triggers for tables --
 -- triggers for table source.source -- 
 
@@ -4526,7 +4582,7 @@ declare
   rec_snap record;
   snapping_tolerance float;
 begin
-  snapping_tolerance = coalesce((select cast(vl as float) from system.setting where name='map-tolerance'), 0.01);
+  snapping_tolerance = coalesce(system.get_setting('map-tolerance')::double precision, 0.01);
   geom_is_modified = (tg_op = 'INSERT' and new.geom_polygon is not null);
   if tg_op= 'UPDATE' and new.geom_polygon is not null then
     geom_is_modified = not st_equals(new.geom_polygon, old.geom_polygon);
@@ -4646,20 +4702,20 @@ LANGUAGE plpgsql;
 CREATE SEQUENCE administrative.ba_unit_first_name_part_seq
   INCREMENT 1
   MINVALUE 1
-  MAXVALUE 9999999
+  MAXVALUE 9999
   START 1
   CACHE 1
   CYCLE;
-COMMENT ON SEQUENCE administrative.ba_unit_first_name_part_seq IS 'Allocates numbers 1 to 9999999 for ba unit first name part';
+COMMENT ON SEQUENCE administrative.ba_unit_first_name_part_seq IS 'Allocates numbers 1 to 9999 for ba unit first name part';
 
 CREATE SEQUENCE administrative.ba_unit_last_name_part_seq
   INCREMENT 1
   MINVALUE 1
-  MAXVALUE 9999999
+  MAXVALUE 9999
   START 1
   CACHE 1
   CYCLE;
-COMMENT ON SEQUENCE administrative.ba_unit_last_name_part_seq IS 'Allocates numbers 1 to 9999999 for ba unit last name part';
+COMMENT ON SEQUENCE administrative.ba_unit_last_name_part_seq IS 'Allocates numbers 1 to 9999 for ba unit last name part';
 
 insert into system.approle_appgroup (approle_code, appgroup_id)
 SELECT r.code, 'super-group-id' FROM system.approle r 
