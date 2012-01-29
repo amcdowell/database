@@ -4718,6 +4718,22 @@ CREATE SEQUENCE administrative.ba_unit_last_name_part_seq
   CYCLE;
 COMMENT ON SEQUENCE administrative.ba_unit_last_name_part_seq IS 'Allocates numbers 1 to 9999 for ba unit last name part';
 
+CREATE OR REPLACE FUNCTION administrative.get_ba_unit_pending_action(baunit_id character varying)
+  RETURNS character varying AS
+$BODY$
+BEGIN
+
+  return (SELECT rt.type_action_code
+  FROM ((administrative.ba_unit_target bt INNER JOIN transaction.transaction t ON bt.transaction_id = t.id)
+  INNER JOIN application.service s ON t.from_service_id = s.id)
+  INNER JOIN application.request_type rt ON s.request_type_code = rt.code
+  WHERE bt.ba_unit_id = baunit_id AND t.status_code = 'pending'
+  LIMIT 1);
+
+END;
+$BODY$
+  LANGUAGE plpgsql;
+
 insert into system.approle_appgroup (approle_code, appgroup_id)
 SELECT r.code, 'super-group-id' FROM system.approle r 
 where r.code not in (select approle_code from system.approle_appgroup g where appgroup_id = 'super-group-id');
