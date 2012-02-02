@@ -886,7 +886,7 @@ values('newtitle-br22-check-different-owners', 'sql', 'Owners of new properties/
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('newtitle-br22-check-different-owners', now(), 'infinity', 
 'with prior_property_owner as (
-	select po.name 
+	select po.name
 	from   
 	party.party po,
 	administrative.party_for_rrr pfro,
@@ -897,7 +897,7 @@ values('newtitle-br22-check-different-owners', now(), 'infinity',
 	pfro.rrr_id = ro.id
 	and
 	ro.ba_unit_id = #{id})
-select  count (pn.name) as vl
+select  count (pn.name)= 0 as vl
 from   
 	party.party pn,
 	administrative.party_for_rrr pfro,
