@@ -881,109 +881,50 @@ from cadastre.cadastre_object_target co where transaction_id = #{id}');
 --------------Check new properties/title owners are not the same as underlying properties/titles owners (Give WARNING if > 0)
 insert into system.br(id, technical_type_code, feedback, technical_description) 
 values('newtitle-br22-check-different-owners', 'sql', 'Owners of new properties/titles are not the same as owners of underlying properties/titles::::Gli aventi diritto delle nuove proprieta/titoli non sono gli stessi delle proprieta/titoli sottostanti',
-'#{id}(application_id) is requested');
+'#{id}(baunit_id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('newtitle-br22-check-different-owners', now(), 'infinity', 
-'select count (*) = 0 as vl
-from
-party.party
-where party.party.name in
-(
-select party.party.name
-from party.party
-where party.party.id
-in
-     ( 	select  administrative.party_for_rrr.party_id
-	from 
-	administrative.party_for_rrr,
-	administrative.rrr,
-	administrative.ba_unit
-	where party_for_rrr.rrr_id = administrative.rrr.id
-	and administrative.rrr.ba_unit_id = administrative.ba_unit.id 
-	and administrative.ba_unit.id in (
-		 select ba_unit_id from administrative.rrr
-		 where transaction_id in (
-			select id from transaction.transaction
-			where from_service_id in (select id from application.service
-		where application_id =  #{id}  
-		)
-		)
-	)	
-	union
-     	select  administrative.party_for_rrr.party_id
-	from 
-	administrative.party_for_rrr,
-	administrative.rrr_share,
-	administrative.rrr,
-	administrative.ba_unit
-	where party_for_rrr.rrr_id = administrative.rrr.id
-	and party_for_rrr.share_id = administrative.rrr_share.id
-	and administrative.rrr_share.rrr_id = administrative.rrr.id 
-	and administrative.rrr.ba_unit_id = administrative.ba_unit.id
-	and administrative.ba_unit.id in (
-		 select ba_unit_id from administrative.rrr
-		 where transaction_id in (
-			select id from transaction.transaction
-			where from_service_id in (select id from application.service
-		where application_id =  #{id}
-                )
-		)
-      )
-    )
-)
-and party.party.name not in
-(
-select party.party.name
-from party.party
-where party.party.id
-in
-     ( 	select  administrative.party_for_rrr.party_id
-	from 
-	administrative.party_for_rrr,
-	administrative.rrr,
-	administrative.ba_unit
-	where administrative.rrr.id in 
-	(select id from administrative.rrr
-		 where transaction_id in (
-			select id from transaction.transaction
-			where from_service_id in (select id from application.service
-		where application_id =  #{id}
-		and request_type_code in (''newFreehold'',''newApartment'', ''newOwnership'', ''newState'', ''newDigitalProperty'' ))
-		)
-	)
-	and party_for_rrr.rrr_id = administrative.rrr.id
-	and administrative.rrr.ba_unit_id = administrative.ba_unit.id 
-	union
-     	select  administrative.party_for_rrr.party_id
-	from 
-	administrative.party_for_rrr,
-	administrative.rrr_share,
-	administrative.rrr,
-	administrative.ba_unit
-	where administrative.rrr.id in 
-	(select id from administrative.rrr
-		 where transaction_id in (
-			select id from transaction.transaction
-			where from_service_id in (select id from application.service
-		where application_id =  #{id}
-		and request_type_code in (''newFreehold'',''newApartment'', ''newOwnership'', ''newState'', ''newDigitalProperty'' ))
-		)
-	)
-	and party_for_rrr.rrr_id = administrative.rrr.id
-	and party_for_rrr.share_id = administrative.rrr_share.id
-	and administrative.rrr_share.rrr_id = administrative.rrr.id 
-	and administrative.rrr.ba_unit_id = administrative.ba_unit.id 
-      )
-)');
+'with prior_property_owner as (
+	select po.name 
+	from   
+	party.party po,
+	administrative.party_for_rrr pfro,
+	administrative.rrr ro
+	where 
+	po.id = pfro.party_id
+	and
+	pfro.rrr_id = ro.id
+	and
+	ro.ba_unit_id = #{id})
+select  count (pn.name) as vl
+from   
+	party.party pn,
+	administrative.party_for_rrr pfro,
+	administrative.rrr ro
+	where 
+	pn.id = pfro.party_id
+	and
+	pfro.rrr_id = ro.id
+	and
+	ro.ba_unit_id in
+	(select administrative.required_relationship_baunit.to_ba_unit_id
+	 from   administrative.required_relationship_baunit
+	 where  administrative.required_relationship_baunit.from_ba_unit_id = #{id})
+   and
+        pn.name not in (select name from prior_property_owner)
+    ');
 
---------------Check shares total = 100% (Give critical if not)
+--- ## ALREADY IMPLEMENTED BY "ba_unit_shares-total-check" TBVD ## ----------
+--------------Check shares total = 100% (Give critical if not) 
 insert into system.br(id, technical_type_code, feedback, technical_description) 
 values('newtitle-br23-check-share-100%', 'sql', 'Ownership Shares for some property/title not equal to 100%::::il totale delle suddivisioni per qualche titolo e uguale al 100%', '#{id}(application_id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('newtitle-br23-check-share-100%', now(), 'infinity', 
-'Select ABS(1 - SUM(TO_NUMBER(TO_CHAR(nominator, ''9.99999''), ''9.99999'')/TO_NUMBER(TO_CHAR(denominator, ''9.99999''), ''9.99999'')))  < 0.01  as vl
+'with all_property_ownership as (
+Select (TO_NUMBER(TO_CHAR(nominator, ''9.99999''), ''9.99999'')/TO_NUMBER(TO_CHAR(denominator, ''9.99999''), ''9.99999'')) as share,
+administrative.rrr.id as id
 FROM administrative.ba_unit
 INNER JOIN administrative.rrr ON administrative.rrr.ba_unit_id = administrative.ba_unit.id
 INNER JOIN administrative.rrr_share ON administrative.rrr.id = administrative.rrr_share.rrr_id
@@ -996,33 +937,55 @@ WHERE administrative.ba_unit.id in (
 		)
 		)
 	)	
-AND administrative.rrr.status_code != ''cancelled''  
-');
+AND administrative.rrr.status_code != ''cancelled''
+AND administrative.rrr.is_primary 
+)
+select ABS(
+        (Select count (distinct(id)) from all_property_ownership) -
+         (Select SUM(share) from all_property_ownership)
+      )<0.01 as vl');
 
---------------Check rrr transferred to new titles/properties (Give WARNING if > 0)
+--------------Check rrr transferred to new titles/properties (Critical if > 0)
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('newtitle-br24-check-rrr-accounted', 'sql', 'Not all rights and restrictions have been accounted for the new title/property::::non tutti i diritti e le restrizioni sono stati trasferiti al nuovo titolo', '#{id}(application_id) is requested');
+values('newtitle-br24-check-rrr-accounted', 'sql', 'Not all rights and restrictions have been accounted for the new title/property::::non tutti i diritti e le restrizioni sono stati trasferiti al nuovo titolo', '#{id}(baunit_id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('newtitle-br24-check-rrr-accounted', now(), 'infinity', 
-'Select count (*) = 0 as vl
-from administrative.rrr
- where transaction_id in (
-	select id from transaction.transaction
-	where from_service_id in (select id from application.service
-where application_id = #{id}
-and request_type_code not in (''newFreehold'',''newApartment'', ''newOwnership'', ''newState'', ''newDigitalProperty'' ))
-)
-and administrative.rrr.id not in (
-select id from administrative.rrr
- where transaction_id in (
-	select id from transaction.transaction
-	where from_service_id in (select id from application.service
-where application_id = #{id}
-and request_type_code in (''newFreehold'',''newApartment'', ''newOwnership'', ''newState'', ''newDigitalProperty'' ))
-)
-AND administrative.rrr.status_code != ''cancelled''  
-)
+'
+with prior_property_rrr as (
+select ro.id
+from administrative.rrr ro
+where ro.ba_unit_id = #{id}
+AND ro.status_code != ''cancelled'')
+select (
+ (select count (id) from prior_property_rrr)
+-
+  (select count (rn.id) 
+    from administrative.rrr rn
+    where rn.ba_unit_id in
+	(select administrative.required_relationship_baunit.to_ba_unit_id
+	 from   administrative.required_relationship_baunit
+	 where  administrative.required_relationship_baunit.from_ba_unit_id = #{id})
+     and
+        rn.id in (select id from prior_property_rrr)
+  )      
+
+) = 0 as vl
+');
+
+--------------Check there is only one pending transaction per property/title [ba_unit_id] (Critical if > 0)
+insert into system.br(id, technical_type_code, feedback, technical_description) 
+values('newtitle-brNew-check-pending-transaction', 'sql', 'property/title should have only one pending transaction::::per ogni titolo/proprieta deve esserci solo una transazione in corso', '#{id}(baunit_id) is requested');
+
+insert into system.br_definition(br_id, active_from, active_until, body) 
+values('newtitle-brNew-check-pending-transaction', now(), 'infinity', 
+'
+select count (*)= 0 as vl
+from administrative.ba_unit_target,
+transaction.transaction
+where administrative.ba_unit_target.transaction_id = transaction.transaction.id
+and transaction.transaction.status_code=''pending''
+and administrative.ba_unit_target.ba_unit_id  = #{id}
 ');
 
 ----------------------------------------------------------------------------------------------------
@@ -1253,14 +1216,23 @@ values('app-title-has-compatible-cadastre-object', 'medium', 'validate', 'applic
 insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
 values('app-cadastre-object-name', 'medium', 'validate', 'application', 5);
 
-insert into system.br_validation(br_id, severity_code,   target_application_moment, target_code, order_of_execution) 
-values('newtitle-br22-check-different-owners', 'warning', 'validate', 'application',  12);
+insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
+values('newtitle-br22-check-different-owners', 'warning', 'current', 'ba_unit', 2);
 
+--- ## ALREADY IMPLEMENTED BY "ba_unit_shares-total-check" TBVD## ----------
 insert into system.br_validation(br_id, severity_code,   target_application_moment, target_code, order_of_execution) 
-values('newtitle-br23-check-share-100%', 'critical', 'validate', 'application', 14);
+values('newtitle-br23-check-share-100%', 'critical', 'validate', 'application', 26);
+--- ########################################################## ----------
 
-insert into system.br_validation(br_id, severity_code,   target_application_moment, target_code, order_of_execution) 
-values('newtitle-br24-check-rrr-accounted', 'warning', 'validate', 'application', 15);
+insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
+values('newtitle-br24-check-rrr-accounted', 'critical', 'current', 'ba_unit', 10);
+
+insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
+values('newtitle-brNew-check-pending-transaction', 'critical', 'current', 'ba_unit', 18);
+
+---insert into system.br_validation(br_id, severity_code,   target_application_moment, target_code, order_of_execution) 
+---values('newtitle-brNew-check-pending-transaction', 'critical', 'validate', 'application', 31);
+
 
 -------------End application Validation Rules - Neil 18 November 2011-------------------------
 
