@@ -1,4 +1,10 @@
-# Override the default project settings to include pdf files 
-!*.pdf
+# Subfolders to ignore
+logs/
+
+# Files to ignore 
+Thumbs.db
+thumbs.db
+*.log
+
 #Ingore temporary vpp files
 *.vpp~*
