@@ -1066,7 +1066,7 @@ insert into system.br_validation(br_id, severity_code, target_reg_moment, target
 values('cadastre-redefinition-union-old-new-the-same', 'warning', 'pending', 'cadastre_object', 'redefineCadastre', 1);
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
-values('cadastre-redefinition-union-old-new-the-same', 'critical', 'current', 'cadastre_object', 'redefineCadastre', 1);
+values('cadastre-redefinition-union-old-new-the-same', 'warning', 'current', 'cadastre_object', 'redefineCadastre', 1);
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
 values('cadastre-redefinition-target-geometries-dont-overlap', 'critical', 'current', 'cadastre_object', 'redefineCadastre', 1);
@@ -1120,7 +1120,7 @@ insert into system.br_validation(br_id, severity_code, target_reg_moment, target
 values('new-cadastre-objects-present', 'critical', 'current', 'cadastre_object', 'cadastreChange', 6);
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
-values('target-and-new-union-the-same', 'critical', 'current', 'cadastre_object', 'cadastreChange', 7);
+values('target-and-new-union-the-same', 'warning', 'current', 'cadastre_object', 'cadastreChange', 7);
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
 values('new-cadastre-objects-dont-overlap', 'critical', 'current', 'cadastre_object', 'cadastreChange', 8);
