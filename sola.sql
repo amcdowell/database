@@ -2037,7 +2037,7 @@ CREATE TABLE application.request_type(
     
  -- Data for the table application.request_type -- 
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('cadastreChange', 'registrationServices', 'Change to Cadastre::::Cambio del Catasto', 'c', 30, 25.00, 0.10, 0, 1);
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('redefineCadastre', 'registrationServices', 'Redefine Cadastre::::ITALIANO', 'x', 30, 25.00, 0.10, 0, 1);
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('redefineCadastre', 'registrationServices', 'Redefine Cadastre::::ITALIANO', 'c', 30, 25.00, 0.10, 0, 1);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('documentCopy', 'informationServices', 'Document Copy::::Copia Documento', 'c', 1, 0.50, 0.00, 0, 0);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('mortgageCertificate', 'registrationServices', 'Mortgage Certificate::::Certiificato Ipoteca', 'x', 1, 5.00, 0.00, 0, 1, 'Mortgage Certificate issued', 'mortgage', 'vary');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template) values('newFreehold', 'registrationServices', 'New Freehold Title::::Nuovo Titolo', 'c', 5, 5.00, 0.00, 0, 1, 'Fee Simple Estate');
@@ -4730,6 +4730,295 @@ BEGIN
   WHERE bt.ba_unit_id = baunit_id AND t.status_code = 'pending'
   LIMIT 1);
 
+END;
+$BODY$
+  LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION application.getlodgetiming(fromdate character varying, todate character varying)
+  RETURNS SETOF record AS
+$BODY$
+DECLARE 
+
+    resultCode  varchar;
+    resultTotal integer :=0 ;
+    resultDailyAvg  varchar;
+    
+    rec     record;
+    sqlSt varchar;
+    lodgementFound boolean;
+    recToReturn record;
+
+    
+BEGIN
+    
+    sqlSt:= '';
+    
+    sqlSt:= 'select count(code) as total,
+       application.application_action_type.code as code,
+        round((CAST(count(application.application_action_type.code) as decimal)
+         /
+         (to_date('''|| toDate || ''',''yyyy-mm-dd'') - to_date('''|| fromDate || ''',''yyyy-mm-dd''))
+         ),3) as dailyaverage,
+         case when application.application_action_type.code= ''lodge'' then 1
+         else 2
+         end   as order    
+from application.application_historic,
+     application.application_action_type
+where  application.application_historic.action_code = application.application_action_type.code
+and
+application.application_historic.change_time between to_date('''|| fromDate || ''',''yyyy-mm-dd'')  and to_date('''|| toDate || ''',''yyyy-mm-dd'')
+or application.application_historic.lodging_datetime between to_date('''|| fromDate || ''',''yyyy-mm-dd'')  and to_date('''|| toDate || ''',''yyyy-mm-dd'')
+group by  application.application_action_type.code 
+union select 0 as total,
+       application.application_action_type.code as code,
+       0  as dailyaverage,
+       2 as order 
+ from 
+     application.application_action_type
+where  application.application_action_type.code not in (select application.application_historic.action_code from application.application_historic )
+
+union 
+select count(code) as total,
+       ''lodged not completed'' as code,
+        round((CAST(count(application.application_action_type.code) as decimal)
+         /
+         (to_date('''|| toDate || ''',''yyyy-mm-dd'') - to_date('''|| fromDate || ''',''yyyy-mm-dd''))
+         ),3) as dailyaverage,
+         0 as order  
+from application.application_historic,
+     application.application_action_type
+where  application.application_historic.status_code = ''lodged''
+and  application.application_historic.change_action = ''i''
+and
+application.application_historic.id not in
+(select application.application_historic.id 
+from application.application_historic
+  where  application.application_historic.status_code = ''completed''
+)
+and
+application.application_historic.change_time between to_date('''|| fromDate || ''',''yyyy-mm-dd'')  and to_date('''|| toDate || ''',''yyyy-mm-dd'')
+or application.application_historic.lodging_datetime between to_date('''|| fromDate || ''',''yyyy-mm-dd'')  and to_date('''|| toDate || ''',''yyyy-mm-dd'')
+group by  application.application_action_type.code
+order by 4,2
+
+';
+
+
+
+
+  
+
+    --raise exception '%',sqlSt;
+    lodgementFound = false;
+    -- Loop through results
+     
+    FOR rec in EXECUTE sqlSt loop
+
+
+            resultCode:= rec.code;
+            resultTotal:= rec.total;
+
+           if resultCode = 'lodged not completed' then
+               select into resultDailyAvg 
+                cast(sum(to_date(''|| toDate || '','yyyy-mm-dd') - lodging_datetime)/resultTotal as varchar)
+		from application.application_historic
+		where  application.application_historic.status_code = 'lodged'
+		and
+		application.application_historic.id not in
+		(select application.application_historic.id 
+		from application.application_historic
+		  where  application.application_historic.status_code = 'completed'
+		) and
+		application.application_historic.change_time between to_date(''|| fromDate || '','yyyy-mm-dd')  and to_date(''|| toDate || '','yyyy-mm-dd')
+		or application.application_historic.lodging_datetime between to_date(''|| fromDate || '','yyyy-mm-dd')  and to_date(''|| toDate || '','yyyy-mm-dd')
+		group by action_code;
+           else 
+            select into resultDailyAvg 
+                cast (sum(change_time_valid_until - change_time)/resultTotal as varchar)
+		from application.application_historic
+		where action_code = resultCode
+		and
+		application.application_historic.change_time between to_date(''|| fromDate || '','yyyy-mm-dd')  and to_date(''|| toDate || '','yyyy-mm-dd')
+		or application.application_historic.lodging_datetime between to_date(''|| fromDate || '','yyyy-mm-dd')  and to_date(''|| toDate || '','yyyy-mm-dd')
+		group by action_code;
+		--resultDailyAvg:= rec.dailyaverage;
+           end if; 
+            if resultCode is null then
+              resultCode :=0 ;
+            end if;
+	    if resultTotal is null then
+              resultTotal  :=0 ;
+            end if;  
+	    if resultDailyAvg is null then
+	        resultDailyAvg  :='0' ;
+            end if;  
+	   
+          select into recToReturn resultCode::varchar, resultTotal::integer, resultDailyAvg::varchar;
+          return next recToReturn;
+          lodgementFound = true;
+    end loop;
+   
+    if (not lodgementFound) then
+        RAISE EXCEPTION 'no_lodgement_found';
+    end if;
+    return;
+END;
+$BODY$
+  LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION application.getlodgement(fromdate character varying, todate character varying)
+  RETURNS SETOF record AS
+$BODY$
+DECLARE 
+
+    resultType  varchar;
+    resultGroup varchar;
+    resultTotal integer :=0 ;
+    resultTotalPerc decimal:=0 ;
+    resultDailyAvg  decimal:=0 ;
+    resultTotalReq integer:=0 ;
+    resultReqPerc  decimal:=0 ;
+    TotalTot integer:=0 ;
+   
+    rec     record;
+    sqlSt varchar;
+    lodgementFound boolean;
+    recToReturn record;
+
+    
+BEGIN
+    
+    sqlSt:= '';
+    
+    sqlSt:= 'select   1 as order,
+         application.service_historic.request_type_code as type,
+         application.request_type.request_category_code as group,
+         count(application.service_historic.id) as total,
+         round((CAST(count(application.service_historic.id) as decimal)
+         /
+         (to_date('''|| toDate || ''',''yyyy-mm-dd'') - to_date('''|| fromDate || ''',''yyyy-mm-dd''))
+         ),3) as dailyaverage
+from     application.service_historic,
+         application.request_type
+where    application.service_historic.request_type_code = application.request_type.code
+         and
+         application.service_historic.lodging_datetime between to_date('''|| fromDate || ''',''yyyy-mm-dd'')  and to_date('''|| toDate || ''',''yyyy-mm-dd'')
+         and application.service_historic.action_code=''lodge''
+         and application.service_historic.application_id in
+	      (select distinct(application.application_historic.id)
+	       from application.application_historic)
+group by application.service_historic.request_type_code,
+         application.request_type.request_category_code
+union
+select   2 as order,
+         ''Total'' as type,
+         ''All'' as group,
+         count(application.service_historic.id) as total,
+         round((CAST(count(application.service_historic.id) as decimal)
+         /
+         (to_date('''|| toDate || ''',''yyyy-mm-dd'') - to_date('''|| fromDate || ''',''yyyy-mm-dd''))
+         ),3) as dailyaverage
+from     application.service_historic,
+         application.request_type
+where    application.service_historic.request_type_code = application.request_type.code
+         and
+         application.service_historic.lodging_datetime between to_date('''|| fromDate || ''',''yyyy-mm-dd'')  and to_date('''|| toDate || ''',''yyyy-mm-dd'')
+         and application.service_historic.application_id in
+	      (select distinct(application.application_historic.id)
+	       from application.application_historic)
+order by 1,3,2;
+';
+
+
+
+
+  
+
+    --raise exception '%',sqlSt;
+    lodgementFound = false;
+    -- Loop through results
+         select   
+         count(application.service_historic.id)
+         into TotalTot
+from     application.service_historic,
+         application.request_type
+where    application.service_historic.request_type_code = application.request_type.code
+         and
+         application.service_historic.lodging_datetime between to_date(''|| fromDate || '','yyyy-mm-dd')  and to_date(''|| toDate || '','yyyy-mm-dd')
+         and application.service_historic.application_id in
+	      (select distinct(application.application_historic.id)
+	       from application.application_historic);
+
+    
+    FOR rec in EXECUTE sqlSt loop
+            resultType:= rec.type;
+	    resultGroup:= rec.group;
+	    resultTotal:= rec.total;
+	    resultTotalPerc:= round((CAST(rec.total as decimal)*100/TotalTot),3);
+	    resultDailyAvg:= rec.dailyaverage;
+            resultTotalReq:= 0;
+
+           
+
+            if rec.type = 'Total' then
+                 select   count(application.service_historic.id) into resultTotalReq
+		from application.service_historic
+		where application.service_historic.action_code='lodge'
+                      and
+                      application.service_historic.lodging_datetime between to_date(''|| fromDate || '','yyyy-mm-dd')  and to_date(''|| toDate || '','yyyy-mm-dd')
+                      and application.service_historic.application_id in
+		      (select application.application_historic.id
+		       from application.application_historic
+		       where application.application_historic.action_code='requisition');
+            else
+                  select  count(application.service_historic.id) into resultTotalReq
+		from application.service_historic
+		where application.service_historic.action_code='lodge'
+                      and
+                      application.service_historic.lodging_datetime between to_date(''|| fromDate || '','yyyy-mm-dd')  and to_date(''|| toDate || '','yyyy-mm-dd')
+                      and application.service_historic.application_id in
+		      (select application.application_historic.id
+		       from application.application_historic
+		       where application.application_historic.action_code='requisition'
+		      )   
+		and   application.service_historic.request_type_code = rec.type     
+		group by application.service_historic.request_type_code;
+            end if;
+
+            resultReqPerc:= round((CAST(resultTotalReq as decimal)*100/rec.total),3);
+
+            if resultType is null then
+              resultType :=0 ;
+            end if;
+	    if resultTotal is null then
+              resultTotal  :=0 ;
+            end if;  
+	    if resultTotalPerc is null then
+	         resultTotalPerc  :=0 ;
+            end if;  
+	    if resultDailyAvg is null then
+	        resultDailyAvg  :=0 ;
+            end if;  
+	    if resultTotalReq is null then
+	        resultTotalReq  :=0 ;
+            end if;  
+	    if resultReqPerc is null then
+	        resultReqPerc  :=0 ;
+            end if;  
+
+	    if TotalTot is null then
+	       TotalTot  :=0 ;
+            end if;  
+	  
+          select into recToReturn resultType::varchar, resultGroup::varchar, resultTotal::integer, resultTotalPerc::decimal,resultDailyAvg::decimal,resultTotalReq::integer,resultReqPerc::decimal;
+          return next recToReturn;
+          lodgementFound = true;
+    end loop;
+   
+    if (not lodgementFound) then
+        RAISE EXCEPTION 'no_lodgement_found';
+    end if;
+    return;
 END;
 $BODY$
   LANGUAGE plpgsql;
