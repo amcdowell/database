@@ -3231,6 +3231,12 @@ CREATE TABLE administrative.ba_unit_rel_type(
 );
 
     
+ -- Data for the table administrative.ba_unit_rel_type -- 
+insert into administrative.ba_unit_rel_type(code, display_value, description, status) values('priorTitle', 'Prior Title', 'Prior Title', 'c');
+insert into administrative.ba_unit_rel_type(code, display_value, description, status) values('rootTitle', 'Root of Title', 'Root of Title', 'c');
+
+
+
 --Table administrative.notation ----
 DROP TABLE IF EXISTS administrative.notation CASCADE;
 CREATE TABLE administrative.notation(
