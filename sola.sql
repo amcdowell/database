@@ -1273,15 +1273,15 @@ CREATE TABLE cadastre.spatial_unit(
     label varchar(255),
     surface_relation_code varchar(20) NOT NULL DEFAULT ('onSurface'),
     level_id varchar(40),
-    reference_point GEOMETRY,
-    CONSTRAINT enforce_dims_reference_point CHECK (st_ndims(reference_point) = 2),
-    
-            CONSTRAINT enforce_srid_reference_point CHECK (st_srid(reference_point) = 2193),
-    CONSTRAINT enforce_geotype_reference_point CHECK (geometrytype(reference_point) = 'POINT'::text OR reference_point IS NULL),
-    geom GEOMETRY,
-    CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
-    
-            CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
+    reference_point GEOMETRY
+        CONSTRAINT enforce_dims_reference_point CHECK (st_ndims(reference_point) = 2),
+        CONSTRAINT enforce_srid_reference_point CHECK (st_srid(reference_point) = 2193),
+        CONSTRAINT enforce_valid_reference_point CHECK (st_isvalid(reference_point)),
+        CONSTRAINT enforce_geotype_reference_point CHECK (geometrytype(reference_point) = 'POINT'::text OR reference_point IS NULL),
+    geom GEOMETRY
+        CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
+        CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
+        CONSTRAINT enforce_valid_geom CHECK (st_isvalid(geom)),
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
     rowversion integer NOT NULL DEFAULT (0),
     change_action char(1) NOT NULL DEFAULT ('i'),
@@ -1314,15 +1314,15 @@ CREATE TABLE cadastre.spatial_unit_historic
     label varchar(255),
     surface_relation_code varchar(20),
     level_id varchar(40),
-    reference_point GEOMETRY,
-    CONSTRAINT enforce_dims_reference_point CHECK (st_ndims(reference_point) = 2),
-    
-            CONSTRAINT enforce_srid_reference_point CHECK (st_srid(reference_point) = 2193),
-    CONSTRAINT enforce_geotype_reference_point CHECK (geometrytype(reference_point) = 'POINT'::text OR reference_point IS NULL),
-    geom GEOMETRY,
-    CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
-    
-            CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
+    reference_point GEOMETRY
+        CONSTRAINT enforce_dims_reference_point CHECK (st_ndims(reference_point) = 2),
+        CONSTRAINT enforce_srid_reference_point CHECK (st_srid(reference_point) = 2193),
+        CONSTRAINT enforce_valid_reference_point CHECK (st_isvalid(reference_point)),
+        CONSTRAINT enforce_geotype_reference_point CHECK (geometrytype(reference_point) = 'POINT'::text OR reference_point IS NULL),
+    geom GEOMETRY
+        CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
+        CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
+        CONSTRAINT enforce_valid_geom CHECK (st_isvalid(geom)),
     rowidentifier varchar(40),
     rowversion integer,
     change_action char(1),
@@ -1624,16 +1624,16 @@ CREATE TABLE cadastre.spatial_unit_group(
     hierarchy_level integer NOT NULL,
     label varchar(50),
     name varchar(50),
-    reference_point GEOMETRY,
-    CONSTRAINT enforce_dims_reference_point CHECK (st_ndims(reference_point) = 2),
-    
-            CONSTRAINT enforce_srid_reference_point CHECK (st_srid(reference_point) = 2193),
-    CONSTRAINT enforce_geotype_reference_point CHECK (geometrytype(reference_point) = 'POINT'::text OR reference_point IS NULL),
-    geom GEOMETRY,
-    CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
-    
-            CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
-    CONSTRAINT enforce_geotype_geom CHECK (geometrytype(geom) = 'MULTIPOLYGON'::text OR geom IS NULL),
+    reference_point GEOMETRY
+        CONSTRAINT enforce_dims_reference_point CHECK (st_ndims(reference_point) = 2),
+        CONSTRAINT enforce_srid_reference_point CHECK (st_srid(reference_point) = 2193),
+        CONSTRAINT enforce_valid_reference_point CHECK (st_isvalid(reference_point)),
+        CONSTRAINT enforce_geotype_reference_point CHECK (geometrytype(reference_point) = 'POINT'::text OR reference_point IS NULL),
+    geom GEOMETRY
+        CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
+        CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
+        CONSTRAINT enforce_valid_geom CHECK (st_isvalid(geom)),
+        CONSTRAINT enforce_geotype_geom CHECK (geometrytype(geom) = 'MULTIPOLYGON'::text OR geom IS NULL),
     found_in_spatial_unit_group_id varchar(40),
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
     rowversion integer NOT NULL DEFAULT (0),
@@ -1666,16 +1666,16 @@ CREATE TABLE cadastre.spatial_unit_group_historic
     hierarchy_level integer,
     label varchar(50),
     name varchar(50),
-    reference_point GEOMETRY,
-    CONSTRAINT enforce_dims_reference_point CHECK (st_ndims(reference_point) = 2),
-    
-            CONSTRAINT enforce_srid_reference_point CHECK (st_srid(reference_point) = 2193),
-    CONSTRAINT enforce_geotype_reference_point CHECK (geometrytype(reference_point) = 'POINT'::text OR reference_point IS NULL),
-    geom GEOMETRY,
-    CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
-    
-            CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
-    CONSTRAINT enforce_geotype_geom CHECK (geometrytype(geom) = 'MULTIPOLYGON'::text OR geom IS NULL),
+    reference_point GEOMETRY
+        CONSTRAINT enforce_dims_reference_point CHECK (st_ndims(reference_point) = 2),
+        CONSTRAINT enforce_srid_reference_point CHECK (st_srid(reference_point) = 2193),
+        CONSTRAINT enforce_valid_reference_point CHECK (st_isvalid(reference_point)),
+        CONSTRAINT enforce_geotype_reference_point CHECK (geometrytype(reference_point) = 'POINT'::text OR reference_point IS NULL),
+    geom GEOMETRY
+        CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
+        CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
+        CONSTRAINT enforce_valid_geom CHECK (st_isvalid(geom)),
+        CONSTRAINT enforce_geotype_geom CHECK (geometrytype(geom) = 'MULTIPOLYGON'::text OR geom IS NULL),
     found_in_spatial_unit_group_id varchar(40),
     rowidentifier varchar(40),
     rowversion integer,
@@ -1798,10 +1798,10 @@ CREATE TABLE cadastre.legal_space_utility_network(
     ext_physical_network_id varchar(40),
     status_code varchar(20),
     type_code varchar(20) NOT NULL,
-    geom GEOMETRY,
-    CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
-    
-            CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
+    geom GEOMETRY
+        CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
+        CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
+        CONSTRAINT enforce_valid_geom CHECK (st_isvalid(geom)),
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
     rowversion integer NOT NULL DEFAULT (0),
     change_action char(1) NOT NULL DEFAULT ('i'),
@@ -1832,10 +1832,10 @@ CREATE TABLE cadastre.legal_space_utility_network_historic
     ext_physical_network_id varchar(40),
     status_code varchar(20),
     type_code varchar(20),
-    geom GEOMETRY,
-    CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
-    
-            CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
+    geom GEOMETRY
+        CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
+        CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
+        CONSTRAINT enforce_valid_geom CHECK (st_isvalid(geom)),
     rowidentifier varchar(40),
     rowversion integer,
     change_action char(1),
@@ -1933,11 +1933,11 @@ CREATE TABLE application.application(
     expected_completion_date date NOT NULL DEFAULT (now()),
     assignee_id varchar(40),
     assigned_datetime timestamp,
-    location GEOMETRY,
-    CONSTRAINT enforce_dims_location CHECK (st_ndims(location) = 2),
-    
-            CONSTRAINT enforce_srid_location CHECK (st_srid(location) = 2193),
-    CONSTRAINT enforce_geotype_location CHECK (geometrytype(location) = 'MULTIPOINT'::text OR location IS NULL),
+    location GEOMETRY
+        CONSTRAINT enforce_dims_location CHECK (st_ndims(location) = 2),
+        CONSTRAINT enforce_srid_location CHECK (st_srid(location) = 2193),
+        CONSTRAINT enforce_valid_location CHECK (st_isvalid(location)),
+        CONSTRAINT enforce_geotype_location CHECK (geometrytype(location) = 'MULTIPOINT'::text OR location IS NULL),
     services_fee numeric(20, 2) NOT NULL DEFAULT (0),
     tax numeric(20, 2) NOT NULL DEFAULT (0),
     total_fee numeric(20, 2) NOT NULL DEFAULT (0),
@@ -1981,11 +1981,11 @@ CREATE TABLE application.application_historic
     expected_completion_date date,
     assignee_id varchar(40),
     assigned_datetime timestamp,
-    location GEOMETRY,
-    CONSTRAINT enforce_dims_location CHECK (st_ndims(location) = 2),
-    
-            CONSTRAINT enforce_srid_location CHECK (st_srid(location) = 2193),
-    CONSTRAINT enforce_geotype_location CHECK (geometrytype(location) = 'MULTIPOINT'::text OR location IS NULL),
+    location GEOMETRY
+        CONSTRAINT enforce_dims_location CHECK (st_ndims(location) = 2),
+        CONSTRAINT enforce_srid_location CHECK (st_srid(location) = 2193),
+        CONSTRAINT enforce_valid_location CHECK (st_isvalid(location)),
+        CONSTRAINT enforce_geotype_location CHECK (geometrytype(location) = 'MULTIPOINT'::text OR location IS NULL),
     services_fee numeric(20, 2),
     tax numeric(20, 2),
     total_fee numeric(20, 2),
@@ -3151,11 +3151,11 @@ CREATE TABLE cadastre.cadastre_object(
     name_firstpart varchar(20) NOT NULL,
     name_lastpart varchar(50) NOT NULL,
     status_code varchar(20) NOT NULL DEFAULT ('pending'),
-    geom_polygon GEOMETRY,
-    CONSTRAINT enforce_dims_geom_polygon CHECK (st_ndims(geom_polygon) = 2),
-    
-            CONSTRAINT enforce_srid_geom_polygon CHECK (st_srid(geom_polygon) = 2193),
-    CONSTRAINT enforce_geotype_geom_polygon CHECK (geometrytype(geom_polygon) = 'POLYGON'::text OR geom_polygon IS NULL),
+    geom_polygon GEOMETRY
+        CONSTRAINT enforce_dims_geom_polygon CHECK (st_ndims(geom_polygon) = 2),
+        CONSTRAINT enforce_srid_geom_polygon CHECK (st_srid(geom_polygon) = 2193),
+        CONSTRAINT enforce_valid_geom_polygon CHECK (st_isvalid(geom_polygon)),
+        CONSTRAINT enforce_geotype_geom_polygon CHECK (geometrytype(geom_polygon) = 'POLYGON'::text OR geom_polygon IS NULL),
     transaction_id varchar(40) NOT NULL,
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
     rowversion integer NOT NULL DEFAULT (0),
@@ -3193,11 +3193,11 @@ CREATE TABLE cadastre.cadastre_object_historic
     name_firstpart varchar(20),
     name_lastpart varchar(50),
     status_code varchar(20),
-    geom_polygon GEOMETRY,
-    CONSTRAINT enforce_dims_geom_polygon CHECK (st_ndims(geom_polygon) = 2),
-    
-            CONSTRAINT enforce_srid_geom_polygon CHECK (st_srid(geom_polygon) = 2193),
-    CONSTRAINT enforce_geotype_geom_polygon CHECK (geometrytype(geom_polygon) = 'POLYGON'::text OR geom_polygon IS NULL),
+    geom_polygon GEOMETRY
+        CONSTRAINT enforce_dims_geom_polygon CHECK (st_ndims(geom_polygon) = 2),
+        CONSTRAINT enforce_srid_geom_polygon CHECK (st_srid(geom_polygon) = 2193),
+        CONSTRAINT enforce_valid_geom_polygon CHECK (st_isvalid(geom_polygon)),
+        CONSTRAINT enforce_geotype_geom_polygon CHECK (geometrytype(geom_polygon) = 'POLYGON'::text OR geom_polygon IS NULL),
     transaction_id varchar(40),
     rowidentifier varchar(40),
     rowversion integer,
@@ -3514,11 +3514,11 @@ DROP TABLE IF EXISTS cadastre.cadastre_object_target CASCADE;
 CREATE TABLE cadastre.cadastre_object_target(
     transaction_id varchar(40) NOT NULL,
     cadastre_object_id varchar(40) NOT NULL,
-    geom_polygon GEOMETRY,
-    CONSTRAINT enforce_dims_geom_polygon CHECK (st_ndims(geom_polygon) = 2),
-    
-            CONSTRAINT enforce_srid_geom_polygon CHECK (st_srid(geom_polygon) = 2193),
-    CONSTRAINT enforce_geotype_geom_polygon CHECK (geometrytype(geom_polygon) = 'POLYGON'::text OR geom_polygon IS NULL),
+    geom_polygon GEOMETRY
+        CONSTRAINT enforce_dims_geom_polygon CHECK (st_ndims(geom_polygon) = 2),
+        CONSTRAINT enforce_srid_geom_polygon CHECK (st_srid(geom_polygon) = 2193),
+        CONSTRAINT enforce_valid_geom_polygon CHECK (st_isvalid(geom_polygon)),
+        CONSTRAINT enforce_geotype_geom_polygon CHECK (geometrytype(geom_polygon) = 'POLYGON'::text OR geom_polygon IS NULL),
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
     rowversion integer NOT NULL DEFAULT (0),
     change_action char(1) NOT NULL DEFAULT ('i'),
@@ -3547,11 +3547,11 @@ CREATE TABLE cadastre.cadastre_object_target_historic
 (
     transaction_id varchar(40),
     cadastre_object_id varchar(40),
-    geom_polygon GEOMETRY,
-    CONSTRAINT enforce_dims_geom_polygon CHECK (st_ndims(geom_polygon) = 2),
-    
-            CONSTRAINT enforce_srid_geom_polygon CHECK (st_srid(geom_polygon) = 2193),
-    CONSTRAINT enforce_geotype_geom_polygon CHECK (geometrytype(geom_polygon) = 'POLYGON'::text OR geom_polygon IS NULL),
+    geom_polygon GEOMETRY
+        CONSTRAINT enforce_dims_geom_polygon CHECK (st_ndims(geom_polygon) = 2),
+        CONSTRAINT enforce_srid_geom_polygon CHECK (st_srid(geom_polygon) = 2193),
+        CONSTRAINT enforce_valid_geom_polygon CHECK (st_isvalid(geom_polygon)),
+        CONSTRAINT enforce_geotype_geom_polygon CHECK (geometrytype(geom_polygon) = 'POLYGON'::text OR geom_polygon IS NULL),
     rowidentifier varchar(40),
     rowversion integer,
     change_action char(1),
@@ -3596,16 +3596,16 @@ CREATE TABLE cadastre.survey_point(
     transaction_id varchar(40) NOT NULL,
     id varchar(40) NOT NULL,
     boundary bool NOT NULL DEFAULT (true),
-    geom GEOMETRY NOT NULL,
-    CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
-    
-            CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
-    CONSTRAINT enforce_geotype_geom CHECK (geometrytype(geom) = 'POINT'::text OR geom IS NULL),
-    original_geom GEOMETRY NOT NULL,
-    CONSTRAINT enforce_dims_original_geom CHECK (st_ndims(original_geom) = 2),
-    
-            CONSTRAINT enforce_srid_original_geom CHECK (st_srid(original_geom) = 2193),
-    CONSTRAINT enforce_geotype_original_geom CHECK (geometrytype(original_geom) = 'POINT'::text OR original_geom IS NULL),
+    geom GEOMETRY NOT NULL
+        CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
+        CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
+        CONSTRAINT enforce_valid_geom CHECK (st_isvalid(geom)),
+        CONSTRAINT enforce_geotype_geom CHECK (geometrytype(geom) = 'POINT'::text OR geom IS NULL),
+    original_geom GEOMETRY NOT NULL
+        CONSTRAINT enforce_dims_original_geom CHECK (st_ndims(original_geom) = 2),
+        CONSTRAINT enforce_srid_original_geom CHECK (st_srid(original_geom) = 2193),
+        CONSTRAINT enforce_valid_original_geom CHECK (st_isvalid(original_geom)),
+        CONSTRAINT enforce_geotype_original_geom CHECK (geometrytype(original_geom) = 'POINT'::text OR original_geom IS NULL),
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
     rowversion integer NOT NULL DEFAULT (0),
     change_action char(1) NOT NULL DEFAULT ('i'),
@@ -3636,16 +3636,16 @@ CREATE TABLE cadastre.survey_point_historic
     transaction_id varchar(40),
     id varchar(40),
     boundary bool,
-    geom GEOMETRY,
-    CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
-    
-            CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
-    CONSTRAINT enforce_geotype_geom CHECK (geometrytype(geom) = 'POINT'::text OR geom IS NULL),
-    original_geom GEOMETRY,
-    CONSTRAINT enforce_dims_original_geom CHECK (st_ndims(original_geom) = 2),
-    
-            CONSTRAINT enforce_srid_original_geom CHECK (st_srid(original_geom) = 2193),
-    CONSTRAINT enforce_geotype_original_geom CHECK (geometrytype(original_geom) = 'POINT'::text OR original_geom IS NULL),
+    geom GEOMETRY
+        CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
+        CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
+        CONSTRAINT enforce_valid_geom CHECK (st_isvalid(geom)),
+        CONSTRAINT enforce_geotype_geom CHECK (geometrytype(geom) = 'POINT'::text OR geom IS NULL),
+    original_geom GEOMETRY
+        CONSTRAINT enforce_dims_original_geom CHECK (st_ndims(original_geom) = 2),
+        CONSTRAINT enforce_srid_original_geom CHECK (st_srid(original_geom) = 2193),
+        CONSTRAINT enforce_valid_original_geom CHECK (st_isvalid(original_geom)),
+        CONSTRAINT enforce_geotype_original_geom CHECK (geometrytype(original_geom) = 'POINT'::text OR original_geom IS NULL),
     rowidentifier varchar(40),
     rowversion integer,
     change_action char(1),
@@ -3911,11 +3911,11 @@ DROP TABLE IF EXISTS cadastre.cadastre_object_node_target CASCADE;
 CREATE TABLE cadastre.cadastre_object_node_target(
     transaction_id varchar(40) NOT NULL,
     node_id varchar(40) NOT NULL,
-    geom GEOMETRY NOT NULL,
-    CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
-    
-            CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
-    CONSTRAINT enforce_geotype_geom CHECK (geometrytype(geom) = 'POINT'::text OR geom IS NULL),
+    geom GEOMETRY NOT NULL
+        CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
+        CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
+        CONSTRAINT enforce_valid_geom CHECK (st_isvalid(geom)),
+        CONSTRAINT enforce_geotype_geom CHECK (geometrytype(geom) = 'POINT'::text OR geom IS NULL),
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
     rowversion integer NOT NULL DEFAULT (0),
     change_action char(1) NOT NULL DEFAULT ('i'),
@@ -3944,11 +3944,11 @@ CREATE TABLE cadastre.cadastre_object_node_target_historic
 (
     transaction_id varchar(40),
     node_id varchar(40),
-    geom GEOMETRY,
-    CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
-    
-            CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
-    CONSTRAINT enforce_geotype_geom CHECK (geometrytype(geom) = 'POINT'::text OR geom IS NULL),
+    geom GEOMETRY
+        CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
+        CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
+        CONSTRAINT enforce_valid_geom CHECK (st_isvalid(geom)),
+        CONSTRAINT enforce_geotype_geom CHECK (geometrytype(geom) = 'POINT'::text OR geom IS NULL),
     rowidentifier varchar(40),
     rowversion integer,
     change_action char(1),
