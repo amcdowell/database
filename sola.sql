@@ -1585,7 +1585,7 @@ insert into cadastre.structure_type(code, display_value, status) values('polygon
 insert into cadastre.structure_type(code, display_value, status) values('sketch', 'Sketch::::Schizzo', 'c');
 insert into cadastre.structure_type(code, display_value, status) values('text', 'Text::::Testo', 'c');
 insert into cadastre.structure_type(code, display_value, status) values('topological', 'Topological::::Topologico', 'c');
-insert into cadastre.structure_type(code, display_value) values('unStructuredLine', 'UnstructuredLine::::LineanonDefinita');
+insert into cadastre.structure_type(code, display_value, status) values('unStructuredLine', 'UnstructuredLine::::LineanonDefinita', 'c');
 
 
 
