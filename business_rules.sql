@@ -1224,15 +1224,34 @@ insert into system.br_validation(br_id, severity_code,   target_application_mome
 values('newtitle-br23-check-share-100%', 'critical', 'validate', 'application', 26);
 --- ########################################################## ----------
 
-insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
-values('newtitle-br24-check-rrr-accounted', 'critical', 'current', 'ba_unit', 10);
 
-insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
-values('newtitle-brNew-check-pending-transaction', 'critical', 'current', 'ba_unit', 18);
+--- new target code and moment for br24n =  RRR
+insert into system.br_validation(br_id, severity_code, target_reg_moment, target_request_type_code, target_code, order_of_execution) 
+values('newtitle-br24-check-rrr-accounted', 'critical', 'current', 'newFreehold', 'rrr', 10);
 
----insert into system.br_validation(br_id, severity_code,   target_application_moment, target_code, order_of_execution) 
----values('newtitle-brNew-check-pending-transaction', 'critical', 'validate', 'application', 31);
+insert into system.br_validation(br_id, severity_code,  target_request_type_code, target_code, order_of_execution) 
+values('newtitle-br24-check-rrr-accounted', 'critical',  'newApartment', 'rrr', 10);
 
+insert into system.br_validation(br_id, severity_code, target_request_type_code, target_code, order_of_execution) 
+values('newtitle-br24-check-rrr-accounted', 'critical', 'newOwnership', 'rrr', 10);
+
+---insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
+---values('newtitle-br24-check-rrr-accounted', 'critical', 'current', 'ba_unit', 10);
+--- ###### ---
+
+--- new target code and moment for newtitle-brNew-check-pending-transaction = RRR
+insert into system.br_validation(br_id, severity_code, target_reg_moment, target_request_type_code, target_code, order_of_execution) 
+values('newtitle-brNew-check-pending-transaction', 'critical', 'current', 'newFreehold', 'rrr', 18);
+
+insert into system.br_validation(br_id, severity_code,  target_request_type_code, target_code, order_of_execution) 
+values('newtitle-brNew-check-pending-transaction', 'critical',  'newApartment', 'rrr', 18);
+
+insert into system.br_validation(br_id, severity_code, target_request_type_code, target_code, order_of_execution) 
+values('newtitle-brNew-check-pending-transaction', 'critical', 'newOwnership', 'rrr', 18);
+
+---insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
+---values('newtitle-brNew-check-pending-transaction', 'critical', 'current', 'ba_unit', 18);
+--- ### ---
 
 -------------End application Validation Rules - Neil 18 November 2011-------------------------
 
