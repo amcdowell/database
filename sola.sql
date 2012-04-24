@@ -3804,8 +3804,8 @@ LADM Definition
 Not Applicable';
     
  -- Data for the table system.language -- 
-insert into system.language(code, display_value, active, is_default, item_order) values('en', 'English::::Inglese', true, true, 1);
-insert into system.language(code, display_value, active, is_default, item_order) values('it', 'Italian::::Italiano', true, false, 2);
+insert into system.language(code, display_value, active, is_default, item_order) values('en-US', 'English::::Inglese', true, true, 1);
+insert into system.language(code, display_value, active, is_default, item_order) values('it-IT', 'Italian::::Italiano', true, false, 2);
 
 
 
