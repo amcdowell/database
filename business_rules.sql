@@ -980,7 +980,7 @@ values('newtitle-brNew-check-pending-transaction', 'sql', 'property/title should
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('newtitle-brNew-check-pending-transaction', now(), 'infinity', 
 '
-select count (*) > 1 as vl
+select count (*) <= 1 as vl
 from administrative.ba_unit_target,
 transaction.transaction
 where administrative.ba_unit_target.transaction_id = transaction.transaction.id
