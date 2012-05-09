@@ -81,7 +81,7 @@ insert into system.br_definition(br_id, active_from, active_until, body)
 values('application-br1-check-required-sources-are-present', now(), 'infinity', 
 'select count(*) =0  as vl
 from application.request_type_requires_source_type r_s 
-where request_type_code in (select request_type_code from application.service where application_id=#{id})
+where request_type_code in (select request_type_code from application.service where application_id=#{id} and status_code != ''cancelled'')
 and not exists (
   select s.type_code
   from application.application_uses_source a_s inner join source.source s on a_s.source_id= s.id
