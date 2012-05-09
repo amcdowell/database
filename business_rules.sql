@@ -573,7 +573,7 @@ values('baunit-has-multiple-mortgages', 'sql', 'Title already has current mortga
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('baunit-has-multiple-mortgages', now(), 'infinity', 
-'SELECT COUNT(*) > 1 as vl FROM administrative.rrr 
+'SELECT COUNT(*) = 0 as vl FROM administrative.rrr 
 WHERE ba_unit_id = #{id}
 	AND type_code = ''mortgage''
 	AND status_code != ''cancelled''
@@ -736,7 +736,7 @@ values('app-for-title-with-mortgage', 'sql', 'Title already has current mortgage
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('app-for-title-with-mortgage', now(), 'infinity', 
-'SELECT COUNT(*) > 1 as vl FROM administrative.rrr 
+'SELECT COUNT(*) = 0 as vl FROM administrative.rrr 
 	INNER JOIN application.application_property ON administrative.rrr.ba_unit_id = application.application_property.ba_unit_id
 WHERE application.application_property.application_id = #{id}
 	AND type_code = ''mortgage''
