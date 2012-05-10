@@ -32,7 +32,7 @@ values('generate-source-nr', now(), 'infinity',
 
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code) values('generate-baunit-nr', 'sql');
-
+ 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('generate-baunit-nr', now(), 'infinity', 
 'SELECT to_char(now(), ''yymm'') || trim(to_char(nextval(''administrative.ba_unit_first_name_part_seq''), ''0000''))
