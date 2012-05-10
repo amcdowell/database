@@ -480,7 +480,7 @@ values('ba_unit_shares-total-check', 'sql', 'Shares do not total to 1::::ITALIAN
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('ba_unit_shares-total-check', now(), 'infinity', 
-'Select ABS(1 - SUM(TO_NUMBER(TO_CHAR(nominator, ''9.99999''), ''9.99999'')/TO_NUMBER(TO_CHAR(denominator, ''9.99999''), ''9.99999''))) < 0.01  as vl 
+'Select ABS(count(1) - SUM(TO_NUMBER(TO_CHAR(nominator, ''9.99999''), ''9.99999'')/TO_NUMBER(TO_CHAR(denominator, ''9.99999''), ''9.99999''))) < 0.01  as vl 
 FROM administrative.ba_unit
 INNER JOIN administrative.rrr ON administrative.rrr.ba_unit_id = administrative.ba_unit.id
 INNER JOIN administrative.rrr_share ON administrative.rrr.id = administrative.rrr_share.rrr_id
@@ -691,7 +691,7 @@ values('app-shares-total-check', 'sql', 'Shares do not total to 1::::ITALIANO',
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('app-shares-total-check', now(), 'infinity', 
-'Select ABS(1 - SUM(TO_NUMBER(TO_CHAR(nominator, ''9.99999''), ''9.99999'')/TO_NUMBER(TO_CHAR(denominator, ''9.99999''), ''9.99999''))) < 0.01 as vl 
+'Select ABS(count(1) - SUM(TO_NUMBER(TO_CHAR(nominator, ''9.99999''), ''9.99999'')/TO_NUMBER(TO_CHAR(denominator, ''9.99999''), ''9.99999''))) < 0.01 as vl 
 FROM administrative.ba_unit
 	INNER JOIN application.application_property ON application.application_property.ba_unit_id = administrative.ba_unit.id
 	INNER JOIN administrative.rrr ON administrative.rrr.ba_unit_id = administrative.ba_unit.id
