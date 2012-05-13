@@ -32,7 +32,7 @@ values('generate-source-nr', now(), 'infinity',
 
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code) values('generate-baunit-nr', 'sql');
-
+ 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('generate-baunit-nr', now(), 'infinity', 
 'SELECT to_char(now(), ''yymm'') || trim(to_char(nextval(''administrative.ba_unit_first_name_part_seq''), ''0000''))
@@ -81,7 +81,7 @@ insert into system.br_definition(br_id, active_from, active_until, body)
 values('application-br1-check-required-sources-are-present', now(), 'infinity', 
 'select count(*) =0  as vl
 from application.request_type_requires_source_type r_s 
-where request_type_code in (select request_type_code from application.service where application_id=#{id})
+where request_type_code in (select request_type_code from application.service where application_id=#{id} and status_code != ''cancelled'')
 and not exists (
   select s.type_code
   from application.application_uses_source a_s inner join source.source s on a_s.source_id= s.id
@@ -480,7 +480,7 @@ values('ba_unit_shares-total-check', 'sql', 'Shares do not total to 1::::ITALIAN
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('ba_unit_shares-total-check', now(), 'infinity', 
-'Select ABS(1 - SUM(TO_NUMBER(TO_CHAR(nominator, ''9.99999''), ''9.99999'')/TO_NUMBER(TO_CHAR(denominator, ''9.99999''), ''9.99999''))) < 0.01  as vl 
+'Select ABS(count(1) - SUM(TO_NUMBER(TO_CHAR(nominator, ''9.99999''), ''9.99999'')/TO_NUMBER(TO_CHAR(denominator, ''9.99999''), ''9.99999''))) < 0.01  as vl 
 FROM administrative.ba_unit
 INNER JOIN administrative.rrr ON administrative.rrr.ba_unit_id = administrative.ba_unit.id
 INNER JOIN administrative.rrr_share ON administrative.rrr.id = administrative.rrr_share.rrr_id
@@ -573,7 +573,7 @@ values('baunit-has-multiple-mortgages', 'sql', 'Title already has current mortga
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('baunit-has-multiple-mortgages', now(), 'infinity', 
-'SELECT COUNT(*) > 1 as vl FROM administrative.rrr 
+'SELECT COUNT(*) = 0 as vl FROM administrative.rrr 
 WHERE ba_unit_id = #{id}
 	AND type_code = ''mortgage''
 	AND status_code != ''cancelled''
@@ -691,7 +691,7 @@ values('app-shares-total-check', 'sql', 'Shares do not total to 1::::ITALIANO',
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('app-shares-total-check', now(), 'infinity', 
-'Select ABS(1 - SUM(TO_NUMBER(TO_CHAR(nominator, ''9.99999''), ''9.99999'')/TO_NUMBER(TO_CHAR(denominator, ''9.99999''), ''9.99999''))) < 0.01 as vl 
+'Select ABS(count(1) - SUM(TO_NUMBER(TO_CHAR(nominator, ''9.99999''), ''9.99999'')/TO_NUMBER(TO_CHAR(denominator, ''9.99999''), ''9.99999''))) < 0.01 as vl 
 FROM administrative.ba_unit
 	INNER JOIN application.application_property ON application.application_property.ba_unit_id = administrative.ba_unit.id
 	INNER JOIN administrative.rrr ON administrative.rrr.ba_unit_id = administrative.ba_unit.id
@@ -736,7 +736,7 @@ values('app-for-title-with-mortgage', 'sql', 'Title already has current mortgage
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('app-for-title-with-mortgage', now(), 'infinity', 
-'SELECT COUNT(*) > 1 as vl FROM administrative.rrr 
+'SELECT COUNT(*) = 0 as vl FROM administrative.rrr 
 	INNER JOIN application.application_property ON administrative.rrr.ba_unit_id = application.application_property.ba_unit_id
 WHERE application.application_property.application_id = #{id}
 	AND type_code = ''mortgage''
