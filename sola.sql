@@ -4943,6 +4943,7 @@ insert into system.query(name, sql) values('dynamic.informationtool.get_parcel_h
 insert into system.query(name, sql) values('map_search.cadastre_object_by_number', 'select id, name_firstpart || ''/ '' || name_lastpart as label, st_asewkb(geom_polygon) as the_geom  from cadastre.cadastre_object  where status_code= ''current'' and compare_strings(#{search_string}, name_firstpart || '' '' || name_lastpart) limit 30');
 insert into system.query(name, sql) values('map_search.cadastre_object_by_baunit', 'select distinct co.id,  ba_unit.name_firstpart || ''/ '' || ba_unit.name_lastpart || '' > '' || co.name_firstpart || ''/ '' || co.name_lastpart as label,  st_asewkb(geom_polygon) as the_geom from cadastre.cadastre_object  co    inner join administrative.ba_unit_contains_spatial_unit bas on co.id = bas.spatial_unit_id     inner join administrative.ba_unit on ba_unit.id = bas.ba_unit_id  where (co.status_code= ''current'' or ba_unit.status_code= ''current'')    and compare_strings(#{search_string}, ba_unit.name_firstpart || '' '' || ba_unit.name_lastpart) limit 30');
 insert into system.query(name, sql) values('map_search.cadastre_object_by_baunit_owner', 'select distinct co.id,  coalesce(party.name, '''') || '' '' || coalesce(party.last_name, '''') || '' > '' || co.name_firstpart || ''/ '' || co.name_lastpart as label,  st_asewkb(co.geom_polygon) as the_geom from cadastre.cadastre_object  co    inner join administrative.ba_unit_contains_spatial_unit bas on co.id = bas.spatial_unit_id  inner join administrative.ba_unit on bas.ba_unit_id= ba_unit.id   inner join administrative.rrr on (ba_unit.id = rrr.ba_unit_id and rrr.status_code = ''current'' and rrr.type_code = ''ownership'')  inner join administrative.party_for_rrr pfr on rrr.id = pfr.rrr_id   inner join party.party on pfr.party_id= pfr.party_id    where (co.status_code= ''current'' or ba_unit.status_code= ''current'')    and compare_strings(#{search_string}, coalesce(party.name, '''') || '' '' || coalesce(party.last_name, '''')) limit 30');
+insert into system.query(name, sql, description) values('system_search.cadastre_object_by_baunit_id', 'SELECT id,  name_firstpart || ''/ '' || name_lastpart as label, st_asewkb(geom_polygon) as the_geom  FROM cadastre.cadastre_object WHERE transaction_id IN (  SELECT cot.transaction_id FROM (administrative.ba_unit_contains_spatial_unit ba_su     INNER JOIN cadastre.cadastre_object co ON ba_su.spatial_unit_id = co.id)     INNER JOIN cadastre.cadastre_object_target cot ON co.id = cot.cadastre_object_id     WHERE ba_su.ba_unit_id = #{search_string})  AND (SELECT COUNT(1) FROM administrative.ba_unit_contains_spatial_unit WHERE spatial_unit_id = cadastre_object.id) = 0 AND status_code = ''current''', 'Query used by BaUnitBean.loadNewParcels');
 
 
 
@@ -5126,6 +5127,8 @@ CREATE TABLE system.map_search_option(
     title varchar(50) NOT NULL,
     query_name varchar(100) NOT NULL,
     active bool NOT NULL DEFAULT (true),
+    min_search_str_len smallint NOT NULL DEFAULT (3),
+    zoom_in_buffer numeric(20, 2) NOT NULL DEFAULT (50),
     description varchar(500),
 
     -- Internal constraints
@@ -5138,9 +5141,9 @@ CREATE TABLE system.map_search_option(
 comment on table system.map_search_option is 'This table contains information about the options to search objects in the map. The list of options here will be used to configure the list of search by options in the Map Search Component.';
     
  -- Data for the table system.map_search_option -- 
-insert into system.map_search_option(code, title, query_name, active) values('NUMBER', 'Number', 'map_search.cadastre_object_by_number', true);
-insert into system.map_search_option(code, title, query_name, active) values('BAUNIT', 'Property number', 'map_search.cadastre_object_by_baunit', true);
-insert into system.map_search_option(code, title, query_name, active) values('OWNER_OF_BAUNIT', 'Property owner', 'map_search.cadastre_object_by_baunit_owner', true);
+insert into system.map_search_option(code, title, query_name, active, min_search_str_len, zoom_in_buffer) values('NUMBER', 'Number', 'map_search.cadastre_object_by_number', true, 3, 50);
+insert into system.map_search_option(code, title, query_name, active, min_search_str_len, zoom_in_buffer) values('BAUNIT', 'Property number', 'map_search.cadastre_object_by_baunit', true, 3, 50);
+insert into system.map_search_option(code, title, query_name, active, min_search_str_len, zoom_in_buffer) values('OWNER_OF_BAUNIT', 'Property owner', 'map_search.cadastre_object_by_baunit_owner', true, 3, 50);
 
 
 
