@@ -1,4 +1,4 @@
-
+﻿
 -- Starting up the database script generation
 ALTER DATABASE sola SET bytea_output TO 'escape';
     
@@ -878,16 +878,16 @@ insert into source.administrative_source_type(code, display_value, status, has_s
 insert into source.administrative_source_type(code, display_value, status, has_status) values('agriLease', 'Agricultural Lease::::Contratto Affitto Agricolo', 'x', false);
 insert into source.administrative_source_type(code, display_value, status, has_status) values('agriNotaryStatement', 'Agricultural Notary Statement::::Dichiarazione Agricola Notaio', 'x', false);
 insert into source.administrative_source_type(code, display_value, status, has_status) values('deed', 'Deed', 'c', false);
-insert into source.administrative_source_type(code, display_value, status, has_status) values('lease', 'Lease::::ITALIANO', 'c', false);
+insert into source.administrative_source_type(code, display_value, status, has_status) values('lease', 'Lease::::Affitto', 'c', false);
 insert into source.administrative_source_type(code, display_value, status, has_status) values('mortgage', 'Mortgage::::Ipoteca', 'c', false);
 insert into source.administrative_source_type(code, display_value, status, has_status) values('title', 'Title::::Titolo', 'c', false);
 insert into source.administrative_source_type(code, display_value, status, has_status, description) values('proclamation', 'Proclamation::::Bando', 'c', false, 'Extension to LADM');
 insert into source.administrative_source_type(code, display_value, status, has_status, description) values('courtOrder', 'Court Order::::Ordine Tribunale', 'c', false, 'Extension to LADM');
 insert into source.administrative_source_type(code, display_value, status, has_status, description) values('agreement', 'Agreement::::Accordo', 'c', false, 'Extension to LADM');
-insert into source.administrative_source_type(code, display_value, status, has_status, description) values('contractForSale', 'Contract for Sale::::ITALIANO', 'c', false, 'Extension to LADM');
-insert into source.administrative_source_type(code, display_value, status, has_status, description) values('will', 'Will::::ITALIANO', 'c', false, 'Extension to LADM');
-insert into source.administrative_source_type(code, display_value, status, has_status, description) values('powerOfAttorney', 'Power of Attorney::::ITALIANO', 'c', true, 'Extension to LADM');
-insert into source.administrative_source_type(code, display_value, status, has_status, description) values('standardDocument', 'Standard Document::::ITALIANO', 'c', false, 'Extension to LADM');
+insert into source.administrative_source_type(code, display_value, status, has_status, description) values('contractForSale', 'Contract for Sale::::Contratto in vendita', 'c', false, 'Extension to LADM');
+insert into source.administrative_source_type(code, display_value, status, has_status, description) values('will', 'Will::::Testamento', 'c', false, 'Extension to LADM');
+insert into source.administrative_source_type(code, display_value, status, has_status, description) values('powerOfAttorney', 'Power of Attorney::::Lettera di incarico', 'c', true, 'Extension to LADM');
+insert into source.administrative_source_type(code, display_value, status, has_status, description) values('standardDocument', 'Standard Document::::Documento standard', 'c', false, 'Extension to LADM');
 insert into source.administrative_source_type(code, display_value, status, has_status, description) values('cadastralMap', 'Cadastral Map::::Mappa Catastale', 'c', false, 'Extension to LADM');
 insert into source.administrative_source_type(code, display_value, status, has_status, description) values('cadastralSurvey', 'Cadastral Survey::::Rilevamento Catastale', 'c', false, 'Extension to LADM');
 insert into source.administrative_source_type(code, display_value, status, has_status, description) values('waiver', 'Waiver to Caveat or other requirement', 'c', false, 'Extension to LADM');
@@ -1569,10 +1569,10 @@ insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is
 insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, status) values('servitude', 'restrictions', 'Servitude::::Servitu', false, false, false, 'c');
 insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, status) values('monumentMaintenance', 'responsibilities', 'Monument Maintenance::::Mantenimento Monumenti', false, false, false, 'x');
 insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, status) values('waterwayMaintenance', 'responsibilities', 'Waterway Maintenance::::Mantenimento Acqurdotti', false, false, false, 'x');
-insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) values('lifeEstate', 'rights', 'Life Estate::::Patrimonio vita', true, true, true, 'Extension to LADM', 'x');
+insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) values('lifeEstate', 'rights', 'Life Estate::::Patrimonio vitalizia', true, true, true, 'Extension to LADM', 'x');
 insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) values('apartment', 'rights', 'Apartment Ownership::::Proprieta Appartamento', true, true, true, 'Extension to LADM', 'c');
 insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) values('stateOwnership', 'rights', 'State Ownership::::Proprieta di Stato', true, false, false, 'Extension to LADM', 'c');
-insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) values('caveat', 'restrictions', 'Caveat::::Ammonizione', false, true, true, 'Extension to LADM', 'c');
+insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) values('caveat', 'restrictions', 'Caveat::::Prelazione', false, true, true, 'Extension to LADM', 'c');
 insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) values('historicPreservation', 'restrictions', 'Historic Preservation::::Conservazione Storica', false, false, false, 'Extension to LADM', 'c');
 insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) values('limitedAccess', 'restrictions', 'Limited Access (to Road)::::Accesso limitato (su strada)', false, false, false, 'Extension to LADM', 'c');
 
@@ -2638,7 +2638,7 @@ LADM Definition
 Not Defined';
     
  -- Data for the table cadastre.utility_network_type -- 
-insert into cadastre.utility_network_type(code, display_value, status) values('chemical', 'Chemicals::::Cimica', 'c');
+insert into cadastre.utility_network_type(code, display_value, status) values('chemical', 'Chemicals::::Chimica', 'c');
 insert into cadastre.utility_network_type(code, display_value, status) values('electricity', 'Electricity::::Elettricita', 'c');
 insert into cadastre.utility_network_type(code, display_value, status) values('gas', 'Gas::::Gas', 'c');
 insert into cadastre.utility_network_type(code, display_value, status) values('heating', 'Heating::::Riscaldamento', 'c');
@@ -2786,8 +2786,8 @@ LADM Definition
 Not Applicable';
     
  -- Data for the table application.request_type -- 
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('cadastreChange', 'registrationServices', 'Change to Cadastre::::Cambio del Catasto', 'c', 30, 25.00, 0.10, 0, 1);
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('redefineCadastre', 'registrationServices', 'Redefine Cadastre::::ITALIANO', 'c', 30, 25.00, 0.10, 0, 1);
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('cadastreChange', 'registrationServices', 'Change to Cadastre::::Modifica Catastale', 'c', 30, 25.00, 0.10, 0, 1);
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('redefineCadastre', 'registrationServices', 'Redefine Cadastre::::Redefinizione Catastale', 'c', 30, 25.00, 0.10, 0, 1);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('documentCopy', 'informationServices', 'Document Copy::::Copia Documento', 'c', 1, 0.50, 0.00, 0, 0);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('mortgageCertificate', 'registrationServices', 'Mortgage Certificate::::Certiificato Ipoteca', 'x', 1, 5.00, 0.00, 0, 1, 'Mortgage Certificate issued', 'mortgage', 'vary');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template) values('newFreehold', 'registrationServices', 'New Freehold Title::::Nuovo Titolo', 'c', 5, 5.00, 0.00, 0, 1, 'Fee Simple Estate');
@@ -2801,27 +2801,27 @@ insert into application.request_type(code, request_category_code, display_value,
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('cadastrePrint', 'informationServices', 'Cadastre Print::::Stampa Catastale', 'c', 1, 0.50, 0.00, 0, 0);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('cadastreExport', 'informationServices', 'Cadastre Export::::Export Catastale', 'x', 1, 0.00, 0.10, 0, 0);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('cadastreBulk', 'informationServices', 'Cadastre Bulk Export::::Export Carico Catastale', 'x', 5, 5.00, 0.10, 0, 0);
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('registerLease', 'registrationServices', 'Register Lease::::ITALIANO', 'c', 5, 5.00, 0.00, 0.01, 1, 'Lease of nn years to <name>', 'lease', 'new');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template) values('noteOccupation', 'registrationServices', 'Occupation Noted::::ITALIANO', 'x', 5, 5.00, 0.00, 0.01, 1, 'Occupation by <name> recorded');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('newOwnership', 'registrationServices', 'Register New Ownership::::ITALIANO', 'c', 5, 5.00, 0.00, 0.02, 1, 'Transfer to <name>', 'ownership', 'new');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('usufruct', 'registrationServices', 'Register Usufruct::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, '<usufruct> right granted to <name>', 'usufruct', 'new');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('waterRights', 'registrationServices', 'Register Water Rights::::ITALIANO''', 'c', 5, 5.00, 0.01, 0, 1, 'Water Rights granted to <name>', 'waterrights', 'new');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('mortgage', 'registrationServices', 'Register Mortgage::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, 'Mortgage to <lender>', 'mortgage', 'new');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('buildingRestriction', 'registrationServices', 'Register Building Restriction::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, 'Building Restriction', 'noBuilding', 'new');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('servitude', 'registrationServices', 'Register Servitude::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, 'Servitude over <parcel1> in favour of <parcel2>', 'servitude', 'new');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('lifeEstate', 'registrationServices', 'Establish Life Estate::::ITALIANO', 'x', 5, 5.00, 0.00, 0.02, 1, 'Life Estate for <name1> with Remainder Estate in <name2, name3>', 'lifeEstate', 'new');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('registerLease', 'registrationServices', 'Register Lease::::Registrazione Affitto', 'c', 5, 5.00, 0.00, 0.01, 1, 'Lease of nn years to <name>', 'lease', 'new');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template) values('noteOccupation', 'registrationServices', 'Occupation Noted::::Nota Occupazione', 'x', 5, 5.00, 0.00, 0.01, 1, 'Occupation by <name> recorded');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('newOwnership', 'registrationServices', 'Register New Ownership::::Registrazione Nuova proprieta', 'c', 5, 5.00, 0.00, 0.02, 1, 'Transfer to <name>', 'ownership', 'new');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('usufruct', 'registrationServices', 'Register Usufruct::::Registrazione Usufrutto', 'c', 5, 5.00, 0.00, 0, 1, '<usufruct> right granted to <name>', 'usufruct', 'new');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('waterRights', 'registrationServices', 'Register Water Rights::::Registrazione Servitu Acqua''', 'c', 5, 5.00, 0.01, 0, 1, 'Water Rights granted to <name>', 'waterrights', 'new');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('mortgage', 'registrationServices', 'Register Mortgage::::Registrazione Ipoteca', 'c', 5, 5.00, 0.00, 0, 1, 'Mortgage to <lender>', 'mortgage', 'new');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('buildingRestriction', 'registrationServices', 'Register Building Restriction::::Registrazione Limitazioni Edificabilita', 'c', 5, 5.00, 0.00, 0, 1, 'Building Restriction', 'noBuilding', 'new');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('servitude', 'registrationServices', 'Register Servitude::::Registrazione Servitu', 'c', 5, 5.00, 0.00, 0, 1, 'Servitude over <parcel1> in favour of <parcel2>', 'servitude', 'new');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('lifeEstate', 'registrationServices', 'Establish Life Estate::::Imponi Rendita Vitalizia', 'x', 5, 5.00, 0.00, 0.02, 1, 'Life Estate for <name1> with Remainder Estate in <name2, name3>', 'lifeEstate', 'new');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('newApartment', 'registrationServices', 'New Apartment Title::::Nuovo Titolo', 'c', 5, 5.00, 0.00, 0.02, 1, 'Apartment Estate', 'apartment', 'new');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template) values('newState', 'registrationServices', 'New State Title::::Nuovo Titolo', 'x', 5, 0.00, 0.00, 0, 1, 'State Estate');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('caveat', 'registrationServices', 'Register Caveat::::ITALIANO''', 'c', 5, 50.00, 0.00, 0, 1, 'Caveat in the name of <name>', 'caveat', 'new');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('removeCaveat', 'registrationServices', 'Remove Caveat::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, 'Caveat <reference> removed', 'caveat', 'cancel');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('historicOrder', 'registrationServices', 'Register Historic Preservation Order::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, 'Historic Preservation Order', 'noBuilding', 'new');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code) values('limitedRoadAccess', 'registrationServices', 'Register Limited Road Access::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, 'Limited Road Access', 'limitedAccess');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('varyLease', 'registrationServices', 'Vary Lease::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, 'Variation of Lease <reference>', 'lease', 'vary');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, type_action_code) values('varyRight', 'registrationServices', 'Vary Right (General)::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, 'Variation of <right> <reference>', 'vary');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, type_action_code) values('removeRight', 'registrationServices', 'Remove Right (General)::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, '<right> <reference> cancelled', 'cancel');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template) values('newState', 'registrationServices', 'New State Title::::Nuovo Titolo di Stato', 'x', 5, 0.00, 0.00, 0, 1, 'State Estate');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('caveat', 'registrationServices', 'Register Caveat::::Registrazione Prelazione''', 'c', 5, 50.00, 0.00, 0, 1, 'Caveat in the name of <name>', 'caveat', 'new');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('removeCaveat', 'registrationServices', 'Remove Caveat::::Rimozione Prelazione', 'c', 5, 5.00, 0.00, 0, 1, 'Caveat <reference> removed', 'caveat', 'cancel');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('historicOrder', 'registrationServices', 'Register Historic Preservation Order::::Registrazione Ordine Prelazione Storica', 'c', 5, 5.00, 0.00, 0, 1, 'Historic Preservation Order', 'noBuilding', 'new');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code) values('limitedRoadAccess', 'registrationServices', 'Register Limited Road Access::::Registrazione Limite Accesso Strada', 'c', 5, 5.00, 0.00, 0, 1, 'Limited Road Access', 'limitedAccess');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('varyLease', 'registrationServices', 'Vary Lease::::Varia Affitto', 'c', 5, 5.00, 0.00, 0, 1, 'Variation of Lease <reference>', 'lease', 'vary');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, type_action_code) values('varyRight', 'registrationServices', 'Vary Right (General)::::Varia Diritto', 'c', 5, 5.00, 0.00, 0, 1, 'Variation of <right> <reference>', 'vary');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, type_action_code) values('removeRight', 'registrationServices', 'Remove Right (General)::::Rimuovi Diritto (Generico)', 'c', 5, 5.00, 0.00, 0, 1, '<right> <reference> cancelled', 'cancel');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template) values('newDigitalTitle', 'registrationServices', 'New Digital Title::::Nuovo Titolo Digitale', 'c', 5, 0.00, 0.00, 0, 1, 'Title converted to digital format');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('newDigitalProperty', 'registrationServices', 'New Digital Property::::Nuova Proprieta Digitale', 'x', 5, 0.00, 0.00, 0, 1);
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, type_action_code) values('removeRestriction', 'registrationServices', 'Remove Restriction (General)::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, '<restriction> <reference> cancelled', 'cancel');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, type_action_code) values('removeRestriction', 'registrationServices', 'Remove Restriction (General)::::Rimozione Restrizione', 'c', 5, 5.00, 0.00, 0, 1, '<restriction> <reference> cancelled', 'cancel');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, type_action_code) values('cancelProperty', 'registrationServices', 'Cancel property::::Cancella prioprieta', 'c', 5, 5, 0, 0, 1, '', 'cancel');
 
 
@@ -3355,11 +3355,11 @@ insert into application.application_action_type(code, display_value, status, des
 insert into application.application_action_type(code, display_value, status_to_set, status, description) values('approve', 'Approve::::Approvata', 'approved', 'c', 'Application is approved (automatically logged when application is approved successively)::::Pratica approvata');
 insert into application.application_action_type(code, display_value, status_to_set, status, description) values('archive', 'Archive::::Archiviata', 'completed', 'c', 'Paper application records are archived (action is manually logged)::::I fogli della pratica sono stati archiviati');
 insert into application.application_action_type(code, display_value, status, description) values('despatch', 'Despatch::::Inviata', 'c', 'Application documents and new land office products are sent or collected by applicant (action is manually logged)::::I documenti della pratica e i nuovi prodotti da Ufficio Territoriale sono stati spediti o ritirati dal richiedente');
-insert into application.application_action_type(code, display_value, status_to_set, status) values('lapse', 'Lapse::::ITALIANO', 'anulled', 'c');
-insert into application.application_action_type(code, display_value, status) values('assign', 'Assign::::ITALIANO', 'c');
-insert into application.application_action_type(code, display_value, status) values('unAssign', 'Unassign::::ITALIANO', 'c');
-insert into application.application_action_type(code, display_value, status_to_set, status) values('resubmit', 'Resubmit::::ITALIANO', 'lodged', 'c');
-insert into application.application_action_type(code, display_value, status, description) values('validate', 'Validate::::ITALIANO', 'c', 'The action validate does not leave a mark, because validateFailed and validateSucceded will be used instead when the validate is completed.');
+insert into application.application_action_type(code, display_value, status_to_set, status) values('lapse', 'Lapse::::Sospesa', 'anulled', 'c');
+insert into application.application_action_type(code, display_value, status) values('assign', 'Assign::::Assegna', 'c');
+insert into application.application_action_type(code, display_value, status) values('unAssign', 'Unassign::::Dealloca', 'c');
+insert into application.application_action_type(code, display_value, status_to_set, status) values('resubmit', 'Resubmit::::Reinvia', 'lodged', 'c');
+insert into application.application_action_type(code, display_value, status, description) values('validate', 'Validate::::Convalida', 'c', 'The action validate does not leave a mark, because validateFailed and validateSucceded will be used instead when the validate is completed.');
 
 
 
@@ -3383,7 +3383,7 @@ comment on table application.service_status_type is 'It is the status that a ser
  -- Data for the table application.service_status_type -- 
 insert into application.service_status_type(code, display_value, status, description) values('lodged', 'Lodged::::Registrata', 'c', 'Application for a service has been lodged and officially received by land office::::La pratica per un servizio, registrata e formalmente ricevuta da ufficio territoriale');
 insert into application.service_status_type(code, display_value, status) values('completed', 'Completed::::Completata', 'c');
-insert into application.service_status_type(code, display_value, status) values('pending', 'Pending::::ITALIANO', 'c');
+insert into application.service_status_type(code, display_value, status) values('pending', 'Pending::::Pendente', 'c');
 insert into application.service_status_type(code, display_value, status) values('cancelled', 'Cancelled::::Cancellato', 'c');
 
 
@@ -3443,7 +3443,7 @@ insert into application.service_action_type(code, display_value, status_to_set, 
 insert into application.service_action_type(code, display_value, status_to_set, status, description) values('start', 'Start::::Comincia', 'pending', 'c', 'Provisional RRR Changes Made to Database as a result of application (action is automatically logged when a change is made to a rrr object)::::Apportate Modifiche Provvisorie di tipo RRR al Database come risultato della pratica');
 insert into application.service_action_type(code, display_value, status_to_set, status, description) values('cancel', 'Cancel::::Cancella la pratica', 'cancelled', 'c', 'Service is cancelled by Land Office (action is automatically logged when a service is cancelled)::::Pratica cancellata da Ufficio Territoriale');
 insert into application.service_action_type(code, display_value, status_to_set, status, description) values('complete', 'Complete::::Completa', 'completed', 'c', 'Application is ready for approval (action is automatically logged when service is marked as complete::::Pratica pronta per approvazione');
-insert into application.service_action_type(code, display_value, status_to_set, status, description) values('revert', 'Revert::::ITALIANO', 'pending', 'c', 'The status of the service has been reverted to pending from being completed (action is automatically logged when a service is reverted back for further work)::::ITALIANO');
+insert into application.service_action_type(code, display_value, status_to_set, status, description) values('revert', 'Revert::::Ripristina', 'pending', 'c', 'The status of the service has been reverted to pending from being completed (action is automatically logged when a service is reverted back for further work)::::Lo stato del servizio ripristinato da completato a pendente (azione automaticamente richiesta quando un servizio viene ripristinato per ulteriori attivita)');
 
 
 
@@ -3657,10 +3657,10 @@ Not Applicable';
     
  -- Data for the table application.application_status_type -- 
 insert into application.application_status_type(code, display_value, status, description) values('lodged', 'Lodged::::Registrata', 'c', 'Application has been lodged and officially received by land office::::La pratica registrata e formalmente ricevuta da ufficio territoriale');
-insert into application.application_status_type(code, display_value, status) values('approved', 'Approved::::ITALIANO', 'c');
-insert into application.application_status_type(code, display_value, status) values('anulled', 'Anulled::::Anullato', 'c');
-insert into application.application_status_type(code, display_value, status) values('completed', 'Completed::::ITALIANO', 'c');
-insert into application.application_status_type(code, display_value, status) values('requisitioned', 'Requisitioned::::ITALIANO', 'c');
+insert into application.application_status_type(code, display_value, status) values('approved', 'Approved::::Approvato', 'c');
+insert into application.application_status_type(code, display_value, status) values('anulled', 'Annulled::::Annullato', 'c');
+insert into application.application_status_type(code, display_value, status) values('completed', 'Completed::::Completato', 'c');
+insert into application.application_status_type(code, display_value, status) values('requisitioned', 'Requisitioned::::Requisito', 'c');
 
 
 
@@ -3841,12 +3841,12 @@ LADM Definition
 Not Applicable';
     
  -- Data for the table system.config_map_layer -- 
-insert into system.config_map_layer(name, title, type_code, pojo_query_name, pojo_structure, pojo_query_name_for_select, style, active, item_order) values('parcels', 'Parcels::::ITALIANO', 'pojo', 'SpatialResult.getParcels', 'theGeom:Polygon,label:""', 'dynamic.informationtool.get_parcel', 'parcel.xml', true, 20);
-insert into system.config_map_layer(name, title, type_code, pojo_query_name, pojo_structure, pojo_query_name_for_select, style, active, item_order) values('pending-parcels', 'Pending parcels::::ITALIANO', 'pojo', 'SpatialResult.getParcelsPending', 'theGeom:Polygon,label:""', 'dynamic.informationtool.get_parcel_pending', 'pending_parcels.xml', true, 30);
-insert into system.config_map_layer(name, title, type_code, pojo_query_name, pojo_structure, pojo_query_name_for_select, style, active, item_order) values('roads', 'Roads::::ITALIANO', 'pojo', 'SpatialResult.getRoads', 'theGeom:MultiPolygon,label:""', 'dynamic.informationtool.get_road', 'road.xml', true, 40);
-insert into system.config_map_layer(name, title, type_code, pojo_query_name, pojo_structure, pojo_query_name_for_select, style, active, item_order) values('survey-controls', 'Survey controls::::ITALIANO', 'pojo', 'SpatialResult.getSurveyControls', 'theGeom:Point,label:""', 'dynamic.informationtool.get_survey_control', 'survey_control.xml', true, 50);
-insert into system.config_map_layer(name, title, type_code, pojo_query_name, pojo_structure, pojo_query_name_for_select, style, active, item_order) values('place-names', 'Places names::::ITALIANO', 'pojo', 'SpatialResult.getPlaceNames', 'theGeom:Point,label:""', 'dynamic.informationtool.get_place_name', 'place_name.xml', true, 60);
-insert into system.config_map_layer(name, title, type_code, pojo_query_name, pojo_structure, pojo_query_name_for_select, style, active, item_order) values('applications', 'Applications::::ITALIANO', 'pojo', 'SpatialResult.getApplications', 'theGeom:MultiPoint,label:""', 'dynamic.informationtool.get_application', 'application.xml', true, 70);
+insert into system.config_map_layer(name, title, type_code, pojo_query_name, pojo_structure, pojo_query_name_for_select, style, active, item_order) values('parcels', 'Parcels::::Particelle', 'pojo', 'SpatialResult.getParcels', 'theGeom:Polygon,label:""', 'dynamic.informationtool.get_parcel', 'parcel.xml', true, 20);
+insert into system.config_map_layer(name, title, type_code, pojo_query_name, pojo_structure, pojo_query_name_for_select, style, active, item_order) values('pending-parcels', 'Pending parcels::::Particelle pendenti', 'pojo', 'SpatialResult.getParcelsPending', 'theGeom:Polygon,label:""', 'dynamic.informationtool.get_parcel_pending', 'pending_parcels.xml', true, 30);
+insert into system.config_map_layer(name, title, type_code, pojo_query_name, pojo_structure, pojo_query_name_for_select, style, active, item_order) values('roads', 'Roads::::Strade', 'pojo', 'SpatialResult.getRoads', 'theGeom:MultiPolygon,label:""', 'dynamic.informationtool.get_road', 'road.xml', true, 40);
+insert into system.config_map_layer(name, title, type_code, pojo_query_name, pojo_structure, pojo_query_name_for_select, style, active, item_order) values('survey-controls', 'Survey controls::::Piani di controllo', 'pojo', 'SpatialResult.getSurveyControls', 'theGeom:Point,label:""', 'dynamic.informationtool.get_survey_control', 'survey_control.xml', true, 50);
+insert into system.config_map_layer(name, title, type_code, pojo_query_name, pojo_structure, pojo_query_name_for_select, style, active, item_order) values('place-names', 'Places names::::Nomi di luogo', 'pojo', 'SpatialResult.getPlaceNames', 'theGeom:Point,label:""', 'dynamic.informationtool.get_place_name', 'place_name.xml', true, 60);
+insert into system.config_map_layer(name, title, type_code, pojo_query_name, pojo_structure, pojo_query_name_for_select, style, active, item_order) values('applications', 'Applications::::Pratiche', 'pojo', 'SpatialResult.getApplications', 'theGeom:MultiPoint,label:""', 'dynamic.informationtool.get_application', 'application.xml', true, 70);
 insert into system.config_map_layer(name, title, type_code, pojo_query_name, pojo_structure, pojo_query_name_for_select, style, active, item_order) values('parcels-historic-current-ba', 'Historic parcels with current titles', 'pojo', 'SpatialResult.getParcelsHistoricWithCurrentBA', 'theGeom:Polygon,label:""', 'dynamic.informationtool.get_parcel_historic_current_ba', 'parcel_historic_current_ba.xml', true, 10);
 
 
@@ -4053,12 +4053,12 @@ CREATE TABLE system.br_validation_target_type(
 comment on table system.br_validation_target_type is 'The potential targets of the validation rules.';
     
  -- Data for the table system.br_validation_target_type -- 
-insert into system.br_validation_target_type(code, display_value, status, description) values('application', 'Application::::ITALIANO', 'c', 'The target of the validation is the application. It accepts one parameter {id} which is the application id.');
-insert into system.br_validation_target_type(code, display_value, status, description) values('service', 'Service::::ITALIANO', 'c', 'The target of the validation is the service. It accepts one parameter {id} which is the service id.');
-insert into system.br_validation_target_type(code, display_value, status, description) values('rrr', 'Right or Restriction::::ITALIANO', 'c', 'The target of the validation is the rrr. It accepts one parameter {id} which is the rrr id. ');
-insert into system.br_validation_target_type(code, display_value, status, description) values('ba_unit', 'Administrative Unit::::ITALIANO', 'c', 'The target of the validation is the ba_unit. It accepts one parameter {id} which is the ba_unit id.');
-insert into system.br_validation_target_type(code, display_value, status, description) values('source', 'Source::::ITALIANO', 'c', 'The target of the validation is the source. It accepts one parameter {id} which is the source id.');
-insert into system.br_validation_target_type(code, display_value, status, description) values('cadastre_object', 'Cadastre Object::::ITALIANO', 'c', 'The target of the validation is the transaction related with the cadastre change. It accepts one parameter {id} which is the transaction id.');
+insert into system.br_validation_target_type(code, display_value, status, description) values('application', 'Application::::Pratica', 'c', 'The target of the validation is the application. It accepts one parameter {id} which is the application id.');
+insert into system.br_validation_target_type(code, display_value, status, description) values('service', 'Service::::Servizio', 'c', 'The target of the validation is the service. It accepts one parameter {id} which is the service id.');
+insert into system.br_validation_target_type(code, display_value, status, description) values('rrr', 'Right or Restriction::::Diritto o Restrizione', 'c', 'The target of the validation is the rrr. It accepts one parameter {id} which is the rrr id. ');
+insert into system.br_validation_target_type(code, display_value, status, description) values('ba_unit', 'Administrative Unit::::Unita Amministrativa', 'c', 'The target of the validation is the ba_unit. It accepts one parameter {id} which is the ba_unit id.');
+insert into system.br_validation_target_type(code, display_value, status, description) values('source', 'Source::::Sorgente', 'c', 'The target of the validation is the source. It accepts one parameter {id} which is the source id.');
+insert into system.br_validation_target_type(code, display_value, status, description) values('cadastre_object', 'Cadastre Object::::Oggetto Catastale', 'c', 'The target of the validation is the transaction related with the cadastre change. It accepts one parameter {id} which is the transaction id.');
 
 
 
@@ -4080,9 +4080,9 @@ CREATE TABLE cadastre.cadastre_object_type(
 comment on table cadastre.cadastre_object_type is 'The type of spatial object. This defines the specialisation of the spatial unit. It can be a parcel, building_unit or backgroup data like a road etc.';
     
  -- Data for the table cadastre.cadastre_object_type -- 
-insert into cadastre.cadastre_object_type(code, display_value, status) values('parcel', 'Parcel::::ITALIANO', 'c');
-insert into cadastre.cadastre_object_type(code, display_value, status) values('buildingUnit', 'Building Unit::::ITALIANO', 'c');
-insert into cadastre.cadastre_object_type(code, display_value, status) values('utilityNetwork', 'Utility Network::::ITALIANO', 'c');
+insert into cadastre.cadastre_object_type(code, display_value, status) values('parcel', 'Parcel::::Particella', 'c');
+insert into cadastre.cadastre_object_type(code, display_value, status) values('buildingUnit', 'Building Unit::::Unita Immobiliare', 'c');
+insert into cadastre.cadastre_object_type(code, display_value, status) values('utilityNetwork', 'Utility Network::::Network Utilita', 'c');
 
 
 
@@ -4514,8 +4514,8 @@ Potential values are current, pending, rejected.';
  -- Data for the table transaction.transaction_status_type -- 
 insert into transaction.transaction_status_type(code, display_value, status) values('approved', 'Approved::::Approvata', 'c');
 insert into transaction.transaction_status_type(code, display_value, status) values('cancelled', 'CancelledApproved::::Cancellata', 'c');
-insert into transaction.transaction_status_type(code, display_value, status) values('pending', 'Pending::::In Attesa', 'c');
-insert into transaction.transaction_status_type(code, display_value, status) values('completed', 'Completed::::ITALIANO', 'c');
+insert into transaction.transaction_status_type(code, display_value, status) values('pending', 'Pending::::Pendente', 'c');
+insert into transaction.transaction_status_type(code, display_value, status) values('completed', 'Completed::::Completata', 'c');
 
 
 
@@ -4537,9 +4537,9 @@ CREATE TABLE application.type_action(
 comment on table application.type_action is 'This is the coded list of allowed operations on rrr and ba_unit. Present values are: new, remove, vary.';
     
  -- Data for the table application.type_action -- 
-insert into application.type_action(code, display_value, status) values('new', 'New::::ITALIANO', 'c');
-insert into application.type_action(code, display_value, status) values('vary', 'Vary::::ITALIANO', 'c');
-insert into application.type_action(code, display_value, status) values('cancel', 'Cancel::::ITALIANO', 'c');
+insert into application.type_action(code, display_value, status) values('new', 'New::::Nuovo', 'c');
+insert into application.type_action(code, display_value, status) values('vary', 'Vary::::Varia', 'c');
+insert into application.type_action(code, display_value, status) values('cancel', 'Cancel::::Cancella', 'c');
 
 
 
@@ -4967,14 +4967,14 @@ comment on table system.query_field is 'It defines a field in the query. The fie
 Not for all queries is needed to define the fields. It becomes important only for queries that will need to have fields that has to be localized.';
     
  -- Data for the table system.query_field -- 
-insert into system.query_field(query_name, index_in_query, name, display_value) values('dynamic.informationtool.get_parcel', 1, 'parcel_nr', 'Parcel number::::ITALIANO');
-insert into system.query_field(query_name, index_in_query, name, display_value) values('dynamic.informationtool.get_parcel', 2, 'ba_units', 'Properties::::ITALIANO');
-insert into system.query_field(query_name, index_in_query, name, display_value) values('dynamic.informationtool.get_parcel', 3, 'area_official_sqm', 'Official area (m2)::::ITALIANO');
+insert into system.query_field(query_name, index_in_query, name, display_value) values('dynamic.informationtool.get_parcel', 1, 'parcel_nr', 'Parcel number::::Numero particella');
+insert into system.query_field(query_name, index_in_query, name, display_value) values('dynamic.informationtool.get_parcel', 2, 'ba_units', 'Properties::::Proprieta');
+insert into system.query_field(query_name, index_in_query, name, display_value) values('dynamic.informationtool.get_parcel', 3, 'area_official_sqm', 'Official area (m2)::::Area ufficiale (m2)');
 insert into system.query_field(query_name, index_in_query, name) values('dynamic.informationtool.get_parcel', 0, 'id');
 insert into system.query_field(query_name, index_in_query, name) values('dynamic.informationtool.get_parcel', 4, 'the_geom');
 insert into system.query_field(query_name, index_in_query, name) values('dynamic.informationtool.get_parcel_pending', 0, 'id');
-insert into system.query_field(query_name, index_in_query, name, display_value) values('dynamic.informationtool.get_parcel_pending', 1, 'parcel_nr', 'Parcel number::::ITALIANO');
-insert into system.query_field(query_name, index_in_query, name, display_value) values('dynamic.informationtool.get_parcel_pending', 2, 'area_official_sqm', 'Official area (m2)::::ITALIANO');
+insert into system.query_field(query_name, index_in_query, name, display_value) values('dynamic.informationtool.get_parcel_pending', 1, 'parcel_nr', 'Parcel number::::Numero particella');
+insert into system.query_field(query_name, index_in_query, name, display_value) values('dynamic.informationtool.get_parcel_pending', 2, 'area_official_sqm', 'Official area (m2)::::Area ufficiale (m2)');
 insert into system.query_field(query_name, index_in_query, name) values('dynamic.informationtool.get_parcel_pending', 3, 'the_geom');
 insert into system.query_field(query_name, index_in_query, name) values('dynamic.informationtool.get_place_name', 0, 'id');
 insert into system.query_field(query_name, index_in_query, name, display_value) values('dynamic.informationtool.get_place_name', 1, 'label', 'Name::::Nome');
@@ -4986,12 +4986,12 @@ insert into system.query_field(query_name, index_in_query, name) values('dynamic
 insert into system.query_field(query_name, index_in_query, name, display_value) values('dynamic.informationtool.get_application', 1, 'nr', 'Number::::Numero');
 insert into system.query_field(query_name, index_in_query, name) values('dynamic.informationtool.get_application', 2, 'the_geom');
 insert into system.query_field(query_name, index_in_query, name) values('dynamic.informationtool.get_survey_control', 0, 'id');
-insert into system.query_field(query_name, index_in_query, name, display_value) values('dynamic.informationtool.get_survey_control', 1, 'label', 'Label::::ITALIANO');
+insert into system.query_field(query_name, index_in_query, name, display_value) values('dynamic.informationtool.get_survey_control', 1, 'label', 'Label::::Etichetta');
 insert into system.query_field(query_name, index_in_query, name) values('dynamic.informationtool.get_survey_control', 2, 'the_geom');
 insert into system.query_field(query_name, index_in_query, name) values('dynamic.informationtool.get_parcel_historic_current_ba', 0, 'id');
-insert into system.query_field(query_name, index_in_query, name, display_value) values('dynamic.informationtool.get_parcel_historic_current_ba', 1, 'parcel_nr', 'Parcel number::::ITALIANO');
-insert into system.query_field(query_name, index_in_query, name, display_value) values('dynamic.informationtool.get_parcel_historic_current_ba', 2, 'ba_units', 'Properties::::ITALIANO');
-insert into system.query_field(query_name, index_in_query, name, display_value) values('dynamic.informationtool.get_parcel_historic_current_ba', 3, 'area_official_sqm', 'Official area (m2)::::ITALIANO');
+insert into system.query_field(query_name, index_in_query, name, display_value) values('dynamic.informationtool.get_parcel_historic_current_ba', 1, 'parcel_nr', 'Parcel number::::Numero particella');
+insert into system.query_field(query_name, index_in_query, name, display_value) values('dynamic.informationtool.get_parcel_historic_current_ba', 2, 'ba_units', 'Properties::::Proprieta');
+insert into system.query_field(query_name, index_in_query, name, display_value) values('dynamic.informationtool.get_parcel_historic_current_ba', 3, 'area_official_sqm', 'Official area (m2)::::Area ufficiale (m2)');
 insert into system.query_field(query_name, index_in_query, name) values('dynamic.informationtool.get_parcel_historic_current_ba', 4, 'the_geom');
 
 
@@ -5762,19 +5762,19 @@ where r.code not in (select approle_code from system.approle_appgroup g where ap
 DROP VIEW IF EXISTS cadastre.survey_control CASCADE;
 CREATE VIEW cadastre.survey_control AS SELECT su.id, su.label, su.geom
 FROM cadastre.level l, cadastre.spatial_unit su 
-WHERE l.id = su.level_id AND l.name = 'Survey Control';;
+WHERE l.id = su.level_id AND l.name = 'Survey Control';
 
 -------View cadastre.road ---------
 DROP VIEW IF EXISTS cadastre.road CASCADE;
 CREATE VIEW cadastre.road AS SELECT su.id, su.label, su.geom
 FROM cadastre.level l, cadastre.spatial_unit su 
-WHERE l.id= su.level_id AND l.name = 'Roads';;
+WHERE l.id= su.level_id AND l.name = 'Roads';
 
 -------View cadastre.place_name ---------
 DROP VIEW IF EXISTS cadastre.place_name CASCADE;
 CREATE VIEW cadastre.place_name AS SELECT su.id, su.label, su.geom
 FROM cadastre.level l, cadastre.spatial_unit su 
-WHERE l.id = su.level_id AND l.name = 'Place Names';;
+WHERE l.id = su.level_id AND l.name = 'Place Names';
 
 -------View system.user_roles ---------
 DROP VIEW IF EXISTS system.user_roles CASCADE;
@@ -5800,7 +5800,7 @@ from application.service
 union 
 select uuid_generate_v1()::varchar as id, application_id, status_code, service_order::varchar, request_type_code, change_time, 
 (select first_name || ' ' || last_name from system.appuser where id = service_historic.change_user) as user_fullname, action_notes
-from application.service_historic;;
+from application.service_historic;
 
 -------View system.br_current ---------
 DROP VIEW IF EXISTS system.br_current CASCADE;

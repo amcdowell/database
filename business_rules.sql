@@ -177,7 +177,7 @@ and s.submission + 1 * interval ''1 month'' > now()
 
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback) 
-values('application-on-approve-check-services-status', 'sql', 'All services in the application must have the status cancelled or completed::::ITALIANO');
+values('application-on-approve-check-services-status', 'sql', 'All services in the application must have the status cancelled or completed::::Tutti i servizi devono avere lo stato di cancellato o completato');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('application-on-approve-check-services-status', now(), 'infinity', 
@@ -186,7 +186,7 @@ from application.service s where s.application_id = #{id} and status_code not in
 
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback) 
-values('application-on-approve-check-services-without-transaction', 'sql', 'All services with the status ''completed'' must have done changes in the system::::ITALIANO');
+values('application-on-approve-check-services-without-transaction', 'sql', 'All services with the status ''completed'' must have done changes in the system::::Tutti i servizi con stato completato devono aver prodotto modifiche nel sistema');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('application-on-approve-check-services-without-transaction', now(), 'infinity', 
@@ -196,7 +196,7 @@ and id not in (select from_service_id from transaction.transaction)');
 
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback) 
-values('service-on-complete-without-transaction', 'sql', 'Service must have been started and done some changes in the system::::ITALIANO');
+values('service-on-complete-without-transaction', 'sql', 'Service must have been started and done some changes in the system::::Service must have been started and done some changes in the system');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('service-on-complete-without-transaction', now(), 'infinity', 
@@ -205,7 +205,7 @@ from application.service s where id= #{id} and id not in (select from_service_id
 
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback) 
-values('rrr-must-have-parties', 'sql', 'Rrr that must have parties have parties::::ITALIANO');
+values('rrr-must-have-parties', 'sql', 'Rrr that must have parties have parties::::RRR per cui sono previste parti, le devono avere');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('rrr-must-have-parties', now(), 'infinity', 
@@ -247,7 +247,7 @@ and co_target_also.transaction_id  in (select id from transaction.transaction
 
 --------------Check the union of target co is the same as the union of the new co
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('target-and-new-union-the-same', 'sql', 'The union of new cadastral objects is the same with the union of target cadastral objects::::ITALIANO',
+values('target-and-new-union-the-same', 'sql', 'The union of new cadastral objects is the same with the union of target cadastral objects::::La unione dei nuovi oggetti catastali deve corrispondere alla unione di quelli originari',
  '#{id}(transaction_id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -265,7 +265,7 @@ where id in (select cadastre_object_id
 
 --------------Check the union of new co has the same area as the sum of all areas of new co-s, which means the new co-s don't overlap
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('new-cadastre-objects-dont-overlap', 'sql', 'The new cadastral objects don''t overlap::::ITALIANO',
+values('new-cadastre-objects-dont-overlap', 'sql', 'The new cadastral objects don''t overlap::::I nuovi oggetti catastali non devono sovrapporsi',
  '#{id}(transaction_id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -374,7 +374,7 @@ inner join administrative.ba_unit ba
 
 --------------Check there are survey points attached with the cadastre change (CRITICAL)
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('survey-points-present', 'sql', 'There are at least 3 survey points present::::ITALIANO',
+values('survey-points-present', 'sql', 'There are at least 3 survey points present::::Devono esservi almeno 3 punti di controllo',
  '#{id}(transaction_id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -383,7 +383,7 @@ values('survey-points-present', now(), 'infinity',
 
 --------------Check there are target parcels attached with the cadastre change (CRITICAL)
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('target-parcels-present', 'sql', 'There are target parcels selected::::ITALIANO',
+values('target-parcels-present', 'sql', 'There are target parcels selected::::Esistono particelle originarie selezionate',
  '#{id}(transaction_id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -392,7 +392,7 @@ values('target-parcels-present', now(), 'infinity',
 
 --------------Check there are documents (sources) attached with the cadastre change (WARNING)
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('documents-present', 'sql', 'There are documents/ sources attached::::ITALIANO',
+values('documents-present', 'sql', 'There are documents/ sources attached::::Vi sono documenti allegati',
  '#{id}(transaction_id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -401,7 +401,7 @@ values('documents-present', now(), 'infinity',
 
 --------------Check there are new cadastral objects with the cadastre change (WARNING)
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('new-cadastre-objects-present', 'sql', 'There are new cadastral objects defined::::ITALIANO',
+values('new-cadastre-objects-present', 'sql', 'There are new cadastral objects defined::::Vi sono nuovi oggetti catastali definiti',
  '#{id}(transaction_id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -411,7 +411,7 @@ values('new-cadastre-objects-present', now(), 'infinity',
 
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('source-attach-in-transaction-no-pendings', 'sql', 'Source must not have pending status::::ITALIANO',
+values('source-attach-in-transaction-no-pendings', 'sql', 'Source must not have pending status::::Documento non deve avere stato pendente',
  '#{id} of the source is requested. It checks if the source has already a record with the status pending.');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -423,7 +423,7 @@ where la_nr in (select la_nr
 and status_code is not null and status_code in (''pending'')');
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('source-attach-in-transaction-allowed-type', 'sql', 'Source must be of a type for which the transaction is allowed::::ITALIANO',
+values('source-attach-in-transaction-allowed-type', 'sql', 'Source must be of a type for which the transaction is allowed::::Documento deve essrer di tipo consentito per la transazione',
  '#{id} of the source is requested. It checks if the source has a type which has the has_status attribute true.');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -437,7 +437,7 @@ where id= #{id}
 -------------Start ba_unit and other business rules - Neil 01 November 2011-------------------------
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('baunit-check-name', 'sql', 'Invalid identifier for title::::ITALIANO',
+values('baunit-check-name', 'sql', 'Invalid identifier for title::::Invalido titolo ientificativo',
  '#{id}(administrative.ba_unit.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -451,7 +451,7 @@ WHERE id= #{id}
 	OR TO_NUMBER(name_lastpart, ''9999'') = 0');
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('application-check-no-previous-digital-title-service', 'sql', 'Checks to see if a digital title already exists for requested property::::ITALIANO',
+values('application-check-no-previous-digital-title-service', 'sql', 'Checks to see if a digital title already exists for requested property::::Controllare se esiste un titolo digita per la proprieta richiesta',
  '#{id}(application.application.id) is requested where service is for newDigitalTitle or newDigitalProperty');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -464,7 +464,7 @@ WHERE application.application_property.application_id = #{id}
 	AND administrative.rrr.is_primary');
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('mortgage-value-check', 'sql', 'Mortgage is for more than reported value::::ITALIANO',
+values('mortgage-value-check', 'sql', 'Mortgage is for more than reported value::::Ipoteca superiore al valore riportato',
  '#{id}(application.application.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -475,7 +475,7 @@ values('mortgage-value-check', now(), 'infinity',
 WHERE application.application_property.application_id = #{id}');
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('ba_unit_shares-total-check', 'sql', 'Shares do not total to 1::::ITALIANO',
+values('ba_unit_shares-total-check', 'sql', 'Shares do not total to 1::::Quote non raggiungono 1',
  '#{id}(administrative.ba_unit.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -489,7 +489,7 @@ AND administrative.rrr.is_primary
 AND administrative.rrr.status_code != ''cancelled''');
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('current-caveat-check', 'sql', 'There is a current caveat registered on this title::::ITALIANO',
+values('current-caveat-check', 'sql', 'There is a current caveat registered on this title::::Esiste un diritto di prelazione registrato su questo titolo',
  '#{id}(administrative.ba_unit.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -500,7 +500,7 @@ AND type_code = ''caveat''
 AND status_code != ''cancelled''');
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('current-caveat-and-no-withdrawal-or-waiver', 'sql', 'There is a current caveat registered on this title and application does not include withdrawal or waiver document::::ITALIANO',
+values('current-caveat-and-no-withdrawal-or-waiver', 'sql', 'There is a current caveat registered on this title and application does not include withdrawal or waiver document::::Esiste un diritto di prelazione registrato su questo titolo e la pratica non include un documento per il ritiro o deroga ',
  '#{id}(administrative.ba_unit.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -517,7 +517,7 @@ WHERE administrative.rrr.ba_unit_id = #{id}
 	AND source.source.type_code = ''waiver''');
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('current-rrr-for-variation-or-cancellation-check', 'sql', 'Title includes no current right or restriction (apart from primary right). Confirm request for variation or cancellation and check title identifier::::ITALIANO',
+values('current-rrr-for-variation-or-cancellation-check', 'sql', 'Title includes no current right or restriction (apart from primary right). Confirm request for variation or cancellation and check title identifier::::Il titolo non include diritti o restrizioni correnti (oltre al diritto primario). Confermare la richiesta di variazione o cancellazione e verificare il titolo identificativo',
  '#{id}(application.application.id) is requested where there is a service that varies or extinguishes an existing rrr');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -530,7 +530,7 @@ WHERE application.application.id = #{id}
 AND administrative.rrr.status_code = ''current''');
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('applicant-name-to-owner-name-check', 'sql', 'Applicant name is different from current recorded owners::::ITALIANO',
+values('applicant-name-to-owner-name-check', 'sql', 'Applicant name is different from current recorded owners::::Il nome del richiedente differisce da quello dei proprietari registrati',
  '#{id}(application.application.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -558,7 +558,7 @@ WHERE application.application.id = #{id}
 	   AND party.party_role.type_code = ''applicant'')');
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('applicant-identification-check', 'sql', 'No personal identification details recorded for application::::ITALIANO',
+values('applicant-identification-check', 'sql', 'No personal identification details recorded for application::::Non esistono dettagli identificativi registrati per la pratica',
  '#{id}(application.application.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -568,7 +568,7 @@ values('applicant-identification-check', now(), 'infinity',
 WHERE application.application.id = #{id}');
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('baunit-has-multiple-mortgages', 'sql', 'Title already has current mortgage::::ITALIANO',
+values('baunit-has-multiple-mortgages', 'sql', 'Title already has current mortgage::::Il titolo ha una ipoteca corrente',
  '#{id}(administrative.ba_unit.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -580,7 +580,7 @@ WHERE ba_unit_id = #{id}
 	AND id IN (SELECT id FROM administrative.rrr WHERE ba_unit_id = #{id} AND type_code = ''mortgage'' AND status_code = ''pending'')');
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('baunit-has-several-mortgages-with-same-rank', 'sql', 'Title already has a current mortgage with this ranking::::ITALIANO',
+values('baunit-has-several-mortgages-with-same-rank', 'sql', 'Title already has a current mortgage with this ranking::::Il titolo ha gia una ipoteca con lo stesso ordine priorita',
  '#{id}(administrative.ba_unit.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -598,7 +598,7 @@ values('baunit-has-several-mortgages-with-same-rank', now(), 'infinity',
  AND    rrr2.id != rrr1.id');
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('baunit-has-primary-right', 'sql', 'Title must have a primary right::::ITALIANO',
+values('baunit-has-primary-right', 'sql', 'Title must have a primary right::::Il titolo deve avere un diritto primario',
  '#{id}(administrative.ba_unit.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -609,7 +609,7 @@ WHERE ba_unit_id = #{id}
 	AND status_code != ''cancelled''');
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('baunit-area-compares-to-related-parcel-area', 'sql', 'Title area differs from parcel area(s) by more than 1%::::ITALIANO',
+values('baunit-area-compares-to-related-parcel-area', 'sql', 'Title area differs from parcel area(s) by more than 1%::::Area riportata nel titolo differisce da quella delle particelle per piu del 1%',
  '#{id}(administrative.ba_unit.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -627,7 +627,7 @@ WHERE administrative.ba_unit.id = #{id}
 	AND cadastre.spatial_value_area.type_code = ''officialArea''');		   
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('baunit-has-cadastre-object-check', 'sql', 'Title must have an associated parcel (or cadastre object)::::ITALIANO',
+values('baunit-has-cadastre-object-check', 'sql', 'Title must have an associated parcel (or cadastre object)::::Il titolo deve avere una particella (o altro oggetto catastale)',
  '#{id}(administrative.ba_unit.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -639,7 +639,7 @@ values('baunit-has-cadastre-object-check', now(), 'infinity',
 WHERE administrative.ba_unit.id = #{id}');		   
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('baunit-has-compatible-cadastre-object', 'sql', 'Title appears to have incompatible parcel (or cadastre object)::::ITALIANO',
+values('baunit-has-compatible-cadastre-object', 'sql', 'Title appears to have incompatible parcel (or cadastre object)::::Il titolo ha particelle (oggetti catastali) incompatibili',
  '#{id}(administrative.ba_unit.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -655,7 +655,7 @@ WHERE administrative.ba_unit.id = #{id}
 	AND cadastre.cadastre_object.type_code = ''parcel''');	
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('cadastre-object-check-name', 'sql', 'Invalid identifier for parcel (cadastre object)::::ITALIANO',
+values('cadastre-object-check-name', 'sql', 'Invalid identifier for parcel (cadastre object)::::Identificativo per la particella (oggetto catastale) invalido',
  '#{id}(cadastre.cadastre_object.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -672,7 +672,7 @@ WHERE transaction_id = #{id} and type_code = ''parcel''
 -------------Start application business rules - Neil 18 November 2011-------------------------
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('app-baunit-name-check', 'sql', 'Invalid identifier for title::::ITALIANO',
+values('app-baunit-name-check', 'sql', 'Invalid identifier for title::::Identificativo titolo invalido',
  '#{id}(application.application.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -686,7 +686,7 @@ WHERE application_id= #{id}
 	OR TO_NUMBER(name_lastpart, ''9999'') = 0');
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('app-shares-total-check', 'sql', 'Shares do not total to 1::::ITALIANO',
+values('app-shares-total-check', 'sql', 'Shares do not total to 1::::Le quote non raggiungono 1',
  '#{id}(application.application.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -701,7 +701,7 @@ AND administrative.rrr.is_primary
 AND administrative.rrr.status_code != ''cancelled''');
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('app-current-caveat-check', 'sql', 'There is a current caveat registered on the title for this application::::ITALIANO',
+values('app-current-caveat-check', 'sql', 'There is a current caveat registered on the title for this application::::Esiste un diritto di prelazione registrato su questo titolo ',
  '#{id}(application.application.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -714,7 +714,7 @@ AND administrative.rrr.type_code = ''caveat''
 AND administrative.rrr.status_code != ''cancelled''');
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('app-current-caveat-and-no-withdrawal-or-waiver', 'sql', 'There is a current caveat registered on this title and application does not include withdrawal or waiver document::::ITALIANO',
+values('app-current-caveat-and-no-withdrawal-or-waiver', 'sql', 'There is a current caveat registered on this title and application does not include withdrawal or waiver document::::Esiste un diritto di prelazione registrato su questo titolo e la pratica non include un documento per il ritiro o deroga',
  '#{id}(application.application.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -731,7 +731,7 @@ WHERE application.application_property.application_id = #{id}
 	AND source.source.type_code = ''waiver''');
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('app-for-title-with-mortgage', 'sql', 'Title already has current mortgage::::ITALIANO',
+values('app-for-title-with-mortgage', 'sql', 'Title already has current mortgage::::Il titolo ha una ipoteca corrente',
  '#{id}(application.application.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -747,7 +747,7 @@ WHERE application.application_property.application_id = #{id}
 		WHERE application_id = #{id} AND type_code = ''mortgage'' AND status_code = ''pending'')');
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('app-has-title-several-mortgages-with-same-rank', 'sql', 'Title already has a current mortgage with this ranking::::ITALIANO',
+values('app-has-title-several-mortgages-with-same-rank', 'sql', 'Title already has a current mortgage with this ranking::::Il titolo ha una ipoteca corrente con lo stesso grado di priorita',
  '#{id}(application.application.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -763,7 +763,7 @@ WHERE type_code = ''mortgage''
 			AND status_code = ''pending'')');
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('app-title-has-primary-right', 'sql', 'Title that is part of this application must have a primary right::::ITALIANO',
+values('app-title-has-primary-right', 'sql', 'Title that is part of this application must have a primary right::::Il titolo deve avere un diritto primario',
  '#{id}(application.application.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -776,7 +776,7 @@ WHERE application_id = #{id}
 	AND rrr.status_code != ''historic''');
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('app-area-comparison', 'sql', 'Title area differs from parcel area(s) by more than 1%::::ITALIANO',
+values('app-area-comparison', 'sql', 'Title area differs from parcel area(s) by more than 1%::::Area indicata nel titolo differisce da quella delle particelle per piu del 1%',
  '#{id}(application.application.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -795,7 +795,7 @@ WHERE application.application_property.application_id = #{id}
 	AND cadastre.spatial_value_area.type_code = ''officialArea''');
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('app-title-has-cadastre-object', 'sql', 'Title must have an associated parcel (or cadastre object)::::ITALIANO',
+values('app-title-has-cadastre-object', 'sql', 'Title must have an associated parcel (or cadastre object)::::Il titolo deve avere particelle (oggetti catastali) associati',
  '#{id}(application.application.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -809,7 +809,7 @@ FROM administrative.ba_unit
 WHERE application.application_property.application_id = #{id}');
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('app-title-has-compatible-cadastre-object', 'sql', 'Title appears to have incompatible parcel (or cadastre object)::::ITALIANO',
+values('app-title-has-compatible-cadastre-object', 'sql', 'Title appears to have incompatible parcel (or cadastre object)::::Il titolo ha particelle (oggetti catastali) incompatibili',
  '#{id}(application.application.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -827,7 +827,7 @@ WHERE application.application_property.application_id = #{id}
 	AND cadastre.cadastre_object.type_code = ''parcel''');
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('app-cadastre-object-name', 'sql', 'Invalid identifier for parcel (cadastre object)::::ITALIANO',
+values('app-cadastre-object-name', 'sql', 'Invalid identifier for parcel (cadastre object)::::Identificativo per particelle (oggetti catastali) invalido',
  '#{id}(application.application.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -848,7 +848,7 @@ WHERE application.application_property.application_id = #{id}
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
 values('cadastre-redefinition-union-old-new-the-same', 'sql', 
-    'The union of the new polygons must be the same with the union of the old polygons::::ITALIANO',
+    'The union of the new polygons must be the same with the union of the old polygons::::La unione dei nuovi poligoni deve esser la stessa di quella dei vecchi poligoni',
  '#{id} is the parameter asked. It is the transaction id.');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -867,7 +867,7 @@ where transaction_id = #{id}),
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
 values('cadastre-redefinition-target-geometries-dont-overlap', 'sql', 
-    'New polygons do not overlap with each other.::::ITALIANO',
+    'New polygons do not overlap with each other.::::I nuovi poligoni non devono sovrapporsi',
  '#{id} is the parameter asked. It is the transaction id.');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
