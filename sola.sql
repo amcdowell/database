@@ -5796,6 +5796,26 @@ CREATE TRIGGER trg_geommodify before insert or update
 insert into system.approle_appgroup (approle_code, appgroup_id)
 SELECT r.code, 'super-group-id' FROM system.approle r 
 where r.code not in (select approle_code from system.approle_appgroup g where appgroup_id = 'super-group-id');
+
+--Make the function ST_MakeBox3D(geometry, geometry) RETURNS box3d if it does not exist. The function does not exist if Postgis 2.0 is used
+
+create or replace function make_function_ST_MakeBox3D() returns void
+as 
+$$
+begin
+  if (select count(*)=0 from pg_proc where proname='st_makebox3d') then
+    CREATE OR REPLACE FUNCTION ST_MakeBox3D(geometry, geometry)
+      RETURNS box3d AS 'SELECT ST_3DMakeBox($1, $2)'
+    LANGUAGE 'sql' IMMUTABLE STRICT;
+  end if;
+end;
+$$
+language 'plpgsql';
+
+
+select make_function_ST_MakeBox3D();
+
+drop function make_function_ST_MakeBox3D();
 -------View cadastre.survey_control ---------
 DROP VIEW IF EXISTS cadastre.survey_control CASCADE;
 CREATE VIEW cadastre.survey_control AS SELECT su.id, su.label, su.geom
