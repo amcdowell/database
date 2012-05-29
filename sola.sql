@@ -5803,11 +5803,11 @@ create or replace function make_function_ST_MakeBox3D() returns void
 as
 $$
 begin
- if (select count(*)=0 from pg_proc where proname='st_makebox3d') then
-   CREATE OR REPLACE FUNCTION ST_MakeBox3D(geometry, geometry)
-     RETURNS box3d AS 'SELECT ST_3DMakeBox($1, $2)'
-   LANGUAGE 'sql' IMMUTABLE STRICT;
- end if;
+  if (select count(*)=0 from pg_proc where proname='st_makebox3d') then
+    CREATE OR REPLACE FUNCTION ST_MakeBox3D(geometry, geometry)
+      RETURNS box3d AS 'SELECT ST_3DMakeBox($1, $2)'
+    LANGUAGE 'sql' IMMUTABLE STRICT;
+  end if;
 end;
 $$
 language 'plpgsql';
