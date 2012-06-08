@@ -81,7 +81,9 @@ insert into system.br_definition(br_id, active_from, active_until, body)
 values('application-br1-check-required-sources-are-present', now(), 'infinity', 
 'select count(*) =0  as vl
 from application.request_type_requires_source_type r_s 
-where request_type_code in (select request_type_code from application.service where application_id=#{id} and status_code != ''cancelled'')
+where request_type_code in (
+  select request_type_code 
+  from application.service where application_id=#{id} and status_code != ''cancelled'')
 and not exists (
   select s.type_code
   from application.application_uses_source a_s inner join source.source s on a_s.source_id= s.id
@@ -112,11 +114,13 @@ values('application-br3-check-properties-are-not-historic', 'sql',
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('application-br3-check-properties-are-not-historic', now(), 'infinity', 
-'select count(*)=0 as vl
+'select false as vl
 from application.application_property  
 where application_id=#{id}
 and (name_firstpart, name_lastpart) 
-    in (select name_firstpart, name_lastpart from administrative.ba_unit where status_code in (''historic''))
+    in (select name_firstpart, name_lastpart 
+      from administrative.ba_unit where status_code in (''historic''))
+limit 1
 ');
 
 ----------------------------------------------------------------------------------------------------
@@ -141,7 +145,8 @@ values('application-br5-check-there-are-front-desk-services', now(), 'infinity',
 'select count(*)=0 as vl
 from application.service
 where application_id = #{id} 
-  and request_type_code in (''serviceEnquiry'', ''documentCopy'', ''cadastrePrint'', ''surveyPlanCopy'', ''titleSearch'')
+  and request_type_code in (''serviceEnquiry'', ''documentCopy'', ''cadastrePrint'', 
+    ''surveyPlanCopy'', ''titleSearch'')
 ');
 
 ----------------------------------------------------------------------------------------------------
@@ -152,7 +157,8 @@ values('application-br6-check-new-title-service-is-needed', 'sql',
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('application-br6-check-new-title-service-is-needed', now(), 'infinity', 
 'select 
-      case when count(*)=0 then (select count(*)>0 from application.service where request_type_code = ''newFreehold'')
+      case when count(*)=0 then (select count(*)>0 from application.service
+         where request_type_code = ''newFreehold'')
            else true
       end as vl
 from application.application_property  
@@ -451,7 +457,8 @@ WHERE id= #{id}
 	OR TO_NUMBER(name_lastpart, ''9999'') = 0');
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('application-check-no-previous-digital-title-service', 'sql', 'Checks to see if a digital title already exists for requested property::::Controllare se esiste un titolo digita per la proprieta richiesta',
+values('application-check-no-previous-digital-title-service', 'sql', 
+'Checks to see if a digital title already exists for requested property::::Controllare se esiste un titolo digita per la proprieta richiesta',
  '#{id}(application.application.id) is requested where service is for newDigitalTitle or newDigitalProperty');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -660,13 +667,11 @@ values('cadastre-object-check-name', 'sql', 'Invalid identifier for parcel (cada
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('cadastre-object-check-name', now(), 'infinity', 
-'Select Count(*) = 1 as vl 
+'Select cadastre.cadastre_object_name_is_valid(name_firstpart, name_lastpart) as vl 
 FROM cadastre.cadastre_object
 WHERE transaction_id = #{id} and type_code = ''parcel''
-	AND ((SUBSTRING(name_firstpart from 1 for 4) = ''Lot ''))
-	AND (SUBSTRING(name_lastpart from 1 for 3) = ''DP '') 
-	AND TO_NUMBER(SUBSTRING(name_firstpart from 5 for (CHAR_LENGTH(name_firstpart) - 4)), ''999'') > 0
-	AND TO_NUMBER(SUBSTRING(name_lastpart from 4 for POSITION('' '' IN SUBSTRING(name_lastpart from 4 for (CHAR_LENGTH(name_lastpart) - 4)))), ''9999'') > 0');	   		   
+order by 1
+limit 1');
 -------------End ba_unit and other business rules - Neil 01 November 2011-------------------------
 ----------------------------------------------------------------------------------------------------
 -------------Start application business rules - Neil 18 November 2011-------------------------
@@ -677,13 +682,11 @@ values('app-baunit-name-check', 'sql', 'Invalid identifier for title::::Identifi
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('app-baunit-name-check', now(), 'infinity', 
-'SELECT count(*) > 0 as vl 
+'SELECT administrative.ba_unit_name_is_valid(name_firstpart, name_lastpart) as vl 
 FROM application.application_property 
 WHERE application_id= #{id} 
-	AND name_firstpart IS NULL
-	OR name_lastpart IS NULL
-	OR SUBSTR(name_firstpart, 1) = ''N''
-	OR TO_NUMBER(name_lastpart, ''9999'') = 0');
+order by 1
+limit 1');
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
 values('app-shares-total-check', 'sql', 'Shares do not total to 1::::Le quote non raggiungono 1',
@@ -832,16 +835,14 @@ values('app-cadastre-object-name', 'sql', 'Invalid identifier for parcel (cadast
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('app-cadastre-object-name', now(), 'infinity', 
-'SELECT Count(*) = 1 as vl 
+'SELECT cadastre.cadastre_object_name_is_valid(cadastre.cadastre_object.name_firstpart, cadastre.cadastre_object.name_lastpart) as vl 
 FROM cadastre.cadastre_object
 	 INNER JOIN administrative.ba_unit_contains_spatial_unit ON administrative.ba_unit_contains_spatial_unit.spatial_unit_id = cadastre.cadastre_object.id
 	 INNER JOIN application.application_property ON administrative.ba_unit_contains_spatial_unit.ba_unit_id = application.application_property.ba_unit_id
 WHERE application.application_property.application_id = #{id}
 	AND cadastre.cadastre_object.type_code = ''parcel''
-	AND ((SUBSTRING(cadastre.cadastre_object.name_firstpart from 1 for 4) = ''Lot ''))
-	AND (SUBSTRING(cadastre.cadastre_object.name_lastpart from 1 for 3) = ''DP '') 
-	AND TO_NUMBER(SUBSTRING(cadastre.cadastre_object.name_firstpart from 5 for (CHAR_LENGTH(cadastre.cadastre_object.name_firstpart) - 4)), ''999'') > 0
-	AND TO_NUMBER(SUBSTRING(cadastre.cadastre_object.name_lastpart from 4 for POSITION('' '' IN SUBSTRING(cadastre.cadastre_object.name_lastpart from 4 for (CHAR_LENGTH(cadastre.cadastre_object.name_lastpart) - 4)))), ''9999'') > 0');	   		   
+order by 1
+limit 1');
 -------------End application business rules - Neil 18 November 2011-------------------------
 
 ----Business rules that are used for the cadastre redefinition--------------------------------------
@@ -1183,8 +1184,8 @@ values('baunit-has-compatible-cadastre-object', 'medium', 'current', 'ba_unit', 
 
 -------------End ba_unit and other business Validation Rules - Neil 01 November 2011-------------------------
 -------------Start application Validation Rules - Neil 18 November 2011-------------------------
---insert into system.br_validation(br_id, severity_code, moment_code, target_code, order_of_execution) 
---values('application-valid-property-name', 'app-baunit-name-check', 'medium', 'start', 'application', 9);
+insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
+values( 'app-baunit-name-check', 'medium', 'validate', 'application', 9);
 
 insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
 values('app-shares-total-check', 'critical', 'validate', 'application', 16);
