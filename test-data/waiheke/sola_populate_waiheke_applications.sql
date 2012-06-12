@@ -47,7 +47,7 @@ FROM testdata.application_
 WHERE id NOT IN (SELECT id FROM application.application);
 
 INSERT INTO application.service (id, application_id, request_type_code, lodging_datetime, expected_completion_date, service_order, status_code, action_code, change_user)
-SELECT id, application_id, request_type_code, now(), now(), service_order, 'lodged' AS status_code, 'lodge' AS ac_code, 'test' AS ch_user 
+SELECT id, application_id, case when request_type_code='mortgageCertificate' then 'varyMortgage' else request_type_code end, now(), now(), service_order, 'lodged' AS status_code, 'lodge' AS ac_code, 'test' AS ch_user 
 FROM testdata.service_
 WHERE application_id IN (SELECT id FROM application.application)
 AND id NOT IN (SELECT id FROM application.service); 

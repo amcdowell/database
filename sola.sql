@@ -5820,11 +5820,13 @@ drop function make_function_ST_MakeBox3D();
 --This function is used to multiply values from a set or rows. It is used to sum the shares.
 --Based in an example found in http://a-kretschmer.de/diverses.shtml
 
+DROP FUNCTION IF EXISTS multiply_agg_step(int,int) CASCADE;
 CREATE FUNCTION multiply_agg_step(int,int) RETURNS int 
 AS ' select $1 * $2; ' 
 language sql IMMUTABLE STRICT; 
 
-CREATE AGGREGATE multiply_agg (basetype=int, sfunc=multiply_agg_step, stype=int, initcond=1 ) 
+CREATE AGGREGATE multiply_agg (basetype=int, sfunc=multiply_agg_step, stype=int, initcond=1 ) ;
+
 -------View cadastre.survey_control ---------
 DROP VIEW IF EXISTS cadastre.survey_control CASCADE;
 CREATE VIEW cadastre.survey_control AS SELECT su.id, su.label, su.geom
