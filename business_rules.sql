@@ -120,6 +120,7 @@ where application_id=#{id}
 and (name_firstpart, name_lastpart) 
     in (select name_firstpart, name_lastpart 
       from administrative.ba_unit where status_code in (''historic''))
+order by 1
 limit 1
 ');
 
@@ -468,6 +469,7 @@ FROM application.service s inner join application.application_property ap on s.a
   INNER JOIN administrative.ba_unit ba ON (ap.name_firstpart, ap.name_lastpart) = (ba.name_firstpart, ba.name_lastpart)
   LEFT JOIN administrative.rrr ON rrr.ba_unit_id = ba.id
 WHERE s.id = #{id} 
+order by coalesce(not rrr.is_primary, true) desc
 limit 1');
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
