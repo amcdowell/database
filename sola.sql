@@ -2827,7 +2827,7 @@ Not Applicable';
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('cadastreChange', 'registrationServices', 'Change to Cadastre::::Cambio del Catasto', 'c', 30, 25.00, 0.10, 0, 1);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('redefineCadastre', 'registrationServices', 'Redefine Cadastre::::ITALIANO', 'c', 30, 25.00, 0.10, 0, 1);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('documentCopy', 'informationServices', 'Document Copy::::Copia Documento', 'c', 1, 0.50, 0.00, 0, 0);
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('mortgageCertificate', 'registrationServices', 'Mortgage Certificate::::Certiificato Ipoteca', 'x', 1, 5.00, 0.00, 0, 1, 'Mortgage Certificate issued', 'mortgage', 'vary');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('varyMortgage', 'registrationServices', 'Vary Certificate::::ITALIANO', 'c', 1, 5.00, 0.00, 0, 1, 'Change on the mortgage', 'mortgage', 'vary');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template) values('newFreehold', 'registrationServices', 'New Freehold Title::::Nuovo Titolo', 'c', 5, 5.00, 0.00, 0, 1, 'Fee Simple Estate');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('serviceEnquiry', 'informationServices', 'Service Enquiry::::Richiesta Servizio', 'c', 1, 0.00, 0.00, 0, 0);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('regnDeeds', 'registrationServices', 'Deed Registration::::Registrazione Atto', 'x', 3, 1.00, 0.00, 0, 0);
@@ -3637,8 +3637,8 @@ Not Applicable';
  -- Data for the table application.request_type_requires_source_type -- 
 insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('cadastralSurvey', 'cadastreChange');
 insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('cadastralSurvey', 'redefineCadastre');
-insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('mortgage', 'mortgageCertificate');
-insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('title', 'mortgageCertificate');
+insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('mortgage', 'varyMortgage');
+insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('title', 'varyMortgage');
 insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('title', 'regnOnTitle');
 insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('deed', 'regnDeeds');
 insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('lease', 'registerLease');
@@ -4021,7 +4021,7 @@ CREATE TABLE system.br_validation(
     CONSTRAINT br_validation_service_request_type_valid CHECK (target_request_type_code is null or (target_request_type_code is not null and target_code != 'application')),
     CONSTRAINT br_validation_rrr_rrr_type_valid CHECK (target_rrr_type_code is null or (target_rrr_type_code is not null and target_code = 'rrr')),
     CONSTRAINT br_validation_app_moment_unique UNIQUE (br_id, target_code, target_application_moment),
-    CONSTRAINT br_validation_service_moment_unique UNIQUE (br_id, target_code, target_service_moment),
+    CONSTRAINT br_validation_service_moment_unique UNIQUE (br_id, target_code, target_service_moment, target_request_type_code),
     CONSTRAINT br_validation_reg_moment_unique UNIQUE (br_id, target_code, target_reg_moment),
     CONSTRAINT br_validation_service_moment_valid CHECK (target_code!= 'service' or (target_code = 'service' and target_application_moment is null and target_reg_moment is null)),
     CONSTRAINT br_validation_application_moment_valid CHECK (target_code!= 'application' or (target_code = 'application' and target_service_moment is null and target_reg_moment is null)),
@@ -5816,6 +5816,15 @@ language 'plpgsql';
 select make_function_ST_MakeBox3D();
 
 drop function make_function_ST_MakeBox3D();
+
+--This function is used to multiply values from a set or rows. It is used to sum the shares.
+--Based in an example found in http://a-kretschmer.de/diverses.shtml
+
+CREATE FUNCTION multiply_agg_step(int,int) RETURNS int 
+AS ' select $1 * $2; ' 
+language sql IMMUTABLE STRICT; 
+
+CREATE AGGREGATE multiply_agg (basetype=int, sfunc=multiply_agg_step, stype=int, initcond=1 ) 
 -------View cadastre.survey_control ---------
 DROP VIEW IF EXISTS cadastre.survey_control CASCADE;
 CREATE VIEW cadastre.survey_control AS SELECT su.id, su.label, su.geom
