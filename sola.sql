@@ -761,7 +761,7 @@ AS $$
 begin
   if name_firstpart is null then return false; end if;
   if name_lastpart is null then return false; end if;
-  if name_firstpart not similar to 'Lot [0-9]+' then return false;  end if;
+  if not (name_firstpart similar to 'Lot [0-9]+' or name_firstpart similar to '[0-9]+') then return false;  end if;
   if name_lastpart not similar to '(D|S)P [0-9 ]+' then return false;  end if;
   return true;
 end;
@@ -1353,11 +1353,11 @@ CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
 DROP TABLE IF EXISTS administrative.ba_unit CASCADE;
 CREATE TABLE administrative.ba_unit(
     id varchar(40) NOT NULL,
-    type_code varchar(20) NOT NULL,
+    type_code varchar(20) NOT NULL DEFAULT ('basicPropertyUnit'),
     name varchar(255),
     name_firstpart varchar(20) NOT NULL,
     name_lastpart varchar(50) NOT NULL,
-    status_code varchar(20) NOT NULL,
+    status_code varchar(20) NOT NULL DEFAULT ('pending'),
     transaction_id varchar(40),
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
     rowversion integer NOT NULL DEFAULT (0),
@@ -1440,11 +1440,9 @@ LADM Definition
 Not Defined';
     
  -- Data for the table administrative.ba_unit_type -- 
-insert into administrative.ba_unit_type(code, display_value, status) values('basicPropertyUnit', 'Basic Property Unit::::Unita base Proprieta', 'c');
+insert into administrative.ba_unit_type(code, display_value, description, status) values('basicPropertyUnit', 'Basic Property Unit::::Unita base Proprieta', 'This is the basic property unit that is used by default', 'c');
 insert into administrative.ba_unit_type(code, display_value, status) values('leasedUnit', 'Leased Unit::::Unita Affitto', 'x');
 insert into administrative.ba_unit_type(code, display_value, status) values('propertyRightUnit', 'Property Right Unit::::Unita Diritto Proprieta', 'x');
-insert into administrative.ba_unit_type(code, display_value, description, status) values('administrativeUnit', 'Administrative Unit::::Unita Amministrativa', 'Extension to LADM', 'c');
-insert into administrative.ba_unit_type(code, display_value, description, status) values('basicParcel', 'Basic Parcel::::Particella Base', 'Extension to LADM', 'c');
 
 
 
@@ -2861,6 +2859,7 @@ insert into application.request_type(code, request_category_code, display_value,
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('newDigitalProperty', 'registrationServices', 'New Digital Property::::Nuova Proprieta Digitale', 'x', 5, 0.00, 0.00, 0, 1);
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, type_action_code) values('removeRestriction', 'registrationServices', 'Remove Restriction (General)::::ITALIANO', 'c', 5, 5.00, 0.00, 0, 1, '<restriction> <reference> cancelled', 'cancel');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, type_action_code) values('cancelProperty', 'registrationServices', 'Cancel property::::Cancella prioprieta', 'c', 5, 5, 0, 0, 1, '', 'cancel');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('varyCaveat', 'registrationServices', 'Vary caveat', 'c', 5, 5, 0, 0, 1, '<Caveat> <reference>', 'caveat', 'vary');
 
 
 
