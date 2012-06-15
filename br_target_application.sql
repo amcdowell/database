@@ -271,3 +271,6 @@ insert into system.br_validation(br_id, severity_code, target_application_moment
 values('applicant-identification-check', 'medium', 'approve', 'application', 13);
 
 ----------------------------------------------------------------------------------------------------
+
+update system.br set display_name = id where display_name !=id;
+

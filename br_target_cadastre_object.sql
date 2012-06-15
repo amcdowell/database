@@ -336,3 +336,6 @@ insert into system.br_validation(br_id, severity_code, target_reg_moment, target
 values('area-check-percentage-newareas-oldareas', 'warning', 'current', 'cadastre_object', 'cadastreChange', 12);
 
 ----------------------------------------------------------------------------------------------------
+
+update system.br set display_name = id where display_name !=id;
+

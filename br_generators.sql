@@ -35,3 +35,6 @@ values('generate-baunit-nr', now(), 'infinity',
 || ''/'' || trim(to_char(nextval(''administrative.ba_unit_last_name_part_seq''), ''0000'')) AS vl');
 
 ----------------------------------------------------------------------------------------------------
+
+update system.br set display_name = id where display_name !=id;
+

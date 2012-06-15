@@ -32,3 +32,5 @@ insert into system.br_validation(br_id, severity_code, target_reg_moment, target
 values('source-attach-in-transaction-allowed-type', 'critical', 'pending', 'source', 2);
 
 ----------------------------------------------------------------------------------------------------
+
+update system.br set display_name = id where display_name !=id;

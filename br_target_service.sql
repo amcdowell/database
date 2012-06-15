@@ -92,3 +92,5 @@ insert into system.br_validation(br_id, severity_code, target_service_moment, ta
 values('current-rrr-for-variation-or-cancellation-check', 'medium', 'complete', 'service', 11);
 
 ----------------------------------------------------------------------------------------------------
+
+--update system.br set display_name = id where display_name is null;
