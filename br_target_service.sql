@@ -36,8 +36,8 @@ values('baunit-has-multiple-mortgages', 'sql', 'Title already has current mortga
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('baunit-has-multiple-mortgages', now(), 'infinity', 
-'SELECT (select rrr.status_code =''current'' from administrative.rrr 
-  where rrr.ba_unit_id = ba.id and rrr.type_code= ''mortgage'') AS vl 
+'SELECT (select count(*)=0 from administrative.rrr 
+  where rrr.ba_unit_id = ba.id and rrr.type_code= ''mortgage'' and rrr.status_code =''current'' ) AS vl 
   from application.service s inner join application.application_property ap on s.application_id = ap.application_id 
  INNER JOIN administrative.ba_unit ba ON (ap.name_firstpart, ap.name_lastpart) = (ba.name_firstpart, ba.name_lastpart)
 WHERE s.id =#{id}
@@ -59,7 +59,7 @@ values('mortgage-value-check', now(), 'infinity',
   from application.service s inner join application.application_property ap on s.application_id = ap.application_id 
  INNER JOIN administrative.ba_unit ba ON (ap.name_firstpart, ap.name_lastpart) = (ba.name_firstpart, ba.name_lastpart)
  INNER JOIN administrative.rrr ON rrr.ba_unit_id = ba.id
-WHERE s.id = #{id} and rrr.type_code= ''mortgage'' and rrr.status_code in (''current'', ''pending'')
+WHERE s.id = #{id} and rrr.type_code= ''mortgage'' and rrr.status_code in (''pending'')
 order by 1
 limit 1');
 

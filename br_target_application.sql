@@ -185,30 +185,8 @@ limit 1');
 insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
 values('app-current-caveat-and-no-remove-or-vary', 'medium', 'validate', 'application', 1);
 
-insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-values('app-current-caveat-and-no-remove-or-vary', 'critical', null, 'application', 21);
-
 ----------------------------------------------------------------------------------------------------
-insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('app-has-title-several-mortgages-with-same-rank', 'sql', 'Title already has a current mortgage with this ranking::::Il titolo ha una ipoteca corrente con lo stesso grado di priorita',
- '#{id}(application.application.id) is requested');
 
-insert into system.br_definition(br_id, active_from, active_until, body) 
-values('app-has-title-several-mortgages-with-same-rank', now(), 'infinity', 
-'SELECT COUNT(*) > 0 as vl FROM administrative.rrr 
-WHERE type_code = ''mortgage''
-	AND status_code != ''cancelled''
-	AND administrative.rrr.id || to_char(mortgage_ranking, ''999'') IN 
-		(SELECT administrative.rrr.id || to_char(mortgage_ranking, ''999'') FROM administrative.rrr 
-			INNER JOIN application.application_property ON administrative.rrr.ba_unit_id = application.application_property.ba_unit_id
-		WHERE application_id = #{id}
-			AND type_code = ''mortgage'' 
-			AND status_code = ''pending'')');
-
-insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-values('app-has-title-several-mortgages-with-same-rank', 'critical', null, 'application', 19);
-
-----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
 values('app-title-has-primary-right', 'sql', 'Title that is part of this application must have a primary right::::Il titolo deve avere un diritto primario',
  '#{id}(application.application.id) is requested');
@@ -222,7 +200,7 @@ from application.application_property ap
 where ap.application_id = #{id}
   and ap.application_id in 
     (select application_id from application.service s
-      where s.application_id= #{id} and request_type_code not 
+      where s.application_id= #{id} and s.status_code != ''cancelled'' and request_type_code not 
         in (''newFreeHold'', ''newApartment'', ''newState'', ''newDigitalProperty'', ''newDigitalTitle''))
 order by 1
 limit 1');

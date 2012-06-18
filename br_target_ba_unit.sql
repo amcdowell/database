@@ -160,14 +160,14 @@ select (
 ) = 0 as vl
 ');
 
-insert into system.br_validation(br_id, severity_code, target_reg_moment, target_request_type_code, target_code, order_of_execution) 
-values('newtitle-br24-check-rrr-accounted', 'critical', 'current', 'newFreehold', 'rrr', 10);
+--insert into system.br_validation(br_id, severity_code, target_reg_moment, target_request_type_code, target_code, order_of_execution) 
+--values('newtitle-br24-check-rrr-accounted', 'critical', 'current', 'newFreehold', 'rrr', 10);
 
-insert into system.br_validation(br_id, severity_code,  target_request_type_code, target_code, order_of_execution) 
-values('newtitle-br24-check-rrr-accounted', 'critical',  'newApartment', 'rrr', 10);
+--insert into system.br_validation(br_id, severity_code,  target_request_type_code, target_code, order_of_execution) 
+--values('newtitle-br24-check-rrr-accounted', 'critical',  'newApartment', 'rrr', 10);
 
-insert into system.br_validation(br_id, severity_code, target_request_type_code, target_code, order_of_execution) 
-values('newtitle-br24-check-rrr-accounted', 'critical', 'newOwnership', 'rrr', 10);
+--insert into system.br_validation(br_id, severity_code, target_request_type_code, target_code, order_of_execution) 
+--values('newtitle-br24-check-rrr-accounted', 'critical', 'newOwnership', 'rrr', 10);
 
 ----------------------------------------------------------------------------------------------------
 
@@ -187,14 +187,14 @@ and transaction.transaction.status_code=''pending''
 and administrative.ba_unit_target.ba_unit_id  = #{id}
 ');
 
-insert into system.br_validation(br_id, severity_code, target_reg_moment, target_request_type_code, target_code, order_of_execution) 
-values('newtitle-brNew-check-pending-transaction', 'critical', 'current', 'newFreehold', 'rrr', 18);
+--insert into system.br_validation(br_id, severity_code, target_reg_moment, target_request_type_code, target_code, order_of_execution) 
+--values('newtitle-brNew-check-pending-transaction', 'critical', 'current', 'newFreehold', 'rrr', 18);
 
-insert into system.br_validation(br_id, severity_code,  target_request_type_code, target_code, order_of_execution) 
-values('newtitle-brNew-check-pending-transaction', 'critical',  'newApartment', 'rrr', 18);
+--insert into system.br_validation(br_id, severity_code,  target_request_type_code, target_code, order_of_execution) 
+--values('newtitle-brNew-check-pending-transaction', 'critical',  'newApartment', 'rrr', 18);
 
-insert into system.br_validation(br_id, severity_code, target_request_type_code, target_code, order_of_execution) 
-values('newtitle-brNew-check-pending-transaction', 'critical', 'newOwnership', 'rrr', 18);
+--insert into system.br_validation(br_id, severity_code, target_request_type_code, target_code, order_of_execution) 
+--values('newtitle-brNew-check-pending-transaction', 'critical', 'newOwnership', 'rrr', 18);
 
 ----------------------------------------------------------------------------------------------------
 
