@@ -61,28 +61,6 @@ insert into system.br_validation(br_id, severity_code, target_reg_moment, target
 values('ba_unit-spatial_unit-area-comparison', 'medium', 'current', 'ba_unit', 2);
 
 ----------------------------------------------------------------------------------------------------
-insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('baunit-has-several-mortgages-with-same-rank', 'sql', 'Title already has a current mortgage with this ranking::::Il titolo ha gia una ipoteca con lo stesso ordine priorita',
- '#{id}(administrative.ba_unit.id) is requested');
-
-insert into system.br_definition(br_id, active_from, active_until, body) 
-values('baunit-has-several-mortgages-with-same-rank', now(), 'infinity', 
-'SELECT COUNT(*) = 0 as vl 
- FROM   administrative.rrr rrr1,
-        administrative.rrr rrr2
- WHERE  rrr1.type_code = ''mortgage''
- AND    rrr1.status_code != ''cancelled''
- AND    rrr1.ba_unit_id = #{id}
- AND    rrr2.ba_unit_id = rrr1.ba_unit_id
- AND    rrr2.type_code = rrr1.type_code
- AND    rrr2.status_code = ''pending''
- AND    rrr2.mortgage_ranking = rrr1.mortgage_ranking
- AND    rrr2.id != rrr1.id');
-
-insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
-values('baunit-has-several-mortgages-with-same-rank', 'critical', 'current', 'ba_unit', 1);
-
-----------------------------------------------------------------------------------------------------
 
 insert into system.br(id, technical_type_code, feedback, technical_description) 
 values('baunit-has-primary-right', 'sql', 'Title must have a primary right::::Il titolo deve avere un diritto primario',
@@ -90,10 +68,10 @@ values('baunit-has-primary-right', 'sql', 'Title must have a primary right::::Il
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('baunit-has-primary-right', now(), 'infinity', 
-'SELECT COUNT(*) = 1 as vl FROM administrative.rrr 
+'SELECT COUNT(*) > 0 as vl FROM administrative.rrr 
 WHERE ba_unit_id = #{id}
 	AND is_primary
-	AND status_code != ''cancelled''');
+	AND status_code in (''pending'', ''current'')');
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
 values('baunit-has-primary-right', 'critical', 'current', 'ba_unit', 6);
@@ -172,30 +150,29 @@ select (
 ----------------------------------------------------------------------------------------------------
 
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('newtitle-brNew-check-pending-transaction', 'sql', 
-'property/title should have only one pending transaction::::per ogni titolo/proprieta deve esserci solo una transazione in corso',
- '#{id}(baunit_id) is requested. Check there is only one pending transaction per property/title [ba_unit_id] (Critical if > 0)');
+values('target-ba_unit-check-if-pending', 'sql', 
+'There are no pending edits for target title::::ITALIANO',
+ '#{id}(baunit_id) is requested. It checks if there is no pending transaction for target ba_unit.
+ It checks if the administrative.ba_unit_target has a record of this ba_unit which is different
+ from the transaction that is targeting ba_unit and that record is of a transaction not approved yet
+ and if the ba_unit has an rrr which is pending.');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
-values('newtitle-brNew-check-pending-transaction', now(), 'infinity', 
+values('target-ba_unit-check-if-pending', now(), 'infinity', 
 '
-select count (*) <= 1 as vl
-from administrative.ba_unit_target,
-transaction.transaction
-where administrative.ba_unit_target.transaction_id = transaction.transaction.id
-and transaction.transaction.status_code=''pending''
-and administrative.ba_unit_target.ba_unit_id  = #{id}
-');
+select (select count(*) =0
+  from administrative.ba_unit_target ba_t2 inner join transaction.transaction t 
+    on ba_t2.transaction_id= t.id and t.status_code != ''approved''
+  where ba_t2.ba_unit_id= ba_t.ba_unit_id and ba_t2.transaction_id!= ba_t.transaction_id)
+  and (select count(*)= 0 from administrative.rrr 
+    where ba_t.ba_unit_id= rrr.ba_unit_id and rrr.status_code = ''pending'') as vl
+from administrative.ba_unit_target ba_t
+where ba_t.ba_unit_id = #{id}
+order by 1
+limit 1');
 
---insert into system.br_validation(br_id, severity_code, target_reg_moment, target_request_type_code, target_code, order_of_execution) 
---values('newtitle-brNew-check-pending-transaction', 'critical', 'current', 'newFreehold', 'rrr', 18);
-
---insert into system.br_validation(br_id, severity_code,  target_request_type_code, target_code, order_of_execution) 
---values('newtitle-brNew-check-pending-transaction', 'critical',  'newApartment', 'rrr', 18);
-
---insert into system.br_validation(br_id, severity_code, target_request_type_code, target_code, order_of_execution) 
---values('newtitle-brNew-check-pending-transaction', 'critical', 'newOwnership', 'rrr', 18);
-
+insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
+values('target-ba_unit-check-if-pending', 'critical', 'current', 'ba_unit', 18);
 ----------------------------------------------------------------------------------------------------
 
 update system.br set display_name = id where display_name !=id;
