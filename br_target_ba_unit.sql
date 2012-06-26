@@ -138,8 +138,8 @@ select (
 ) = 0 as vl
 ');
 
---insert into system.br_validation(br_id, severity_code, target_reg_moment, target_request_type_code, target_code, order_of_execution) 
---values('newtitle-br24-check-rrr-accounted', 'critical', 'current', 'newFreehold', 'rrr', 10);
+insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
+values('newtitle-br24-check-rrr-accounted', 'critical', 'current', 'ba_unit', 10);
 
 --insert into system.br_validation(br_id, severity_code,  target_request_type_code, target_code, order_of_execution) 
 --values('newtitle-br24-check-rrr-accounted', 'critical',  'newApartment', 'rrr', 10);
