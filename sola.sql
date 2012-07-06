@@ -1,4 +1,4 @@
-
+﻿
 -- Starting up the database script generation
 ALTER DATABASE sola SET bytea_output TO 'escape';
     
@@ -3385,15 +3385,15 @@ Not Applicable';
  -- Data for the table application.application_action_type -- 
 insert into application.application_action_type(code, display_value, status_to_set, status, description) values('lodge', 'Lodgement Notice Prepared::::Ricevuta della Registrazione Preparata', 'lodged', 'c', 'Lodgement notice is prepared (action is automatically logged when application details are saved for the first time::::La ricevuta della registrazione pronta');
 insert into application.application_action_type(code, display_value, status, description) values('addDocument', 'Add document::::Documenti scannerizzati allegati alla pratica', 'c', 'Scanned Documents linked to Application (action is automatically logged when a new document is saved)::::Documenti scannerizzati allegati alla pratica');
-insert into application.application_action_type(code, display_value, status_to_set, status, description) values('withdraw', 'Withdraw application::::Pratica Ritirata', 'anulled', 'c', 'Application withdrawn by Applicant (action is manually logged)::::Pratica Ritirata dal Richiedente');
-insert into application.application_action_type(code, display_value, status_to_set, status, description) values('cancel', 'Cancel application::::Pratica cancellata', 'anulled', 'c', 'Application cancelled by Land Office (action is automatically logged when application is cancelled)::::Pratica cancellata da Ufficio Territoriale');
+insert into application.application_action_type(code, display_value, status_to_set, status, description) values('withdraw', 'Withdraw application::::Pratica Ritirata', 'annulled', 'c', 'Application withdrawn by Applicant (action is manually logged)::::Pratica Ritirata dal Richiedente');
+insert into application.application_action_type(code, display_value, status_to_set, status, description) values('cancel', 'Cancel application::::Pratica cancellata', 'annulled', 'c', 'Application cancelled by Land Office (action is automatically logged when application is cancelled)::::Pratica cancellata da Ufficio Territoriale');
 insert into application.application_action_type(code, display_value, status_to_set, status, description) values('requisition', 'Requisition:::Ulteriori Informazioni domandate dal richiedente', 'requisitioned', 'c', 'Further information requested from applicant (action is manually logged)::::Ulteriori Informazioni domandate dal richiedente');
 insert into application.application_action_type(code, display_value, status, description) values('validateFailed', 'Quality Check Fails::::Controllo Qualita Fallito', 'c', 'Quality check fails (automatically logged when a critical business rule failure occurs)::::Controllo Qualita Fallito');
 insert into application.application_action_type(code, display_value, status, description) values('validatePassed', 'Quality Check Passes::::Controllo Qualita Superato', 'c', 'Quality check passes (automatically logged when business rules are run without any critical failures)::::Controllo Qualita Superato');
 insert into application.application_action_type(code, display_value, status_to_set, status, description) values('approve', 'Approve::::Approvata', 'approved', 'c', 'Application is approved (automatically logged when application is approved successively)::::Pratica approvata');
 insert into application.application_action_type(code, display_value, status_to_set, status, description) values('archive', 'Archive::::Archiviata', 'completed', 'c', 'Paper application records are archived (action is manually logged)::::I fogli della pratica sono stati archiviati');
 insert into application.application_action_type(code, display_value, status, description) values('dispatch', 'Despatch::::Inviata', 'c', 'Application documents and new land office products are sent or collected by applicant (action is manually logged)::::I documenti della pratica e i nuovi prodotti da Ufficio Territoriale sono stati spediti o ritirati dal richiedente');
-insert into application.application_action_type(code, display_value, status_to_set, status) values('lapse', 'Lapse::::ITALIANO', 'anulled', 'c');
+insert into application.application_action_type(code, display_value, status_to_set, status) values('lapse', 'Lapse::::ITALIANO', 'annulled', 'c');
 insert into application.application_action_type(code, display_value, status) values('assign', 'Assign::::ITALIANO', 'c');
 insert into application.application_action_type(code, display_value, status) values('unAssign', 'Unassign::::ITALIANO', 'c');
 insert into application.application_action_type(code, display_value, status_to_set, status) values('resubmit', 'Resubmit::::ITALIANO', 'lodged', 'c');
@@ -3696,7 +3696,7 @@ Not Applicable';
  -- Data for the table application.application_status_type -- 
 insert into application.application_status_type(code, display_value, status, description) values('lodged', 'Lodged::::Registrata', 'c', 'Application has been lodged and officially received by land office::::La pratica registrata e formalmente ricevuta da ufficio territoriale');
 insert into application.application_status_type(code, display_value, status) values('approved', 'Approved::::ITALIANO', 'c');
-insert into application.application_status_type(code, display_value, status) values('anulled', 'Anulled::::Anullato', 'c');
+insert into application.application_status_type(code, display_value, status) values('annulled', 'Annulled::::Annullato', 'c');
 insert into application.application_status_type(code, display_value, status) values('completed', 'Completed::::ITALIANO', 'c');
 insert into application.application_status_type(code, display_value, status) values('requisitioned', 'Requisitioned::::ITALIANO', 'c');
 
@@ -5833,19 +5833,19 @@ CREATE AGGREGATE multiply_agg (basetype=int, sfunc=multiply_agg_step, stype=int,
 DROP VIEW IF EXISTS cadastre.survey_control CASCADE;
 CREATE VIEW cadastre.survey_control AS SELECT su.id, su.label, su.geom
 FROM cadastre.level l, cadastre.spatial_unit su 
-WHERE l.id = su.level_id AND l.name = 'Survey Control';;
+WHERE l.id = su.level_id AND l.name = 'Survey Control';
 
 -------View cadastre.road ---------
 DROP VIEW IF EXISTS cadastre.road CASCADE;
 CREATE VIEW cadastre.road AS SELECT su.id, su.label, su.geom
 FROM cadastre.level l, cadastre.spatial_unit su 
-WHERE l.id= su.level_id AND l.name = 'Roads';;
+WHERE l.id= su.level_id AND l.name = 'Roads';
 
 -------View cadastre.place_name ---------
 DROP VIEW IF EXISTS cadastre.place_name CASCADE;
 CREATE VIEW cadastre.place_name AS SELECT su.id, su.label, su.geom
 FROM cadastre.level l, cadastre.spatial_unit su 
-WHERE l.id = su.level_id AND l.name = 'Place Names';;
+WHERE l.id = su.level_id AND l.name = 'Place Names';
 
 -------View system.user_roles ---------
 DROP VIEW IF EXISTS system.user_roles CASCADE;
@@ -5871,7 +5871,7 @@ from application.service
 union 
 select uuid_generate_v1()::varchar as id, application_id, status_code, service_order::varchar, request_type_code, change_time, 
 (select first_name || ' ' || last_name from system.appuser where id = service_historic.change_user) as user_fullname, action_notes
-from application.service_historic;;
+from application.service_historic;
 
 -------View system.br_current ---------
 DROP VIEW IF EXISTS system.br_current CASCADE;
