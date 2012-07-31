@@ -1,4 +1,4 @@
-----------------------------------------------------------------------------------------------------
+﻿----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback) 
 values('application-br8-check-has-services', 'sql', 
 'Application has at least one service attached::::La Pratica ha almeno un documento allegato');
@@ -249,6 +249,57 @@ insert into system.br_validation(br_id, severity_code, target_application_moment
 values('applicant-identification-check', 'medium', 'approve', 'application', 13);
 
 ----------------------------------------------------------------------------------------------------
+insert into system.br(id, technical_type_code, feedback, technical_description) 
+values('newtitle-br24-check-rrr-accounted', 'sql', 
+'Not all rights and restrictions have been accounted for the new title/property::::non tutti i diritti e le restrizioni sono stati trasferiti al nuovo titolo', 
+'#{id}(application_id) is requested');
+
+insert into system.br_definition(br_id, active_from, active_until, body) 
+values('newtitle-br24-check-rrr-accounted', now(), 'infinity', 
+'
+WITH 	pending_property_rrr AS (SELECT DISTINCT ON(rp.nr) rp.nr FROM administrative.rrr rp 
+				INNER JOIN transaction.transaction tn ON (rp.transaction_id = tn.id)
+				INNER JOIN application.service s ON (tn.from_service_id = s.id) 
+				INNER JOIN application.application ap ON (s.application_id = ap.id)
+				WHERE ap.id = #{id}
+				AND rp.status_code = ''pending''),
+	parent_titles	AS	(SELECT DISTINCT ON (pt.from_ba_unit_id) pt.from_ba_unit_id FROM administrative.rrr rr 
+				INNER JOIN administrative.required_relationship_baunit pt ON (rr.ba_unit_id = pt.to_ba_unit_id)
+				INNER JOIN transaction.transaction tn ON (rr.transaction_id = tn.id)
+				INNER JOIN application.service s ON (tn.from_service_id = s.id) 
+				INNER JOIN application.application ap ON (s.application_id = ap.id)
+				WHERE ap.id = #{id}),
+	new_titles	AS	(SELECT DISTINCT ON (rr.ba_unit_id) rr.ba_unit_id FROM administrative.rrr rr 
+				INNER JOIN administrative.ba_unit nt ON (rr.ba_unit_id = nt.id)
+				INNER JOIN transaction.transaction tn ON (rr.transaction_id = tn.id)
+				INNER JOIN application.service s ON (tn.from_service_id = s.id) 
+				INNER JOIN application.application ap ON (s.application_id = ap.id)
+				WHERE ap.id = #{id}),
+	newFreeholdApp	AS	(SELECT (SUM(1) > 0) AS fhCheck FROM application.service se
+				WHERE se.application_id = #{id}
+				AND se.request_type_code = ''newFreehold''),
+					
+	prior_property_rrr AS 	(SELECT DISTINCT ON(pp.nr) pp.nr FROM administrative.rrr pp 
+				WHERE pp.status_code = ''current''
+				AND pp.ba_unit_id IN (SELECT from_ba_unit_id  FROM parent_titles)),
+
+	rem_property_rrr AS	(SELECT nr FROM prior_property_rrr WHERE nr NOT IN (SELECT nr FROM pending_property_rrr))
+				
+SELECT CASE WHEN fhCheck IS TRUE THEN (SELECT sum(1) FROM rem_property_rrr) = 0
+		ELSE NULL
+	END AS vl FROM newFreeholdApp
+');
+
+insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
+values('newtitle-br24-check-rrr-accounted', 'critical', 'validate', 'application', 10);
+----------------------------------------------------------------------------------------------------
 
 update system.br set display_name = id where display_name !=id;
 
+
+--delete from system.br_validation where br_id = 'newtitle-br24-check-rrr-accounted';
+
+--delete from system.br_definition where br_id = 'newtitle-br24-check-rrr-accounted';
+
+--delete from system.br where id = 'newtitle-br24-check-rrr-accounted';
+----------------------------------------------------------------------------------------------------

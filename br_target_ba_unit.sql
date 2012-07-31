@@ -1,4 +1,4 @@
-insert into system.br(id, technical_type_code, feedback, technical_description) 
+﻿insert into system.br(id, technical_type_code, feedback, technical_description) 
 values('newtitle-br22-check-different-owners', 'sql', 
 'Owners of new properties/titles are not the same as owners of underlying properties/titles::::Gli aventi diritto delle nuove proprieta/titoli non sono gli stessi delle proprieta/titoli sottostanti',
 '#{id}(baunit_id) is requested.
@@ -108,44 +108,6 @@ limit 1');
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
 values('ba_unit-has-compatible-cadastre-object', 'medium', 'current', 'ba_unit', 4);
 
-----------------------------------------------------------------------------------------------------
-insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('newtitle-br24-check-rrr-accounted', 'sql', 
-'Not all rights and restrictions have been accounted for the new title/property::::non tutti i diritti e le restrizioni sono stati trasferiti al nuovo titolo', 
-'#{id}(baunit_id) is requested');
-
-insert into system.br_definition(br_id, active_from, active_until, body) 
-values('newtitle-br24-check-rrr-accounted', now(), 'infinity', 
-'
-with prior_property_rrr as (
-select ro.id
-from administrative.rrr ro
-where ro.ba_unit_id = #{id}
-AND ro.status_code != ''cancelled'')
-select (
- (select count (id) from prior_property_rrr)
--
-  (select count (rn.id) 
-    from administrative.rrr rn
-    where rn.ba_unit_id in
-	(select administrative.required_relationship_baunit.to_ba_unit_id
-	 from   administrative.required_relationship_baunit
-	 where  administrative.required_relationship_baunit.from_ba_unit_id = #{id})
-     and
-        rn.id in (select id from prior_property_rrr)
-  )      
-
-) = 0 as vl
-');
-
-insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
-values('newtitle-br24-check-rrr-accounted', 'critical', 'current', 'ba_unit', 10);
-
---insert into system.br_validation(br_id, severity_code,  target_request_type_code, target_code, order_of_execution) 
---values('newtitle-br24-check-rrr-accounted', 'critical',  'newApartment', 'rrr', 10);
-
---insert into system.br_validation(br_id, severity_code, target_request_type_code, target_code, order_of_execution) 
---values('newtitle-br24-check-rrr-accounted', 'critical', 'newOwnership', 'rrr', 10);
 
 ----------------------------------------------------------------------------------------------------
 
