@@ -187,6 +187,7 @@ values('app-current-caveat-and-no-remove-or-vary', 'medium', 'validate', 'applic
 
 ----------------------------------------------------------------------------------------------------
 
+
 insert into system.br(id, technical_type_code, feedback, technical_description) 
 values('app-title-has-primary-right', 'sql', 'Start title for the new title service in this application must have a primary right::::Il titolo deve avere un diritto primario',
  '#{id}(application.application.id) is requested');
