@@ -270,12 +270,13 @@ WITH 	pending_property_rrr AS (SELECT DISTINCT ON(rp.nr) rp.nr FROM administrati
 				INNER JOIN application.application ap ON (s.application_id = ap.id)
 				WHERE ap.id = #{id}
 				AND rp.status_code = ''pending''),
-	parent_titles	AS	(SELECT DISTINCT ON (pt.from_ba_unit_id) pt.from_ba_unit_id FROM administrative.rrr rr 
-				INNER JOIN administrative.required_relationship_baunit pt ON (rr.ba_unit_id = pt.to_ba_unit_id)
-				INNER JOIN transaction.transaction tn ON (rr.transaction_id = tn.id)
+								
+	parent_titles	AS	(SELECT DISTINCT ON (ba.id) ba.id AS liveTitle FROM administrative.ba_unit ba
+				INNER JOIN transaction.transaction tn ON (ba.transaction_id = tn.id)
 				INNER JOIN application.service s ON (tn.from_service_id = s.id) 
-				INNER JOIN application.application ap ON (s.application_id = ap.id)
-				WHERE ap.id = #{id}),
+				INNER JOIN administrative.required_relationship_baunit pt ON (ba.id = pt.to_ba_unit_id)
+				WHERE s.application_id = #{id}),
+				
 	new_titles	AS	(SELECT DISTINCT ON (rr.ba_unit_id) rr.ba_unit_id FROM administrative.rrr rr 
 				INNER JOIN administrative.ba_unit nt ON (rr.ba_unit_id = nt.id)
 				INNER JOIN transaction.transaction tn ON (rr.transaction_id = tn.id)
@@ -292,18 +293,93 @@ WITH 	pending_property_rrr AS (SELECT DISTINCT ON(rp.nr) rp.nr FROM administrati
 
 	rem_property_rrr AS	(SELECT nr FROM prior_property_rrr WHERE nr NOT IN (SELECT nr FROM pending_property_rrr))
 				
-SELECT CASE WHEN fhCheck IS TRUE THEN (SELECT sum(1) FROM rem_property_rrr) = 0
+SELECT CASE WHEN fhCheck IS TRUE THEN (SELECT COUNT(nr) FROM rem_property_rrr) = 0
 		ELSE NULL
 	END AS vl FROM newFreeholdApp
 ');
 
 insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-values('newtitle-br24-check-rrr-accounted', 'critical', 'validate', 'application', 10);
+values('newtitle-br24-check-rrr-accounted', 'critical', 'validate', 'application', 12);
+
+----------------------------------------------------------------------------------------------------
+insert into system.br(id, technical_type_code, feedback) 
+values('application-for-new-title-has-cancel-property-service', 'sql', 
+'There is no cancel title service in this application. Add a cancel title service to your application.::::ITALIANO' );
+
+insert into system.br_definition(br_id, active_from, active_until, body) 
+values('application-for-new-title-has-cancel-property-service', now(), 'infinity', 
+'
+WITH 	newFreeholdApp	AS	(SELECT (SUM(1) > 0) AS fhCheck FROM application.service se
+				WHERE se.application_id = #{id}
+				AND se.request_type_code = ''newFreehold'')
+					
+				
+SELECT CASE WHEN fhCheck IS TRUE THEN (SELECT COUNT(id) FROM application.service sv 
+					WHERE sv.application_id = #{id}
+					AND sv.request_type_code = ''cancelProperty'') > 0
+		ELSE NULL
+	END AS vl FROM newFreeholdApp
+');
+
+insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
+values('application-for-new-title-has-cancel-property-service', 'critical', 'validate', 'application', 10);
 ----------------------------------------------------------------------------------------------------
 
+insert into system.br(id, technical_type_code, feedback) 
+values('application-cancel-property-service-before-new-title', 'sql', 
+'Cancel title service must come before new title service in the application. Please change order of the services in this application.::::ITALIANO' );
+
+insert into system.br_definition(br_id, active_from, active_until, body) 
+values('application-cancel-property-service-before-new-title', now(), 'infinity', 
+'
+WITH 	newFreeholdApp	AS	(SELECT (SUM(1) > 0) AS fhCheck FROM application.service se
+				WHERE se.application_id = #{id}
+				AND se.request_type_code = ''newFreehold''),
+ 	orderCancel	AS	(SELECT service_order + 1 AS cancelSequence FROM application.service sv 
+				WHERE sv.application_id = #{id}
+				AND sv.request_type_code = ''cancelProperty'' LIMIT 1),	
+ 	orderNew	AS	(SELECT service_order + 1 AS newSequence FROM application.service sv 
+				WHERE sv.application_id = #{id}
+				AND sv.request_type_code = ''newFreehold'' LIMIT 1)
+				
+SELECT CASE WHEN fhCheck IS TRUE THEN ((SELECT newSequence FROM orderNew) - (SELECT cancelSequence FROM orderCancel)) > 0
+		ELSE NULL
+	END AS vl FROM newFreeholdApp
+');
+
+insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
+values('application-cancel-property-service-before-new-title', 'critical', 'validate', 'application', 11);
+
+----------------------------------------------------------------------------------------------------
+
+insert into system.br(id, technical_type_code, feedback) 
+values('application-approve-cancel-old-titles', 'sql', 
+'Cancel identified existing title(s). Please Terminate existing title using Cancel Title service.::::ITALIANO' );
+
+insert into system.br_definition(br_id, active_from, active_until, body) 
+values('application-approve-cancel-old-titles', now(), 'infinity', 
+'
+WITH 	newFreeholdApp	AS	(SELECT (SUM(1) > 0) AS fhCheck FROM application.service se
+				WHERE se.application_id = #{id}
+				AND se.request_type_code = ''newFreehold''),
+	parent_titles	AS	(SELECT DISTINCT ON (ba.id) ba.id AS liveTitle, ba.status_code FROM administrative.ba_unit ba
+				INNER JOIN transaction.transaction tn ON (ba.transaction_id = tn.id)
+				INNER JOIN application.service s ON (tn.from_service_id = s.id) 
+				INNER JOIN administrative.required_relationship_baunit pt ON (ba.id = pt.to_ba_unit_id)
+				WHERE s.application_id = #{id}
+				AND ba.status_code = ''pending'')
+				
+SELECT CASE WHEN fhCheck IS TRUE THEN (SELECT COUNT(liveTitle) FROM parent_titles) > 0
+		ELSE NULL
+	END AS vl FROM newFreeholdApp
+');
+
+insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
+values('application-approve-cancel-old-titles', 'critical', 'approve', 'application', 12);
+----------------------------------------------------------------------------------------------------------------------
 update system.br set display_name = id where display_name !=id;
 
-
+----------------------------------------------------------------------------------------------------
 --delete from system.br_validation where br_id = 'newtitle-br24-check-rrr-accounted';
 
 --delete from system.br_definition where br_id = 'newtitle-br24-check-rrr-accounted';
