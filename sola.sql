@@ -137,6 +137,29 @@ COMMENT ON FUNCTION administrative.ba_unit_name_is_valid(
   , name_lastpart varchar
 ) IS 'This function, checks if the name parts of the ba unit are valid.';
     
+-- Function administrative.get_calculated_area_size_action --
+CREATE OR REPLACE FUNCTION administrative.get_calculated_area_size_action(
+ baunit_id varchar
+) RETURNS integer 
+AS $$
+BEGIN
+  return (select coalesce(cast(sum(a.size)as float),0)
+	 from cadastre.spatial_value_area a
+	 where  a.type_code = 'officialArea'
+	 and a.spatial_unit_id in
+           (  select b.spatial_unit_id
+              from administrative.ba_unit_contains_spatial_unit b
+              inner join administrative.ba_unit ba
+	      on b.ba_unit_id = ba.id
+	      where ba.id = baunit_id
+           ));
+END;
+
+$$ LANGUAGE plpgsql;
+COMMENT ON FUNCTION administrative.get_calculated_area_size_action(
+ baunit_id varchar
+) IS 'It returns the sum of parcel areas for the selected ba unit id if any';
+    
 -- Sequence application.application_nr_seq --
 DROP SEQUENCE IF EXISTS application.application_nr_seq;
 CREATE SEQUENCE application.application_nr_seq
