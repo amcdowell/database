@@ -1,4 +1,4 @@
-
+﻿
 -- Starting up the database script generation
 ALTER DATABASE sola SET bytea_output TO 'escape';
     
@@ -924,7 +924,7 @@ CREATE TABLE application.application(
     action_code varchar(20) NOT NULL DEFAULT ('lodge'),
     action_notes varchar(255),
     status_code varchar(20) NOT NULL DEFAULT ('lodged'),
-    receipt_reference varchar(100) NOT NULL,
+    receipt_reference varchar(100),
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
     rowversion integer NOT NULL DEFAULT (0),
     change_action char(1) NOT NULL DEFAULT ('i'),
@@ -5857,19 +5857,19 @@ order by b.id;
 DROP VIEW IF EXISTS cadastre.place_name CASCADE;
 CREATE VIEW cadastre.place_name AS SELECT su.id, su.label, su.geom
 FROM cadastre.level l, cadastre.spatial_unit su 
-WHERE l.id = su.level_id AND l.name = 'Place Names';;
+WHERE l.id = su.level_id AND l.name = 'Place Names';
 
 -------View cadastre.road ---------
 DROP VIEW IF EXISTS cadastre.road CASCADE;
 CREATE VIEW cadastre.road AS SELECT su.id, su.label, su.geom
 FROM cadastre.level l, cadastre.spatial_unit su 
-WHERE l.id= su.level_id AND l.name = 'Roads';;
+WHERE l.id= su.level_id AND l.name = 'Roads';
 
 -------View cadastre.survey_control ---------
 DROP VIEW IF EXISTS cadastre.survey_control CASCADE;
 CREATE VIEW cadastre.survey_control AS SELECT su.id, su.label, su.geom
 FROM cadastre.level l, cadastre.spatial_unit su 
-WHERE l.id = su.level_id AND l.name = 'Survey Control';;
+WHERE l.id = su.level_id AND l.name = 'Survey Control';
 
 -------View system.user_roles ---------
 DROP VIEW IF EXISTS system.user_roles CASCADE;
