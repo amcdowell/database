@@ -1,4 +1,4 @@
-insert into system.br(id, technical_type_code, feedback) 
+﻿insert into system.br(id, technical_type_code, feedback) 
 values('service-on-complete-without-transaction', 'sql', 'Service ''req_type'' must have been started and done some changes in the system::::Service must have been started and done some changes in the system');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -13,7 +13,7 @@ values('service-on-complete-without-transaction', 'critical', 'complete', 'servi
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
 values('service-check-no-previous-digital-title-service', 'sql', 
-'Digital title should not exist for requested property (having no primary right it means also that does not exist)::::ITALIANO',
+'Digital title should not exist for requested property (having no primary right it means also that does not exist)::::Un titolo digitale non dovrebbe esistere per la proprieta richiesta (non avere diritti primari significa anche che non esiste)',
  '#{id}(application.service.id) is requested where service is for newDigitalTitle or newDigitalProperty');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 

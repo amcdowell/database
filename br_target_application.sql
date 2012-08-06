@@ -167,7 +167,7 @@ values('applicant-name-to-owner-name-check', 'warning', 'validate', 'application
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
 values('app-current-caveat-and-no-remove-or-vary', 'sql', 
-'There is a current or pending caveat registered on this title and this application does not include a cancel or waiver/vary caveat service::::ITALIANO',
+'There is a current or pending caveat registered on this title and this application does not include a cancel or waiver/vary caveat service::::Per questo titolo siste un diritto di prelazione pendente o corrente e la pratica non include un servizio di cancellazione o di variazione prelazione ',
  '#{id}(application.application.id) is requested. It checks if there is a caveat (pending or current) registered
  on the title and if the application does not have any service of type remove or vary caveat');
 
@@ -189,7 +189,7 @@ values('app-current-caveat-and-no-remove-or-vary', 'medium', 'validate', 'applic
 
 
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('app-title-has-primary-right', 'sql', 'Start title for the new title service in this application must have a primary right::::Il titolo deve avere un diritto primario',
+values('app-title-has-primary-right', 'sql', 'Start title for the new title service in this application must have a primary right::::Il titolo originario del nuovo titolo deve avere un diritto primario',
  '#{id}(application.application.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -304,7 +304,7 @@ values('newtitle-br24-check-rrr-accounted', 'critical', 'validate', 'application
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback) 
 values('application-for-new-title-has-cancel-property-service', 'sql', 
-'There is no cancel title service in this application. Add a cancel title service to your application.::::ITALIANO' );
+'There is no cancel title service in this application. Add a cancel title service to your application.::::Non esiste nella pratica un servizio di cancellazione titolo. Aggiungere questo servizio alla pratica' );
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('application-for-new-title-has-cancel-property-service', now(), 'infinity', 
@@ -327,7 +327,7 @@ values('application-for-new-title-has-cancel-property-service', 'critical', 'val
 
 insert into system.br(id, technical_type_code, feedback) 
 values('application-cancel-property-service-before-new-title', 'sql', 
-'Cancel title service must come before new title service in the application. Please change order of the services in this application.::::ITALIANO' );
+'Cancel title service must come before new title service in the application. Please change order of the services in this application.::::Il servizio di cancellazione titolo deve venire prima di quello di creazione nuovo titolo. Cambiare ordine servizi nella pratica' );
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('application-cancel-property-service-before-new-title', now(), 'infinity', 
@@ -354,7 +354,7 @@ values('application-cancel-property-service-before-new-title', 'critical', 'vali
 
 insert into system.br(id, technical_type_code, feedback) 
 values('application-approve-cancel-old-titles', 'sql', 
-'Cancel identified existing title(s). Please Terminate existing title using Cancel Title service.::::ITALIANO' );
+'Cancel identified existing title(s). Please Terminate existing title using Cancel Title service.::::Identificati titoli esistenti. Prego terminare i titoli esistenti usando il servizio di Cancellazione Titolo' );
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('application-approve-cancel-old-titles', now(), 'infinity', 

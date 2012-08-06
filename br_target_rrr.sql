@@ -1,4 +1,4 @@
-insert into system.br(id, technical_type_code, feedback) 
+﻿insert into system.br(id, technical_type_code, feedback) 
 values('rrr-must-have-parties', 'sql', 'Rrr that must have parties have parties::::RRR per cui sono previste parti, le devono avere');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -46,7 +46,7 @@ values('ba_unit-has-several-mortgages-with-same-rank', 'critical', 'current', 'r
 
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('ba_unit-has-caveat', 'sql', 'Title has a caveat that is active::::ITALIANO',
+values('ba_unit-has-caveat', 'sql', 'Title has a caveat that is active::::Il titolo ha un diritto di prelazione attivo',
  '#{id}(administrative.rrr.id) is requested.');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -68,7 +68,7 @@ values('ba_unit-has-caveat', 'critical', 'current', 'rrr', 19);
 ----------------------------------------------------------------------------------------------------
 
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('rrr-has-pending', 'sql', 'There are no pending edits related with the right, restriction or responsability that is being changed or removed::::ITALIANO',
+values('rrr-has-pending', 'sql', 'There are no pending edits related with the right, restriction or responsability that is being changed or removed::::Non vi sono modifiche pendenti sul diritto, responsabilita o restrizione che si sta per cambiare o rimuovere',
  '#{id}(administrative.rrr.id) is requested. It checks if for the target rrr there is already a pending edit or record.');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 

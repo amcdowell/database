@@ -1,4 +1,4 @@
-insert into system.br(id, technical_type_code, feedback, technical_description) 
+﻿insert into system.br(id, technical_type_code, feedback, technical_description) 
 values('target-parcels-present', 'sql', 'There are target parcels selected::::Esistono particelle originarie selezionate',
  '#{id}(transaction_id) is requested');
 

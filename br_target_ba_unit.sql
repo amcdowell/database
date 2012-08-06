@@ -113,7 +113,7 @@ values('ba_unit-has-compatible-cadastre-object', 'medium', 'current', 'ba_unit',
 
 insert into system.br(id, technical_type_code, feedback, technical_description) 
 values('target-ba_unit-check-if-pending', 'sql', 
-'There are no pending edits for target title::::ITALIANO',
+'There are no pending edits for target title::::Non esistono modifiche pendenti per il titolo origine',
  '#{id}(baunit_id) is requested. It checks if there is no pending transaction for target ba_unit.
  It checks if the administrative.ba_unit_target has a record of this ba_unit which is different
  from the transaction that is targeting ba_unit and that record is of a transaction not approved yet
