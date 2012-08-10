@@ -271,7 +271,7 @@ WITH 	pending_property_rrr AS (SELECT DISTINCT ON(rp.nr) rp.nr FROM administrati
 				WHERE ap.id = #{id}
 				AND rp.status_code = ''pending''),
 								
-	parent_titles	AS	(SELECT DISTINCT ON (ba.id) ba.id AS liveTitle FROM administrative.ba_unit ba
+	parent_titles	AS	(SELECT DISTINCT ON (ba.id) ba.id AS liveTitle, from_ba_unit_id FROM administrative.ba_unit ba
 				INNER JOIN transaction.transaction tn ON (ba.transaction_id = tn.id)
 				INNER JOIN application.service s ON (tn.from_service_id = s.id) 
 				INNER JOIN administrative.required_relationship_baunit pt ON (ba.id = pt.to_ba_unit_id)
@@ -327,7 +327,7 @@ values('application-for-new-title-has-cancel-property-service', 'critical', 'val
 
 insert into system.br(id, technical_type_code, feedback) 
 values('application-cancel-property-service-before-new-title', 'sql', 
-'Cancel title service must come before new title service in the application. Please change order of the services in this application.::::Il servizio di cancellazione titolo deve venire prima di quello di creazione nuovo titolo. Cambiare ordine servizi nella pratica' );
+'New Freehold title service must come before Cancel Title service in the application. Please change order of the services in this application.::::Il servizio di cancellazione titolo deve venire prima di quello di creazione nuovo titolo. Cambiare ordine servizi nella pratica' );
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('application-cancel-property-service-before-new-title', now(), 'infinity', 
@@ -342,7 +342,7 @@ WITH 	newFreeholdApp	AS	(SELECT (SUM(1) > 0) AS fhCheck FROM application.service
 				WHERE sv.application_id = #{id}
 				AND sv.request_type_code = ''newFreehold'' LIMIT 1)
 				
-SELECT CASE WHEN fhCheck IS TRUE THEN ((SELECT newSequence FROM orderNew) - (SELECT cancelSequence FROM orderCancel)) > 0
+SELECT CASE WHEN fhCheck IS TRUE THEN ((SELECT cancelSequence FROM orderCancel) - (SELECT newSequence FROM orderNew)) > 0
 		ELSE NULL
 	END AS vl FROM newFreeholdApp
 ');
