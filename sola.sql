@@ -406,6 +406,50 @@ COMMENT ON FUNCTION cadastre.cadastre_object_name_is_valid(
   , name_lastpart varchar
 ) IS '';
     
+-- Function cadastre.add_topo_points --
+CREATE OR REPLACE FUNCTION cadastre.add_topo_points(
+ source geometry
+  , target geometry
+) RETURNS geometry 
+AS $$
+declare
+  rec record;
+  point_location float;
+  point_to_add geometry;
+  rings geometry[];
+  nr_elements integer;
+  tolerance double precision;
+  i integer;
+begin
+  tolerance = system.get_setting('map-tolerance')::double precision;
+  if st_geometrytype(target) = 'ST_LineString' then
+    for rec in 
+      select geom from St_DumpPoints(source) s
+        where st_dwithin(target, s.geom, tolerance)
+    loop
+      if (select count(1) from st_dumppoints(target) t where st_dwithin(rec.geom, t.geom, tolerance))=0 then
+        point_location = ST_Line_Locate_Point(target, rec.geom);
+        --point_to_add = ST_Line_Interpolate_Point(target, point_location);
+        target = ST_LineMerge(ST_Union(ST_Line_Substring(target, 0, point_location), ST_Line_Substring(target, point_location, 1)));
+      end if;
+    end loop;
+  elsif st_geometrytype(target)= 'ST_Polygon' then
+    select  array_agg(ST_ExteriorRing(geom)) into rings from ST_DumpRings(target);
+    nr_elements = array_upper(rings, 1);
+    for i in 1..nr_elements loop
+      rings[i] = cadastre.add_topo_points(source, rings[i]);
+    end loop;
+    target = ST_MakePolygon(rings[1], rings[2:nr_elements]);
+  end if;
+  return target;
+end;
+$$ LANGUAGE plpgsql;
+COMMENT ON FUNCTION cadastre.add_topo_points(
+ source geometry
+  , target geometry
+) IS 'This function searches for any point in source that falls into target. If a point is found then the point it is added in the target.
+It returns the modified target.';
+    
 -- Sequence document.document_nr_seq --
 DROP SEQUENCE IF EXISTS document.document_nr_seq;
 CREATE SEQUENCE document.document_nr_seq
@@ -2068,7 +2112,7 @@ CREATE INDEX cadastre_object_index_on_geom_polygon ON cadastre.cadastre_object u
 CREATE INDEX cadastre_object_index_on_rowidentifier ON cadastre.cadastre_object (rowidentifier);
     
 
-comment on table cadastre.cadastre_object is '';
+comment on table cadastre.cadastre_object is 'It is a specialisation of spatial_unit. Cadastre objects are targeted from cadastre change and redefine cadastre processes.';
     
 DROP TRIGGER IF EXISTS __track_changes ON cadastre.cadastre_object CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -2263,6 +2307,7 @@ CREATE TABLE cadastre.cadastre_object_type(
     display_value varchar(250) NOT NULL,
     description varchar(555),
     status char(1) NOT NULL,
+    in_topology bool NOT NULL DEFAULT (false),
 
     -- Internal constraints
     
@@ -2274,9 +2319,9 @@ CREATE TABLE cadastre.cadastre_object_type(
 comment on table cadastre.cadastre_object_type is 'The type of spatial object. This defines the specialisation of the spatial unit. It can be a parcel, building_unit or backgroup data like a road etc.';
     
  -- Data for the table cadastre.cadastre_object_type -- 
-insert into cadastre.cadastre_object_type(code, display_value, status) values('parcel', 'Parcel::::Particella', 'c');
-insert into cadastre.cadastre_object_type(code, display_value, status) values('buildingUnit', 'Building Unit::::Unita Edile', 'c');
-insert into cadastre.cadastre_object_type(code, display_value, status) values('utilityNetwork', 'Utility Network::::Rete Utilita', 'c');
+insert into cadastre.cadastre_object_type(code, display_value, status, in_topology) values('parcel', 'Parcel::::Particella', 'c', true);
+insert into cadastre.cadastre_object_type(code, display_value, status, in_topology) values('buildingUnit', 'Building Unit::::Unita Edile', 'c', false);
+insert into cadastre.cadastre_object_type(code, display_value, status, in_topology) values('utilityNetwork', 'Utility Network::::Rete Utilita', 'c', false);
 
 
 
@@ -4908,6 +4953,7 @@ CREATE TABLE cadastre.survey_point(
     transaction_id varchar(40) NOT NULL,
     id varchar(40) NOT NULL,
     boundary bool NOT NULL DEFAULT (true),
+    linked bool NOT NULL DEFAULT (false),
     geom GEOMETRY NOT NULL
         CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
         CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
@@ -4956,6 +5002,7 @@ CREATE TABLE cadastre.survey_point_historic
     transaction_id varchar(40),
     id varchar(40),
     boundary bool,
+    linked bool,
     geom GEOMETRY
         CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
         CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
@@ -5747,34 +5794,40 @@ CREATE TRIGGER trg_new before insert
 CREATE OR REPLACE FUNCTION cadastre.f_for_tbl_cadastre_object_trg_geommodify() RETURNS TRIGGER 
 AS $$
 declare
-  geom_is_modified boolean;
   rec record;
   rec_snap record;
-  snapping_tolerance float;
+  tolerance float;
+  modified_geom geometry;
 begin
-  snapping_tolerance = coalesce(system.get_setting('map-tolerance')::double precision, 0.01);
-  geom_is_modified = (tg_op = 'INSERT' and new.geom_polygon is not null);
-  if tg_op= 'UPDATE' and new.geom_polygon is not null then
-    geom_is_modified = not st_equals(new.geom_polygon, old.geom_polygon);
-  end if;
-  if not geom_is_modified then
+
+  if new.status_code != 'current' then
     return new;
   end if;
+
+  if new.type_code not in (select code from cadastre.cadastre_object_type where in_topology) then
+    return new;
+  end if;
+
+  tolerance = coalesce(system.get_setting('map-tolerance')::double precision, 0.01);
   for rec in select co.id, co.geom_polygon 
                  from cadastre.cadastre_object co 
-                 where  co.id != new.id 
+                 where  co.id != new.id and co.type_code = new.type_code and co.status_code = 'current'
                      and co.geom_polygon is not null 
-                     and st_dwithin(new.geom_polygon, co.geom_polygon, snapping_tolerance)
+                     and new.geom_polygon && co.geom_polygon 
+                     and st_dwithin(new.geom_polygon, co.geom_polygon, tolerance)
   loop
-    select * into rec_snap 
-        from snap_geometry_to_geometry(new.geom_polygon, rec.geom_polygon, snapping_tolerance, false);
-      new.geom_polygon = rec_snap.geom_to_snap;
+    modified_geom = cadastre.add_topo_points(new.geom_polygon, rec.geom_polygon);
+    if not st_equals(modified_geom, rec.geom_polygon) then
+      update cadastre.cadastre_object 
+        set geom_polygon= modified_geom, change_user= new.change_user 
+      where id= rec.id;
+    end if;
   end loop;
   return new;
 end;
 $$ LANGUAGE plpgsql;
 DROP TRIGGER IF EXISTS trg_geommodify ON cadastre.cadastre_object CASCADE;
-CREATE TRIGGER trg_geommodify before insert or update
+CREATE TRIGGER trg_geommodify after insert or update of geom_polygon
    ON cadastre.cadastre_object FOR EACH ROW
    EXECUTE PROCEDURE cadastre.f_for_tbl_cadastre_object_trg_geommodify();
     
