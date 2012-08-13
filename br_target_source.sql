@@ -1,5 +1,5 @@
 ﻿insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('source-attach-in-transaction-no-pendings', 'sql', 'Source must not have pending status::::Documento non deve avere stato pendente',
+values('source-attach-in-transaction-no-pendings', 'sql', 'Document (source file) must not have pending status::::Documento non deve avere stato pendente',
  '#{id} of the source is requested. It checks if the source has already a record with the status pending.');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -16,7 +16,7 @@ values('source-attach-in-transaction-no-pendings', 'critical', 'pending', 'sourc
 ----------------------------------------------------------------------------------------------------
 
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('source-attach-in-transaction-allowed-type', 'sql', 'Source must be of a type for which the transaction is allowed::::Documento deve essere di tipo consentito per la transazione',
+values('source-attach-in-transaction-allowed-type', 'sql', 'Document (source file) must have an allowable current source type::::Documento deve essere di tipo consentito per la transazione',
  '#{id} of the source is requested. It checks if the source has a type which has the has_status attribute true.');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 

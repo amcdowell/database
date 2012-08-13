@@ -1,5 +1,5 @@
 ﻿insert into system.br(id, technical_type_code, feedback) 
-values('service-on-complete-without-transaction', 'sql', 'Service ''req_type'' must have been started and done some changes in the system::::Service must have been started and done some changes in the system');
+values('service-on-complete-without-transaction', 'sql', 'Service ''req_type'' must have been started and some changes made in the system::::Service must have been started and some changes made in the system');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('service-on-complete-without-transaction', now(), 'infinity', 
@@ -13,7 +13,7 @@ values('service-on-complete-without-transaction', 'critical', 'complete', 'servi
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
 values('service-check-no-previous-digital-title-service', 'sql', 
-'Digital title should not exist for requested property (having no primary right it means also that does not exist)::::Un titolo digitale non dovrebbe esistere per la proprieta richiesta (non avere diritti primari significa anche che non esiste)',
+'For the Convert Title service there must be no existing digital title record (including the recording of a primary (ownership) right) for the identified title::::Un titolo digitale non dovrebbe esistere per la proprieta richiesta (non avere diritti primari significa anche che non esiste)',
  '#{id}(application.service.id) is requested where service is for newDigitalTitle or newDigitalProperty');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -31,7 +31,7 @@ values('service-check-no-previous-digital-title-service', 'warning', 'complete',
 
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('baunit-has-multiple-mortgages', 'sql', 'Title already has current mortgage::::Il titolo ha una ipoteca corrente',
+values('baunit-has-multiple-mortgages', 'sql', 'For the Register Mortgage service the identified title has no existing mortgages::::Il titolo ha una ipoteca corrente',
  '#{id}(administrative.ba_unit.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -50,7 +50,7 @@ values('baunit-has-multiple-mortgages', 'warning', 'complete', 'service', 'mortg
 ----------------------------------------------------------------------------------------------------
 
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('mortgage-value-check', 'sql', 'Mortgage is for more than reported value::::Ipoteca superiore al valore riportato',
+values('mortgage-value-check', 'sql', 'For the Register Mortgage service, the new mortgage is for less than the reported value of property (at time application was received)::::Ipoteca superiore al valore riportato',
  '#{id}(application.service.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -72,7 +72,7 @@ values('mortgage-value-check', 'warning', 'complete', 'service', 'varyMortgage',
 ----------------------------------------------------------------------------------------------------
 
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('current-rrr-for-variation-or-cancellation-check', 'sql', 'Title includes no current right or restriction (apart from primary right). Confirm request for variation or cancellation and check title identifier::::Il titolo non include diritti o restrizioni correnti (oltre al diritto primario). Confermare la richiesta di variazione o cancellazione e verificare il titolo identificativo',
+values('current-rrr-for-variation-or-cancellation-check', 'sql', 'For cancellation or variation of rights (or restrictions), the identified title should have an existing right or restriction (in addition to the primary (ownership) right)::::Il titolo non include diritti o restrizioni correnti (oltre al diritto primario). Confermare la richiesta di variazione o cancellazione e verificare il titolo identificativo',
  '#{id}(application.service.id) It is requested where there is a service that varies or extinguishes an existing rrr');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 

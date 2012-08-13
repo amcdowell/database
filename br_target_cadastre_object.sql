@@ -1,5 +1,5 @@
 ﻿insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('target-parcels-present', 'sql', 'There are target parcels selected::::Esistono particelle originarie selezionate',
+values('target-parcels-present', 'sql', 'Target parcel(s) must be selected::::Esistono particelle originarie selezionate',
  '#{id}(transaction_id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -15,7 +15,7 @@ values('target-parcels-present', 'warning', 'current', 'cadastre_object', 2);
 ----------------------------------------------------------------------------------------------------
 
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('target-parcels-check-nopending', 'sql', 'There are pending changes that overlap the union of the target parcels::::Vi sono modifiche pendenti che bloccano la unione delle Particelle',
+values('target-parcels-check-nopending', 'sql', 'There should be no pending changes for any oftarget parcels::::Vi sono modifiche pendenti che bloccano la unione delle Particelle',
  '#{id}(cadastre.cadastre_object.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -38,7 +38,7 @@ values('target-parcels-check-nopending', 'critical', 'current', 'cadastre_object
 ----------------------------------------------------------------------------------------------------
 
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('documents-present', 'sql', 'There are documents/ sources attached::::Vi sono documenti allegati',
+values('documents-present', 'sql', 'There are documents (source files) attached::::Vi sono documenti allegati',
  '#{id}(transaction_id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -55,7 +55,7 @@ values('documents-present', 'warning', 'current', 'cadastre_object', 5);
 
 insert into system.br(id, technical_type_code, feedback, technical_description) 
 values('cadastre-redefinition-union-old-new-the-same', 'sql', 
-    'The union of the new polygons must be the same with the union of the old polygons::::La unione dei nuovi poligoni deve esser la stessa di quella dei vecchi poligoni',
+    'The union of the new polygons must be the same as the union of the old polygons::::La unione dei nuovi poligoni deve esser la stessa di quella dei vecchi poligoni',
  '#{id} is the parameter asked. It is the transaction id.');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -98,7 +98,7 @@ values('cadastre-redefinition-target-geometries-dont-overlap', 'warning', 'pendi
 ----------------------------------------------------------------------------------------------------
 
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('application-baunit-has-parcels', 'sql', 'Ba Unit must have Parcels::::La BA Unit (Unita Amministrativa di Base) deve avere particelle',
+values('application-baunit-has-parcels', 'sql', 'Title must have Parcels::::Titolo deve avere particelle',
  '#{id}(application.service.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -121,7 +121,7 @@ values('application-baunit-has-parcels', 'critical', 'complete', 'service', 'red
 ----------------------------------------------------------------------------------------------------
 
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('application-baunit-check-area', 'sql', 'Ba Unit has not the same area as its belonging parcels::::La Area della BA Unit (Unita Amministrativa di Base) non ha la stessa estensione di quella delle sue particelle',
+values('application-baunit-check-area', 'sql', 'Title has the same area as the combined area of its associated parcels::::La Area della BA Unit (Unita Amministrativa di Base) non ha la stessa estensione di quella delle sue particelle',
  '#{id}(ba_unit_id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -174,7 +174,7 @@ values('survey-points-present', 'critical', 'current', 'cadastre_object', 'cadas
 ----------------------------------------------------------------------------------------------------
 
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('target-parcels-check-isapolygon', 'sql', 'The union of target parcels must be a polygon::::La unione di Particelle deve essere un poligono unico',
+values('target-parcels-check-isapolygon', 'sql', 'The union of the target parcels must be a polygon::::La unione di Particelle deve essere un poligono unico',
  '#{id}(cadastre.cadastre_object.transaction_id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -194,7 +194,7 @@ values('target-parcels-check-isapolygon', 'critical', 'current', 'cadastre_objec
 ----------------------------------------------------------------------------------------------------
 
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('new-cadastre-objects-present', 'sql', 'There are new cadastral objects defined::::Vi sono nuovi oggetti catastali definiti',
+values('new-cadastre-objects-present', 'sql', 'New cadastral objects must be defined::::Vi sono nuovi oggetti catastali definiti',
  '#{id}(transaction_id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -210,7 +210,7 @@ values('new-cadastre-objects-present', 'critical', 'current', 'cadastre_object',
 ----------------------------------------------------------------------------------------------------
 
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('target-and-new-union-the-same', 'sql', 'The union of new cadastral objects is the same with the union of target cadastral objects::::La unione dei nuovi oggetti catastali deve corrispondere alla unione di quelli originari',
+values('target-and-new-union-the-same', 'sql', 'The union of new parcel polygons is the same with the union of the target parcel polygons::::La unione dei nuovi oggetti catastali deve corrispondere alla unione di quelli originari',
  '#{id}(transaction_id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -236,7 +236,7 @@ values('target-and-new-union-the-same', 'warning', 'current', 'cadastre_object',
 ----------------------------------------------------------------------------------------------------
 
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('new-cadastre-objects-dont-overlap', 'sql', 'The new cadastral objects don''t overlap::::I nuovi oggetti catastali non devono sovrapporsi',
+values('new-cadastre-objects-dont-overlap', 'sql', 'The new parcel polygons must not overlap::::I nuovi oggetti catastali non devono sovrapporsi',
  '#{id}(transaction_id) is requested. Check the union of new co has the same area as the sum of all areas of new co-s, which means the new co-s don''t overlap');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -254,7 +254,7 @@ values('new-cadastre-objects-dont-overlap', 'critical', 'current', 'cadastre_obj
 ----------------------------------------------------------------------------------------------------
 
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('area-check-percentage-newofficialarea-calculatednewarea', 'sql', 'New official area - calculated new area / new official area in percentage should not be > 1%::::Il valore della nuova area ufficiale -  quello CALCOLATO della nuova area / 
+values('area-check-percentage-newofficialarea-calculatednewarea', 'sql', 'The difference between the new official parcel area and the new calculated area should be less than 1%::::Il valore della nuova area ufficiale -  quello CALCOLATO della nuova area / 
 il valore della nuova area ufficiale in percentuale non dovrebbe essere superiore all 1%',
  '#{id}(cadastre.cadastre_object.id) is requested. 
  Check new official area - calculated new area / new official area in percentage (Give in WARNING description, percentage & parcel if percentage > 1%)');
@@ -280,7 +280,7 @@ values('area-check-percentage-newofficialarea-calculatednewarea', 'warning', 'cu
 ----------------------------------------------------------------------------------------------------
 
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('cadastre-object-check-name', 'sql', 'Invalid identifier for parcel (cadastre object)::::Identificativo per la particella (oggetto catastale) invalido',
+values('cadastre-object-check-name', 'sql', 'The parcel (cadastre object) should have a valid form of description (appellation)::::Identificativo per la particella (oggetto catastale) invalido',
  '#{id}(cadastre.cadastre_object.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -300,7 +300,7 @@ values('cadastre-object-check-name', 'medium', 'current', 'cadastre_object', 'ca
 ----------------------------------------------------------------------------------------------------
 
 insert into system.br(id, technical_type_code, feedback) 
-values('area-check-percentage-newareas-oldareas', 'sql', 'New official areas - old official areas / old official areas in percentage should not be > 0.1%::::Il valore delle nuove aree ufficiali -  quello delle vecchie / 
+values('area-check-percentage-newareas-oldareas', 'sql', 'The difference between the total of the new parcels' official areas and the total of the old parcels' official areas should not be greater than 0.1%::::Il valore delle nuove aree ufficiali -  quello delle vecchie / 
 il valore delle vecchie aree ufficiali in percentuale non dovrebbe essere superiore allo 0.1%');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
