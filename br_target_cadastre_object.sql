@@ -300,7 +300,7 @@ values('cadastre-object-check-name', 'medium', 'current', 'cadastre_object', 'ca
 ----------------------------------------------------------------------------------------------------
 
 insert into system.br(id, technical_type_code, feedback) 
-values('area-check-percentage-newareas-oldareas', 'sql', 'The difference between the total of the new parcels' official areas and the total of the old parcels' official areas should not be greater than 0.1%::::Il valore delle nuove aree ufficiali -  quello delle vecchie / 
+values('area-check-percentage-newareas-oldareas', 'sql', 'The difference between the total of the new parcels official areas and the total of the old parcels official areas should not be greater than 0.1%::::Il valore delle nuove aree ufficiali -  quello delle vecchie / 
 il valore delle vecchie aree ufficiali in percentuale non dovrebbe essere superiore allo 0.1%');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
