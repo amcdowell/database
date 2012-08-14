@@ -1,8 +1,8 @@
 ﻿insert into system.br(id, technical_type_code, feedback, technical_description) 
 values('newtitle-br22-check-different-owners', 'sql', 
-'Owners of new properties/titles should be the same as owners of underlying titles::::Gli aventi diritto delle nuove proprieta/titoli non sono gli stessi delle proprieta/titoli sottostanti',
+'Owners of new titles should be the same as owners of underlying titles::::Gli aventi diritto delle nuove titoli non sono gli stessi delle proprieta/titoli sottostanti',
 '#{id}(baunit_id) is requested.
-Check that new properties/title owners are the same as underlying titles owners (Give WARNING if > 0)');
+Check that new title owners are the same as underlying titles owners (Give WARNING if > 0)');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('newtitle-br22-check-different-owners', now(), 'infinity', 
