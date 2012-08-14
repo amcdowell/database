@@ -1,8 +1,8 @@
 ﻿insert into system.br(id, technical_type_code, feedback, technical_description) 
 values('newtitle-br22-check-different-owners', 'sql', 
-'Owners of new properties/titles should be the same as owners of underlying properties/titles::::Gli aventi diritto delle nuove proprieta/titoli non sono gli stessi delle proprieta/titoli sottostanti',
+'Owners of new properties/titles should be the same as owners of underlying titles::::Gli aventi diritto delle nuove proprieta/titoli non sono gli stessi delle proprieta/titoli sottostanti',
 '#{id}(baunit_id) is requested.
-Check that new properties/title owners are the same as underlying properties/titles owners (Give WARNING if > 0)');
+Check that new properties/title owners are the same as underlying titles owners (Give WARNING if > 0)');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('newtitle-br22-check-different-owners', now(), 'infinity', 
@@ -63,7 +63,7 @@ values('ba_unit-spatial_unit-area-comparison', 'medium', 'current', 'ba_unit', 2
 ----------------------------------------------------------------------------------------------------
 
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('baunit-has-primary-right', 'sql', 'Title must have a primary right::::Il titolo deve avere un diritto primario',
+values('baunit-has-primary-right', 'sql', 'Title must have a primary (ownership) right::::Il titolo deve avere un diritto primario',
  '#{id}(administrative.ba_unit.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
