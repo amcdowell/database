@@ -210,138 +210,6 @@ COMMENT ON FUNCTION public.compare_strings(
   , string2 varchar
 ) IS 'Special string compare function.';
     
--- Function public.snap_geometry_to_geometry --
-CREATE OR REPLACE FUNCTION public.snap_geometry_to_geometry(
-inout geom_to_snap geometry
-  ,inout target_geom geometry
-  , snap_distance float
-  , change_target_if_needed bool
-  ,out snapped bool
-  ,out target_is_changed bool
-) RETURNS record 
-AS $$
-DECLARE
-  i integer;
-  nr_elements integer;
-  rec record;
-  rec2 record;
-  point_location float;
-  rings geometry[];
-  
-BEGIN
-  target_is_changed = false;
-  snapped = false;
-  if st_geometrytype(geom_to_snap) not in ('ST_Point', 'ST_LineString', 'ST_Polygon') then
-    raise exception 'geom_to_snap not supported. Only point, linestring and polygon is supported.';
-  end if;
-  if st_geometrytype(geom_to_snap) = 'ST_Point' then
-    -- If the geometry to snap is POINT
-    if st_geometrytype(target_geom) = 'ST_Point' then
-      if st_dwithin(geom_to_snap, target_geom, snap_distance) then
-        geom_to_snap = target_geom;
-        snapped = true;
-      end if;
-    elseif st_geometrytype(target_geom) = 'ST_LineString' then
-      -- Check first if there is any point of linestring where the point can be snapped.
-      select t.* into rec from ST_DumpPoints(target_geom) t where st_dwithin(geom_to_snap, t.geom, snap_distance);
-      if rec is not null then
-        geom_to_snap = rec.geom;
-        snapped = true;
-        return;
-      end if;
-      --Check second if the point is within distance from linestring and get an interpolation point in the line.
-      if st_dwithin(geom_to_snap, target_geom, snap_distance) then
-        point_location = ST_Line_Locate_Point(target_geom, geom_to_snap);
-        geom_to_snap = ST_Line_Interpolate_Point(target_geom, point_location);
-        if change_target_if_needed then
-          target_geom = ST_LineMerge(ST_Union(ST_Line_Substring(target_geom, 0, point_location), ST_Line_Substring(target_geom, point_location, 1)));
-          target_is_changed = true;
-        end if;
-        snapped = true;  
-      end if;
-    elseif st_geometrytype(target_geom) = 'ST_Polygon' then
-      select  array_agg(ST_ExteriorRing(geom)) into rings from ST_DumpRings(target_geom);
-      nr_elements = array_upper(rings,1);
-      i = 1;
-      while i <= nr_elements loop
-        select t.* into rec from snap_geometry_to_geometry(geom_to_snap, rings[i], snap_distance, change_target_if_needed) t;
-        if rec.snapped then
-          geom_to_snap = rec.geom_to_snap;
-          snapped = true;
-          if change_target_if_needed then
-            rings[i] = rec.target_geom;
-            target_geom = ST_MakePolygon(rings[1], rings[2:nr_elements]);
-            target_is_changed = rec.target_is_changed;
-            return;
-          end if;
-        end if;
-        i = i+1;
-      end loop;
-    end if;
-  elseif st_geometrytype(geom_to_snap) = 'ST_LineString' then
-    nr_elements = st_npoints(geom_to_snap);
-    i = 1;
-    while i <= nr_elements loop
-      select t.* into rec
-        from snap_geometry_to_geometry(st_pointn(geom_to_snap,i), target_geom, snap_distance, change_target_if_needed) t;
-      if rec.snapped then
-        if rec.target_is_changed then
-          target_geom= rec.target_geom;
-          target_is_changed = true;
-        end if;
-        geom_to_snap = st_setpoint(geom_to_snap, i-1, rec.geom_to_snap);
-        snapped = true;
-      end if;
-      i = i+1;
-    end loop;
-    -- For each point of the target checks if it can snap to the geom_to_snap
-    for rec in select * from ST_DumpPoints(target_geom) t 
-      where st_dwithin(geom_to_snap, t.geom, snap_distance) loop
-      select t.* into rec2
-        from snap_geometry_to_geometry(rec.geom, geom_to_snap, snap_distance, true) t;
-      if rec2.target_is_changed then
-        geom_to_snap = rec2.target_geom;
-        snapped = true;
-      end if;
-    end loop;
-  elseif st_geometrytype(geom_to_snap) = 'ST_Polygon' then
-    select  array_agg(ST_ExteriorRing(geom)) into rings from ST_DumpRings(geom_to_snap);
-    nr_elements = array_upper(rings,1);
-    i = 1;
-    while i <= nr_elements loop
-      select t.* into rec
-        from snap_geometry_to_geometry(rings[i], target_geom, snap_distance, change_target_if_needed) t;
-      if rec.snapped then
-        rings[i] = rec.geom_to_snap;
-        if rec.target_is_changed then
-          target_geom = rec.target_geom;
-          target_is_changed = true;
-        end if;
-        snapped = true;
-      end if;
-      i= i+1;
-    end loop;
-    if snapped then
-      geom_to_snap = ST_MakePolygon(rings[1], rings[2:nr_elements]);
-    end if;
-  end if;
-  return;
-END;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION public.snap_geometry_to_geometry(
-inout geom_to_snap geometry
-  ,inout target_geom geometry
-  , snap_distance float
-  , change_target_if_needed bool
-  ,out snapped bool
-  ,out target_is_changed bool
-) IS 'Used to snap a geometry to another geometry.
-
-Usage sample:
-select geom_to_snap, target_geom, snapped, target_is_changed 
-FROM snap_geometry_to_geometry(geomfromtext(''POLYGON((0.1 0, 0.1 5.7, 4 3, 0.1 0))''), 
- geomfromtext(''POLYGON((0 0, 0 6, 6 6, 6 0, 0 0),(1 1, 3 5, 4 5, 1 1))''), 1, true)';
-    
 -- Function public.get_geometry_with_srid --
 CREATE OR REPLACE FUNCTION public.get_geometry_with_srid(
  geom geometry
@@ -534,6 +402,177 @@ COMMENT ON FUNCTION cadastre.cadastre_object_name_is_valid(
  name_firstpart varchar
   , name_lastpart varchar
 ) IS '';
+    
+-- Function cadastre.add_topo_points --
+CREATE OR REPLACE FUNCTION cadastre.add_topo_points(
+ source geometry
+  , target geometry
+) RETURNS geometry 
+AS $$
+declare
+  rec record;
+  point_location float;
+  point_to_add geometry;
+  rings geometry[];
+  nr_elements integer;
+  tolerance double precision;
+  i integer;
+begin
+  tolerance = system.get_setting('map-tolerance')::double precision;
+  if st_geometrytype(target) = 'ST_LineString' then
+    for rec in 
+      select geom from St_DumpPoints(source) s
+        where st_dwithin(target, s.geom, tolerance)
+    loop
+      if (select count(1) from st_dumppoints(target) t where st_dwithin(rec.geom, t.geom, tolerance))=0 then
+        point_location = ST_Line_Locate_Point(target, rec.geom);
+        --point_to_add = ST_Line_Interpolate_Point(target, point_location);
+        target = ST_LineMerge(ST_Union(ST_Line_Substring(target, 0, point_location), ST_Line_Substring(target, point_location, 1)));
+      end if;
+    end loop;
+  elsif st_geometrytype(target)= 'ST_Polygon' then
+    select  array_agg(ST_ExteriorRing(geom)) into rings from ST_DumpRings(target);
+    nr_elements = array_upper(rings, 1);
+    for i in 1..nr_elements loop
+      rings[i] = cadastre.add_topo_points(source, rings[i]);
+    end loop;
+    target = ST_MakePolygon(rings[1], rings[2:nr_elements]);
+  end if;
+  return target;
+end;
+$$ LANGUAGE plpgsql;
+COMMENT ON FUNCTION cadastre.add_topo_points(
+ source geometry
+  , target geometry
+) IS 'This function searches for any point in source that falls into target. If a point is found then the point it is added in the target.
+It returns the modified target.';
+    
+-- Function cadastre.snap_geometry_to_geometry --
+CREATE OR REPLACE FUNCTION cadastre.snap_geometry_to_geometry(
+inout geom_to_snap geometry
+  ,inout target_geom geometry
+  , snap_distance float
+  , change_target_if_needed bool
+  ,out snapped bool
+  ,out target_is_changed bool
+) RETURNS record 
+AS $$
+DECLARE
+  i integer;
+  nr_elements integer;
+  rec record;
+  rec2 record;
+  point_location float;
+  rings geometry[];
+  
+BEGIN
+  target_is_changed = false;
+  snapped = false;
+  if st_geometrytype(geom_to_snap) not in ('ST_Point', 'ST_LineString', 'ST_Polygon') then
+    raise exception 'geom_to_snap not supported. Only point, linestring and polygon is supported.';
+  end if;
+  if st_geometrytype(geom_to_snap) = 'ST_Point' then
+    -- If the geometry to snap is POINT
+    if st_geometrytype(target_geom) = 'ST_Point' then
+      if st_dwithin(geom_to_snap, target_geom, snap_distance) then
+        geom_to_snap = target_geom;
+        snapped = true;
+      end if;
+    elseif st_geometrytype(target_geom) = 'ST_LineString' then
+      -- Check first if there is any point of linestring where the point can be snapped.
+      select t.* into rec from ST_DumpPoints(target_geom) t where st_dwithin(geom_to_snap, t.geom, snap_distance);
+      if rec is not null then
+        geom_to_snap = rec.geom;
+        snapped = true;
+        return;
+      end if;
+      --Check second if the point is within distance from linestring and get an interpolation point in the line.
+      if st_dwithin(geom_to_snap, target_geom, snap_distance) then
+        point_location = ST_Line_Locate_Point(target_geom, geom_to_snap);
+        geom_to_snap = ST_Line_Interpolate_Point(target_geom, point_location);
+        if change_target_if_needed then
+          target_geom = ST_LineMerge(ST_Union(ST_Line_Substring(target_geom, 0, point_location), ST_Line_Substring(target_geom, point_location, 1)));
+          target_is_changed = true;
+        end if;
+        snapped = true;  
+      end if;
+    elseif st_geometrytype(target_geom) = 'ST_Polygon' then
+      select  array_agg(ST_ExteriorRing(geom)) into rings from ST_DumpRings(target_geom);
+      nr_elements = array_upper(rings,1);
+      i = 1;
+      while i <= nr_elements loop
+        select t.* into rec from cadastre.snap_geometry_to_geometry(geom_to_snap, rings[i], snap_distance, change_target_if_needed) t;
+        if rec.snapped then
+          geom_to_snap = rec.geom_to_snap;
+          snapped = true;
+          if change_target_if_needed then
+            rings[i] = rec.target_geom;
+            target_geom = ST_MakePolygon(rings[1], rings[2:nr_elements]);
+            target_is_changed = rec.target_is_changed;
+            return;
+          end if;
+        end if;
+        i = i+1;
+      end loop;
+    end if;
+  elseif st_geometrytype(geom_to_snap) = 'ST_LineString' then
+    nr_elements = st_npoints(geom_to_snap);
+    i = 1;
+    while i <= nr_elements loop
+      select t.* into rec
+        from cadastre.snap_geometry_to_geometry(st_pointn(geom_to_snap,i), target_geom, snap_distance, change_target_if_needed) t;
+      if rec.snapped then
+        if rec.target_is_changed then
+          target_geom= rec.target_geom;
+          target_is_changed = true;
+        end if;
+        geom_to_snap = st_setpoint(geom_to_snap, i-1, rec.geom_to_snap);
+        snapped = true;
+      end if;
+      i = i+1;
+    end loop;
+    -- For each point of the target checks if it can snap to the geom_to_snap
+    for rec in select * from ST_DumpPoints(target_geom) t 
+      where st_dwithin(geom_to_snap, t.geom, snap_distance) loop
+      select t.* into rec2
+        from cadastre.snap_geometry_to_geometry(rec.geom, geom_to_snap, snap_distance, true) t;
+      if rec2.target_is_changed then
+        geom_to_snap = rec2.target_geom;
+        snapped = true;
+      end if;
+    end loop;
+  elseif st_geometrytype(geom_to_snap) = 'ST_Polygon' then
+    select  array_agg(ST_ExteriorRing(geom)) into rings from ST_DumpRings(geom_to_snap);
+    nr_elements = array_upper(rings,1);
+    i = 1;
+    while i <= nr_elements loop
+      select t.* into rec
+        from cadastre.snap_geometry_to_geometry(rings[i], target_geom, snap_distance, change_target_if_needed) t;
+      if rec.snapped then
+        rings[i] = rec.geom_to_snap;
+        if rec.target_is_changed then
+          target_geom = rec.target_geom;
+          target_is_changed = true;
+        end if;
+        snapped = true;
+      end if;
+      i= i+1;
+    end loop;
+    if snapped then
+      geom_to_snap = ST_MakePolygon(rings[1], rings[2:nr_elements]);
+    end if;
+  end if;
+  return;
+END;
+$$ LANGUAGE plpgsql;
+COMMENT ON FUNCTION cadastre.snap_geometry_to_geometry(
+inout geom_to_snap geometry
+  ,inout target_geom geometry
+  , snap_distance float
+  , change_target_if_needed bool
+  ,out snapped bool
+  ,out target_is_changed bool
+) IS 'It snaps one geometry to the other. If points needs to be added they will be added.';
     
 -- Sequence application.application_nr_seq --
 DROP SEQUENCE IF EXISTS application.application_nr_seq;
@@ -2259,7 +2298,7 @@ CREATE TABLE source.power_of_attorney(
 CREATE INDEX power_of_attorney_index_on_rowidentifier ON source.power_of_attorney (rowidentifier);
     
 
-comment on table source.power_of_attorney is 'Contains Power of attorney records, referencing source table.';
+comment on table source.power_of_attorney is '';
     
 DROP TRIGGER IF EXISTS __track_changes ON source.power_of_attorney CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -3358,7 +3397,7 @@ CREATE INDEX cadastre_object_index_on_geom_polygon ON cadastre.cadastre_object u
 CREATE INDEX cadastre_object_index_on_rowidentifier ON cadastre.cadastre_object (rowidentifier);
     
 
-comment on table cadastre.cadastre_object is '';
+comment on table cadastre.cadastre_object is 'It is a specialisation of spatial_unit. Cadastre objects are targeted from cadastre change and redefine cadastre processes.';
     
 DROP TRIGGER IF EXISTS __track_changes ON cadastre.cadastre_object CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -3413,6 +3452,7 @@ CREATE TABLE cadastre.cadastre_object_type(
     display_value varchar(250) NOT NULL,
     description varchar(555),
     status char(1) NOT NULL,
+    in_topology bool NOT NULL DEFAULT (false),
 
     -- Internal constraints
     
@@ -3424,9 +3464,9 @@ CREATE TABLE cadastre.cadastre_object_type(
 comment on table cadastre.cadastre_object_type is 'The type of spatial object. This defines the specialisation of the spatial unit. It can be a parcel, building_unit or backgroup data like a road etc.';
     
  -- Data for the table cadastre.cadastre_object_type -- 
-insert into cadastre.cadastre_object_type(code, display_value, status) values('parcel', 'Parcel::::Particella', 'c');
-insert into cadastre.cadastre_object_type(code, display_value, status) values('buildingUnit', 'Building Unit::::Unita Edile', 'c');
-insert into cadastre.cadastre_object_type(code, display_value, status) values('utilityNetwork', 'Utility Network::::Rete Utilita', 'c');
+insert into cadastre.cadastre_object_type(code, display_value, status, in_topology) values('parcel', 'Parcel::::Particella', 'c', true);
+insert into cadastre.cadastre_object_type(code, display_value, status, in_topology) values('buildingUnit', 'Building Unit::::Unita Edile', 'c', false);
+insert into cadastre.cadastre_object_type(code, display_value, status, in_topology) values('utilityNetwork', 'Utility Network::::Rete Utilita', 'c', false);
 
 
 
@@ -4339,6 +4379,7 @@ CREATE TABLE cadastre.survey_point(
     transaction_id varchar(40) NOT NULL,
     id varchar(40) NOT NULL,
     boundary bool NOT NULL DEFAULT (true),
+    linked bool NOT NULL DEFAULT (false),
     geom GEOMETRY NOT NULL
         CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
         CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
@@ -4387,6 +4428,7 @@ CREATE TABLE cadastre.survey_point_historic
     transaction_id varchar(40),
     id varchar(40),
     boundary bool,
+    linked bool,
     geom GEOMETRY
         CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
         CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
@@ -5419,189 +5461,189 @@ ALTER TABLE party.party_role ADD CONSTRAINT party_role_type_code_fk36
             FOREIGN KEY (type_code) REFERENCES party.party_role_type(code) ON UPDATE CASCADE ON DELETE CASCADE;
 CREATE INDEX party_role_type_code_fk36_ind ON party.party_role (type_code);
 
-ALTER TABLE administrative.rrr ADD CONSTRAINT rrr_type_code_fk37 
-            FOREIGN KEY (type_code) REFERENCES administrative.rrr_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX rrr_type_code_fk37_ind ON administrative.rrr (type_code);
-
-ALTER TABLE administrative.rrr ADD CONSTRAINT rrr_ba_unit_id_fk38 
-            FOREIGN KEY (ba_unit_id) REFERENCES administrative.ba_unit(id) ON UPDATE CASCADE ON DELETE Cascade;
-CREATE INDEX rrr_ba_unit_id_fk38_ind ON administrative.rrr (ba_unit_id);
-
-ALTER TABLE administrative.rrr ADD CONSTRAINT rrr_status_code_fk39 
-            FOREIGN KEY (status_code) REFERENCES transaction.reg_status_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX rrr_status_code_fk39_ind ON administrative.rrr (status_code);
-
-ALTER TABLE administrative.rrr ADD CONSTRAINT rrr_transaction_id_fk40 
-            FOREIGN KEY (transaction_id) REFERENCES transaction.transaction(id) ON UPDATE CASCADE ON DELETE Cascade;
-CREATE INDEX rrr_transaction_id_fk40_ind ON administrative.rrr (transaction_id);
-
-ALTER TABLE administrative.rrr ADD CONSTRAINT rrr_mortgage_type_code_fk41 
-            FOREIGN KEY (mortgage_type_code) REFERENCES administrative.mortgage_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX rrr_mortgage_type_code_fk41_ind ON administrative.rrr (mortgage_type_code);
-
-ALTER TABLE administrative.mortgage_isbased_in_rrr ADD CONSTRAINT mortgage_isbased_in_rrr_rrr_id_fk42 
+ALTER TABLE administrative.mortgage_isbased_in_rrr ADD CONSTRAINT mortgage_isbased_in_rrr_rrr_id_fk37 
             FOREIGN KEY (rrr_id) REFERENCES administrative.rrr(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX mortgage_isbased_in_rrr_rrr_id_fk42_ind ON administrative.mortgage_isbased_in_rrr (rrr_id);
+CREATE INDEX mortgage_isbased_in_rrr_rrr_id_fk37_ind ON administrative.mortgage_isbased_in_rrr (rrr_id);
 
-ALTER TABLE administrative.mortgage_isbased_in_rrr ADD CONSTRAINT mortgage_isbased_in_rrr_mortgage_id_fk43 
+ALTER TABLE administrative.mortgage_isbased_in_rrr ADD CONSTRAINT mortgage_isbased_in_rrr_mortgage_id_fk38 
             FOREIGN KEY (mortgage_id) REFERENCES administrative.rrr(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX mortgage_isbased_in_rrr_mortgage_id_fk43_ind ON administrative.mortgage_isbased_in_rrr (mortgage_id);
+CREATE INDEX mortgage_isbased_in_rrr_mortgage_id_fk38_ind ON administrative.mortgage_isbased_in_rrr (mortgage_id);
 
-ALTER TABLE administrative.source_describes_rrr ADD CONSTRAINT source_describes_rrr_rrr_id_fk44 
+ALTER TABLE administrative.source_describes_rrr ADD CONSTRAINT source_describes_rrr_rrr_id_fk39 
             FOREIGN KEY (rrr_id) REFERENCES administrative.rrr(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX source_describes_rrr_rrr_id_fk44_ind ON administrative.source_describes_rrr (rrr_id);
+CREATE INDEX source_describes_rrr_rrr_id_fk39_ind ON administrative.source_describes_rrr (rrr_id);
 
-ALTER TABLE administrative.source_describes_rrr ADD CONSTRAINT source_describes_rrr_source_id_fk45 
+ALTER TABLE administrative.source_describes_rrr ADD CONSTRAINT source_describes_rrr_source_id_fk40 
             FOREIGN KEY (source_id) REFERENCES source.source(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX source_describes_rrr_source_id_fk45_ind ON administrative.source_describes_rrr (source_id);
+CREATE INDEX source_describes_rrr_source_id_fk40_ind ON administrative.source_describes_rrr (source_id);
 
-ALTER TABLE administrative.source_describes_ba_unit ADD CONSTRAINT source_describes_ba_unit_ba_unit_id_fk46 
+ALTER TABLE administrative.source_describes_ba_unit ADD CONSTRAINT source_describes_ba_unit_ba_unit_id_fk41 
             FOREIGN KEY (ba_unit_id) REFERENCES administrative.ba_unit(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX source_describes_ba_unit_ba_unit_id_fk46_ind ON administrative.source_describes_ba_unit (ba_unit_id);
+CREATE INDEX source_describes_ba_unit_ba_unit_id_fk41_ind ON administrative.source_describes_ba_unit (ba_unit_id);
 
-ALTER TABLE administrative.source_describes_ba_unit ADD CONSTRAINT source_describes_ba_unit_source_id_fk47 
+ALTER TABLE administrative.source_describes_ba_unit ADD CONSTRAINT source_describes_ba_unit_source_id_fk42 
             FOREIGN KEY (source_id) REFERENCES source.source(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX source_describes_ba_unit_source_id_fk47_ind ON administrative.source_describes_ba_unit (source_id);
+CREATE INDEX source_describes_ba_unit_source_id_fk42_ind ON administrative.source_describes_ba_unit (source_id);
 
-ALTER TABLE administrative.required_relationship_baunit ADD CONSTRAINT required_relationship_baunit_from_ba_unit_id_fk48 
+ALTER TABLE administrative.required_relationship_baunit ADD CONSTRAINT required_relationship_baunit_from_ba_unit_id_fk43 
             FOREIGN KEY (from_ba_unit_id) REFERENCES administrative.ba_unit(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX required_relationship_baunit_from_ba_unit_id_fk48_ind ON administrative.required_relationship_baunit (from_ba_unit_id);
+CREATE INDEX required_relationship_baunit_from_ba_unit_id_fk43_ind ON administrative.required_relationship_baunit (from_ba_unit_id);
 
-ALTER TABLE administrative.required_relationship_baunit ADD CONSTRAINT required_relationship_baunit_to_ba_unit_id_fk49 
+ALTER TABLE administrative.required_relationship_baunit ADD CONSTRAINT required_relationship_baunit_to_ba_unit_id_fk44 
             FOREIGN KEY (to_ba_unit_id) REFERENCES administrative.ba_unit(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX required_relationship_baunit_to_ba_unit_id_fk49_ind ON administrative.required_relationship_baunit (to_ba_unit_id);
+CREATE INDEX required_relationship_baunit_to_ba_unit_id_fk44_ind ON administrative.required_relationship_baunit (to_ba_unit_id);
 
-ALTER TABLE administrative.required_relationship_baunit ADD CONSTRAINT required_relationship_baunit_relation_code_fk50 
+ALTER TABLE administrative.required_relationship_baunit ADD CONSTRAINT required_relationship_baunit_relation_code_fk45 
             FOREIGN KEY (relation_code) REFERENCES administrative.ba_unit_rel_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX required_relationship_baunit_relation_code_fk50_ind ON administrative.required_relationship_baunit (relation_code);
+CREATE INDEX required_relationship_baunit_relation_code_fk45_ind ON administrative.required_relationship_baunit (relation_code);
 
-ALTER TABLE cadastre.spatial_unit ADD CONSTRAINT spatial_unit_dimension_code_fk51 
+ALTER TABLE cadastre.spatial_unit ADD CONSTRAINT spatial_unit_dimension_code_fk46 
             FOREIGN KEY (dimension_code) REFERENCES cadastre.dimension_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX spatial_unit_dimension_code_fk51_ind ON cadastre.spatial_unit (dimension_code);
+CREATE INDEX spatial_unit_dimension_code_fk46_ind ON cadastre.spatial_unit (dimension_code);
 
-ALTER TABLE cadastre.spatial_unit ADD CONSTRAINT spatial_unit_surface_relation_code_fk52 
+ALTER TABLE cadastre.spatial_unit ADD CONSTRAINT spatial_unit_surface_relation_code_fk47 
             FOREIGN KEY (surface_relation_code) REFERENCES cadastre.surface_relation_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX spatial_unit_surface_relation_code_fk52_ind ON cadastre.spatial_unit (surface_relation_code);
+CREATE INDEX spatial_unit_surface_relation_code_fk47_ind ON cadastre.spatial_unit (surface_relation_code);
 
-ALTER TABLE cadastre.spatial_unit ADD CONSTRAINT spatial_unit_level_id_fk53 
+ALTER TABLE cadastre.spatial_unit ADD CONSTRAINT spatial_unit_level_id_fk48 
             FOREIGN KEY (level_id) REFERENCES cadastre.level(id) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX spatial_unit_level_id_fk53_ind ON cadastre.spatial_unit (level_id);
+CREATE INDEX spatial_unit_level_id_fk48_ind ON cadastre.spatial_unit (level_id);
 
-ALTER TABLE cadastre.level ADD CONSTRAINT level_register_type_code_fk54 
+ALTER TABLE cadastre.level ADD CONSTRAINT level_register_type_code_fk49 
             FOREIGN KEY (register_type_code) REFERENCES cadastre.register_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX level_register_type_code_fk54_ind ON cadastre.level (register_type_code);
+CREATE INDEX level_register_type_code_fk49_ind ON cadastre.level (register_type_code);
 
-ALTER TABLE cadastre.level ADD CONSTRAINT level_structure_code_fk55 
+ALTER TABLE cadastre.level ADD CONSTRAINT level_structure_code_fk50 
             FOREIGN KEY (structure_code) REFERENCES cadastre.structure_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX level_structure_code_fk55_ind ON cadastre.level (structure_code);
+CREATE INDEX level_structure_code_fk50_ind ON cadastre.level (structure_code);
 
-ALTER TABLE cadastre.level ADD CONSTRAINT level_type_code_fk56 
+ALTER TABLE cadastre.level ADD CONSTRAINT level_type_code_fk51 
             FOREIGN KEY (type_code) REFERENCES cadastre.level_content_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX level_type_code_fk56_ind ON cadastre.level (type_code);
+CREATE INDEX level_type_code_fk51_ind ON cadastre.level (type_code);
 
-ALTER TABLE cadastre.cadastre_object ADD CONSTRAINT cadastre_object_id_fk57 
+ALTER TABLE cadastre.cadastre_object ADD CONSTRAINT cadastre_object_id_fk52 
             FOREIGN KEY (id) REFERENCES cadastre.spatial_unit(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX cadastre_object_id_fk57_ind ON cadastre.cadastre_object (id);
+CREATE INDEX cadastre_object_id_fk52_ind ON cadastre.cadastre_object (id);
 
-ALTER TABLE cadastre.cadastre_object ADD CONSTRAINT cadastre_object_type_code_fk58 
+ALTER TABLE cadastre.cadastre_object ADD CONSTRAINT cadastre_object_type_code_fk53 
             FOREIGN KEY (type_code) REFERENCES cadastre.cadastre_object_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX cadastre_object_type_code_fk58_ind ON cadastre.cadastre_object (type_code);
+CREATE INDEX cadastre_object_type_code_fk53_ind ON cadastre.cadastre_object (type_code);
 
-ALTER TABLE cadastre.cadastre_object ADD CONSTRAINT cadastre_object_status_code_fk59 
+ALTER TABLE cadastre.cadastre_object ADD CONSTRAINT cadastre_object_status_code_fk54 
             FOREIGN KEY (status_code) REFERENCES transaction.reg_status_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX cadastre_object_status_code_fk59_ind ON cadastre.cadastre_object (status_code);
+CREATE INDEX cadastre_object_status_code_fk54_ind ON cadastre.cadastre_object (status_code);
 
-ALTER TABLE cadastre.cadastre_object ADD CONSTRAINT cadastre_object_building_unit_type_code_fk60 
+ALTER TABLE cadastre.cadastre_object ADD CONSTRAINT cadastre_object_building_unit_type_code_fk55 
             FOREIGN KEY (building_unit_type_code) REFERENCES cadastre.building_unit_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX cadastre_object_building_unit_type_code_fk60_ind ON cadastre.cadastre_object (building_unit_type_code);
+CREATE INDEX cadastre_object_building_unit_type_code_fk55_ind ON cadastre.cadastre_object (building_unit_type_code);
 
-ALTER TABLE cadastre.cadastre_object ADD CONSTRAINT cadastre_object_transaction_id_fk61 
+ALTER TABLE cadastre.cadastre_object ADD CONSTRAINT cadastre_object_transaction_id_fk56 
             FOREIGN KEY (transaction_id) REFERENCES transaction.transaction(id) ON UPDATE CASCADE ON DELETE Cascade;
-CREATE INDEX cadastre_object_transaction_id_fk61_ind ON cadastre.cadastre_object (transaction_id);
+CREATE INDEX cadastre_object_transaction_id_fk56_ind ON cadastre.cadastre_object (transaction_id);
 
-ALTER TABLE administrative.ba_unit_contains_spatial_unit ADD CONSTRAINT ba_unit_contains_spatial_unit_ba_unit_id_fk62 
+ALTER TABLE administrative.ba_unit_contains_spatial_unit ADD CONSTRAINT ba_unit_contains_spatial_unit_ba_unit_id_fk57 
             FOREIGN KEY (ba_unit_id) REFERENCES administrative.ba_unit(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX ba_unit_contains_spatial_unit_ba_unit_id_fk62_ind ON administrative.ba_unit_contains_spatial_unit (ba_unit_id);
+CREATE INDEX ba_unit_contains_spatial_unit_ba_unit_id_fk57_ind ON administrative.ba_unit_contains_spatial_unit (ba_unit_id);
 
-ALTER TABLE administrative.ba_unit_contains_spatial_unit ADD CONSTRAINT ba_unit_contains_spatial_unit_spatial_unit_id_fk63 
+ALTER TABLE administrative.ba_unit_contains_spatial_unit ADD CONSTRAINT ba_unit_contains_spatial_unit_spatial_unit_id_fk58 
             FOREIGN KEY (spatial_unit_id) REFERENCES cadastre.spatial_unit(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX ba_unit_contains_spatial_unit_spatial_unit_id_fk63_ind ON administrative.ba_unit_contains_spatial_unit (spatial_unit_id);
+CREATE INDEX ba_unit_contains_spatial_unit_spatial_unit_id_fk58_ind ON administrative.ba_unit_contains_spatial_unit (spatial_unit_id);
 
-ALTER TABLE administrative.ba_unit_contains_spatial_unit ADD CONSTRAINT ba_unit_contains_spatial_unit_spatial_unit_id_fk64 
+ALTER TABLE administrative.ba_unit_contains_spatial_unit ADD CONSTRAINT ba_unit_contains_spatial_unit_spatial_unit_id_fk59 
             FOREIGN KEY (spatial_unit_id) REFERENCES cadastre.cadastre_object(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX ba_unit_contains_spatial_unit_spatial_unit_id_fk64_ind ON administrative.ba_unit_contains_spatial_unit (spatial_unit_id);
+CREATE INDEX ba_unit_contains_spatial_unit_spatial_unit_id_fk59_ind ON administrative.ba_unit_contains_spatial_unit (spatial_unit_id);
 
-ALTER TABLE administrative.ba_unit_as_party ADD CONSTRAINT ba_unit_as_party_ba_unit_id_fk65 
+ALTER TABLE administrative.ba_unit_as_party ADD CONSTRAINT ba_unit_as_party_ba_unit_id_fk60 
             FOREIGN KEY (ba_unit_id) REFERENCES administrative.ba_unit(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX ba_unit_as_party_ba_unit_id_fk65_ind ON administrative.ba_unit_as_party (ba_unit_id);
+CREATE INDEX ba_unit_as_party_ba_unit_id_fk60_ind ON administrative.ba_unit_as_party (ba_unit_id);
 
-ALTER TABLE administrative.ba_unit_as_party ADD CONSTRAINT ba_unit_as_party_party_id_fk66 
+ALTER TABLE administrative.ba_unit_as_party ADD CONSTRAINT ba_unit_as_party_party_id_fk61 
             FOREIGN KEY (party_id) REFERENCES party.party(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX ba_unit_as_party_party_id_fk66_ind ON administrative.ba_unit_as_party (party_id);
+CREATE INDEX ba_unit_as_party_party_id_fk61_ind ON administrative.ba_unit_as_party (party_id);
 
-ALTER TABLE administrative.notation ADD CONSTRAINT notation_transaction_id_fk67 
+ALTER TABLE administrative.notation ADD CONSTRAINT notation_transaction_id_fk62 
             FOREIGN KEY (transaction_id) REFERENCES transaction.transaction(id) ON UPDATE CASCADE ON DELETE Cascade;
-CREATE INDEX notation_transaction_id_fk67_ind ON administrative.notation (transaction_id);
+CREATE INDEX notation_transaction_id_fk62_ind ON administrative.notation (transaction_id);
 
-ALTER TABLE administrative.notation ADD CONSTRAINT notation_status_code_fk68 
+ALTER TABLE administrative.notation ADD CONSTRAINT notation_status_code_fk63 
             FOREIGN KEY (status_code) REFERENCES transaction.reg_status_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX notation_status_code_fk68_ind ON administrative.notation (status_code);
+CREATE INDEX notation_status_code_fk63_ind ON administrative.notation (status_code);
 
-ALTER TABLE administrative.notation ADD CONSTRAINT notation_ba_unit_id_fk69 
+ALTER TABLE administrative.notation ADD CONSTRAINT notation_ba_unit_id_fk64 
             FOREIGN KEY (ba_unit_id) REFERENCES administrative.ba_unit(id) ON UPDATE CASCADE ON DELETE Cascade;
-CREATE INDEX notation_ba_unit_id_fk69_ind ON administrative.notation (ba_unit_id);
+CREATE INDEX notation_ba_unit_id_fk64_ind ON administrative.notation (ba_unit_id);
 
-ALTER TABLE administrative.notation ADD CONSTRAINT notation_rrr_id_fk70 
+ALTER TABLE administrative.notation ADD CONSTRAINT notation_rrr_id_fk65 
             FOREIGN KEY (rrr_id) REFERENCES administrative.rrr(id) ON UPDATE CASCADE ON DELETE Cascade;
-CREATE INDEX notation_rrr_id_fk70_ind ON administrative.notation (rrr_id);
+CREATE INDEX notation_rrr_id_fk65_ind ON administrative.notation (rrr_id);
 
-ALTER TABLE administrative.ba_unit_area ADD CONSTRAINT ba_unit_area_ba_unit_id_fk71 
+ALTER TABLE administrative.ba_unit_area ADD CONSTRAINT ba_unit_area_ba_unit_id_fk66 
             FOREIGN KEY (ba_unit_id) REFERENCES administrative.ba_unit(id) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX ba_unit_area_ba_unit_id_fk71_ind ON administrative.ba_unit_area (ba_unit_id);
+CREATE INDEX ba_unit_area_ba_unit_id_fk66_ind ON administrative.ba_unit_area (ba_unit_id);
 
-ALTER TABLE administrative.ba_unit_area ADD CONSTRAINT ba_unit_area_type_code_fk72 
+ALTER TABLE administrative.ba_unit_area ADD CONSTRAINT ba_unit_area_type_code_fk67 
             FOREIGN KEY (type_code) REFERENCES cadastre.area_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX ba_unit_area_type_code_fk72_ind ON administrative.ba_unit_area (type_code);
+CREATE INDEX ba_unit_area_type_code_fk67_ind ON administrative.ba_unit_area (type_code);
 
-ALTER TABLE administrative.rrr_share ADD CONSTRAINT rrr_share_rrr_id_fk73 
+ALTER TABLE administrative.rrr_share ADD CONSTRAINT rrr_share_rrr_id_fk68 
             FOREIGN KEY (rrr_id) REFERENCES administrative.rrr(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX rrr_share_rrr_id_fk73_ind ON administrative.rrr_share (rrr_id);
+CREATE INDEX rrr_share_rrr_id_fk68_ind ON administrative.rrr_share (rrr_id);
 
-ALTER TABLE administrative.party_for_rrr ADD CONSTRAINT party_for_rrr_rrr_id_fk74 
+ALTER TABLE administrative.party_for_rrr ADD CONSTRAINT party_for_rrr_rrr_id_fk69 
             FOREIGN KEY (rrr_id,share_id) REFERENCES administrative.rrr_share(rrr_id,id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX party_for_rrr_rrr_id_fk74_ind ON administrative.party_for_rrr (rrr_id,share_id);
+CREATE INDEX party_for_rrr_rrr_id_fk69_ind ON administrative.party_for_rrr (rrr_id,share_id);
 
-ALTER TABLE administrative.party_for_rrr ADD CONSTRAINT party_for_rrr_rrr_id_fk75 
+ALTER TABLE administrative.party_for_rrr ADD CONSTRAINT party_for_rrr_rrr_id_fk70 
             FOREIGN KEY (rrr_id) REFERENCES administrative.rrr(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX party_for_rrr_rrr_id_fk75_ind ON administrative.party_for_rrr (rrr_id);
+CREATE INDEX party_for_rrr_rrr_id_fk70_ind ON administrative.party_for_rrr (rrr_id);
 
-ALTER TABLE administrative.party_for_rrr ADD CONSTRAINT party_for_rrr_party_id_fk76 
+ALTER TABLE administrative.party_for_rrr ADD CONSTRAINT party_for_rrr_party_id_fk71 
             FOREIGN KEY (party_id) REFERENCES party.party(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX party_for_rrr_party_id_fk76_ind ON administrative.party_for_rrr (party_id);
+CREATE INDEX party_for_rrr_party_id_fk71_ind ON administrative.party_for_rrr (party_id);
 
-ALTER TABLE administrative.ba_unit_target ADD CONSTRAINT ba_unit_target_ba_unit_id_fk77 
+ALTER TABLE administrative.ba_unit_target ADD CONSTRAINT ba_unit_target_ba_unit_id_fk72 
             FOREIGN KEY (ba_unit_id) REFERENCES administrative.ba_unit(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX ba_unit_target_ba_unit_id_fk77_ind ON administrative.ba_unit_target (ba_unit_id);
+CREATE INDEX ba_unit_target_ba_unit_id_fk72_ind ON administrative.ba_unit_target (ba_unit_id);
 
-ALTER TABLE administrative.ba_unit_target ADD CONSTRAINT ba_unit_target_transaction_id_fk78 
+ALTER TABLE administrative.ba_unit_target ADD CONSTRAINT ba_unit_target_transaction_id_fk73 
             FOREIGN KEY (transaction_id) REFERENCES transaction.transaction(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX ba_unit_target_transaction_id_fk78_ind ON administrative.ba_unit_target (transaction_id);
+CREATE INDEX ba_unit_target_transaction_id_fk73_ind ON administrative.ba_unit_target (transaction_id);
 
-ALTER TABLE source.power_of_attorney ADD CONSTRAINT power_of_attorney_id_fk79 
+ALTER TABLE source.power_of_attorney ADD CONSTRAINT power_of_attorney_id_fk74 
             FOREIGN KEY (id) REFERENCES source.source(id) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX power_of_attorney_id_fk79_ind ON source.power_of_attorney (id);
+CREATE INDEX power_of_attorney_id_fk74_ind ON source.power_of_attorney (id);
 
-ALTER TABLE administrative.ba_unit ADD CONSTRAINT ba_unit_type_code_fk80 
+ALTER TABLE administrative.ba_unit ADD CONSTRAINT ba_unit_type_code_fk75 
             FOREIGN KEY (type_code) REFERENCES administrative.ba_unit_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX ba_unit_type_code_fk80_ind ON administrative.ba_unit (type_code);
+CREATE INDEX ba_unit_type_code_fk75_ind ON administrative.ba_unit (type_code);
 
-ALTER TABLE administrative.ba_unit ADD CONSTRAINT ba_unit_status_code_fk81 
+ALTER TABLE administrative.ba_unit ADD CONSTRAINT ba_unit_status_code_fk76 
             FOREIGN KEY (status_code) REFERENCES transaction.reg_status_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX ba_unit_status_code_fk81_ind ON administrative.ba_unit (status_code);
+CREATE INDEX ba_unit_status_code_fk76_ind ON administrative.ba_unit (status_code);
 
-ALTER TABLE administrative.ba_unit ADD CONSTRAINT ba_unit_transaction_id_fk82 
+ALTER TABLE administrative.ba_unit ADD CONSTRAINT ba_unit_transaction_id_fk77 
             FOREIGN KEY (transaction_id) REFERENCES transaction.transaction(id) ON UPDATE CASCADE ON DELETE Cascade;
-CREATE INDEX ba_unit_transaction_id_fk82_ind ON administrative.ba_unit (transaction_id);
+CREATE INDEX ba_unit_transaction_id_fk77_ind ON administrative.ba_unit (transaction_id);
+
+ALTER TABLE administrative.rrr ADD CONSTRAINT rrr_type_code_fk78 
+            FOREIGN KEY (type_code) REFERENCES administrative.rrr_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
+CREATE INDEX rrr_type_code_fk78_ind ON administrative.rrr (type_code);
+
+ALTER TABLE administrative.rrr ADD CONSTRAINT rrr_ba_unit_id_fk79 
+            FOREIGN KEY (ba_unit_id) REFERENCES administrative.ba_unit(id) ON UPDATE CASCADE ON DELETE Cascade;
+CREATE INDEX rrr_ba_unit_id_fk79_ind ON administrative.rrr (ba_unit_id);
+
+ALTER TABLE administrative.rrr ADD CONSTRAINT rrr_status_code_fk80 
+            FOREIGN KEY (status_code) REFERENCES transaction.reg_status_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
+CREATE INDEX rrr_status_code_fk80_ind ON administrative.rrr (status_code);
+
+ALTER TABLE administrative.rrr ADD CONSTRAINT rrr_transaction_id_fk81 
+            FOREIGN KEY (transaction_id) REFERENCES transaction.transaction(id) ON UPDATE CASCADE ON DELETE Cascade;
+CREATE INDEX rrr_transaction_id_fk81_ind ON administrative.rrr (transaction_id);
+
+ALTER TABLE administrative.rrr ADD CONSTRAINT rrr_mortgage_type_code_fk82 
+            FOREIGN KEY (mortgage_type_code) REFERENCES administrative.mortgage_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
+CREATE INDEX rrr_mortgage_type_code_fk82_ind ON administrative.rrr (mortgage_type_code);
 
 ALTER TABLE cadastre.spatial_value_area ADD CONSTRAINT spatial_value_area_spatial_unit_id_fk83 
             FOREIGN KEY (spatial_unit_id) REFERENCES cadastre.spatial_unit(id) ON UPDATE CASCADE ON DELETE CASCADE;
@@ -5848,34 +5890,40 @@ CREATE TRIGGER trg_new before insert
 CREATE OR REPLACE FUNCTION cadastre.f_for_tbl_cadastre_object_trg_geommodify() RETURNS TRIGGER 
 AS $$
 declare
-  geom_is_modified boolean;
   rec record;
   rec_snap record;
-  snapping_tolerance float;
+  tolerance float;
+  modified_geom geometry;
 begin
-  snapping_tolerance = coalesce(system.get_setting('map-tolerance')::double precision, 0.01);
-  geom_is_modified = (tg_op = 'INSERT' and new.geom_polygon is not null);
-  if tg_op= 'UPDATE' and new.geom_polygon is not null then
-    geom_is_modified = not st_equals(new.geom_polygon, old.geom_polygon);
-  end if;
-  if not geom_is_modified then
+
+  if new.status_code != 'current' then
     return new;
   end if;
+
+  if new.type_code not in (select code from cadastre.cadastre_object_type where in_topology) then
+    return new;
+  end if;
+
+  tolerance = coalesce(system.get_setting('map-tolerance')::double precision, 0.01);
   for rec in select co.id, co.geom_polygon 
                  from cadastre.cadastre_object co 
-                 where  co.id != new.id 
+                 where  co.id != new.id and co.type_code = new.type_code and co.status_code = 'current'
                      and co.geom_polygon is not null 
-                     and st_dwithin(new.geom_polygon, co.geom_polygon, snapping_tolerance)
+                     and new.geom_polygon && co.geom_polygon 
+                     and st_dwithin(new.geom_polygon, co.geom_polygon, tolerance)
   loop
-    select * into rec_snap 
-        from snap_geometry_to_geometry(new.geom_polygon, rec.geom_polygon, snapping_tolerance, false);
-      new.geom_polygon = rec_snap.geom_to_snap;
+    modified_geom = cadastre.add_topo_points(new.geom_polygon, rec.geom_polygon);
+    if not st_equals(modified_geom, rec.geom_polygon) then
+      update cadastre.cadastre_object 
+        set geom_polygon= modified_geom, change_user= new.change_user 
+      where id= rec.id;
+    end if;
   end loop;
   return new;
 end;
 $$ LANGUAGE plpgsql;
 DROP TRIGGER IF EXISTS trg_geommodify ON cadastre.cadastre_object CASCADE;
-CREATE TRIGGER trg_geommodify before insert or update
+CREATE TRIGGER trg_geommodify after insert or update of geom_polygon
    ON cadastre.cadastre_object FOR EACH ROW
    EXECUTE PROCEDURE cadastre.f_for_tbl_cadastre_object_trg_geommodify();
     

@@ -1,5 +1,5 @@
 ﻿insert into system.br(id, technical_type_code, feedback) 
-values('rrr-must-have-parties', 'sql', 'Rrr that must have parties have parties::::RRR per cui sono previste parti, le devono avere');
+values('rrr-must-have-parties', 'sql', 'These rights (and restrictions) must have a recorded party (or parties)::::RRR per cui sono previste parti, le devono avere');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('rrr-must-have-parties', now(), 'infinity', 
@@ -13,7 +13,7 @@ values('rrr-must-have-parties', 'critical', 'current', 'rrr', 3);
 
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('rrr-shares-total-check', 'sql', 'Shares of rights have to total to 1::::Le quote non raggiungono 1',
+values('rrr-shares-total-check', 'sql', 'The sum of the shares (in ownership rights) must total to 1::::Le quote non raggiungono 1',
  '#{id}(application.application.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -30,7 +30,7 @@ values('rrr-shares-total-check', 'critical', 'current', 'rrr', 16);
 
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('ba_unit-has-several-mortgages-with-same-rank', 'sql', 'Title already has a current mortgage with this ranking::::Il titolo ha una ipoteca corrente con lo stesso grado di priorita',
+values('ba_unit-has-several-mortgages-with-same-rank', 'sql', 'The rank of a new mortgage must not be the same as an existing mortgage registered on the same title::::Il titolo ha una ipoteca corrente con lo stesso grado di priorita',
  '#{id}(administrative.rrr.id) is requested.');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -46,7 +46,7 @@ values('ba_unit-has-several-mortgages-with-same-rank', 'critical', 'current', 'r
 
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('ba_unit-has-caveat', 'sql', 'Title has a caveat that is active::::Il titolo ha un diritto di prelazione attivo',
+values('ba_unit-has-caveat', 'sql', 'Title is not encumbered by a caveat.::::Il titolo ha un diritto di prelazione attivo',
  '#{id}(administrative.rrr.id) is requested.');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -68,7 +68,7 @@ values('ba_unit-has-caveat', 'critical', 'current', 'rrr', 19);
 ----------------------------------------------------------------------------------------------------
 
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('rrr-has-pending', 'sql', 'There are no pending edits related with the right, restriction or responsability that is being changed or removed::::Non vi sono modifiche pendenti sul diritto, responsabilita o restrizione che si sta per cambiare o rimuovere',
+values('rrr-has-pending', 'sql', 'There are no other pending actions on the rights and restrictions being changed or removed on this application::::Non vi sono modifiche pendenti sul diritto, responsabilita o restrizione che si sta per cambiare o rimuovere',
  '#{id}(administrative.rrr.id) is requested. It checks if for the target rrr there is already a pending edit or record.');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 

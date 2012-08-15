@@ -1,7 +1,7 @@
 ﻿----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback) 
 values('application-br8-check-has-services', 'sql', 
-'Application has at least one service attached::::La Pratica ha almeno un documento allegato');
+'An application must have at least one service::::La Pratica ha almeno un documento allegato');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('application-br8-check-has-services', now(), 'infinity', 
@@ -14,7 +14,7 @@ values('application-br8-check-has-services', 'critical', 'validate', 'applicatio
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback) 
 values('application-br7-check-sources-have-documents', 'sql', 
-'Some of the documents for this application do not have an attached scanned image::::Alcuni dei documenti per questa pratica non hanno una immagine scannerizzata allegata' );
+'Documents attached to this application should have an attached scanned image::::Alcuni dei documenti per questa pratica non hanno una immagine scannerizzata allegata' );
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('application-br7-check-sources-have-documents', now(), 'infinity', 
@@ -30,7 +30,7 @@ values('application-br7-check-sources-have-documents', 'warning', 'validate', 'a
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback) 
 values('application-br1-check-required-sources-are-present', 'sql', 
-'All documents required for the services are present.::::Sono presenti tutti i documenti richiesti per il servizio' );
+'All documents required for the services in this application are present.::::Sono presenti tutti i documenti richiesti per il servizio' );
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('application-br1-check-required-sources-are-present', now(), 'infinity', 
@@ -51,7 +51,7 @@ values('application-br1-check-required-sources-are-present', 'critical', 'valida
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback) 
 values('application-br2-check-title-documents-not-old', 'sql', 
-'All scanned images of titles are less than one week old.::::Tutte le immagini scannerizzate del titolo hanno al massimo una settimana' );
+'The scanned image of the title should be less than one week old.::::Tutte le immagini scannerizzate del titolo hanno al massimo una settimana' );
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('application-br2-check-title-documents-not-old', now(), 'infinity', 
@@ -66,7 +66,7 @@ values('application-br2-check-title-documents-not-old', 'medium', 'validate', 'a
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback) 
 values('application-br3-check-properties-are-not-historic', 'sql', 
-'All properties identified for the application are not historic.::::Tutte le proprieta identificate per la pratica non sono storiche' );
+'All the titles identified for the application must be current.::::Tutte le proprieta identificate per la pratica non sono storiche' );
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('application-br3-check-properties-are-not-historic', now(), 'infinity', 
@@ -87,7 +87,7 @@ values('application-br3-check-properties-are-not-historic', 'critical', 'validat
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback) 
 values('application-br4-check-sources-date-not-in-the-future', 'sql', 
-'No documents have submission dates for the future.::::Nessun documento ha le date di inoltro per il futuro' );
+'Documents should have submission dates that are not in the future.::::Nessun documento ha le date di inoltro per il futuro' );
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('application-br4-check-sources-date-not-in-the-future', now(), 'infinity', 
@@ -121,7 +121,7 @@ values('application-br5-check-there-are-front-desk-services', 'warning', 'valida
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback) 
 values('application-br6-check-new-title-service-is-needed', 'sql', 
-'There is no digital record for this property. Add a New Digital Title service to your application.::::Non esiste un formato digitale per questa proprieta. Aggiungere un Nuovo Titolo Digitale alla vostra pratica' );
+'An application can be associated with a property which should have a digital title record.::::Non esiste un formato digitale per questa proprieta. Aggiungere un Nuovo Titolo Digitale alla vostra pratica' );
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('application-br6-check-new-title-service-is-needed', now(), 'infinity', 
@@ -144,7 +144,7 @@ values('application-br6-check-new-title-service-is-needed', 'warning', 'validate
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
 values('applicant-name-to-owner-name-check', 'sql', 
-'Applicant name is different from current recorded owners::::Il nome del richiedente differisce da quello dei proprietari registrati',
+'The applicants name should be the same as (one of) the current owner(s)::::Il nome del richiedente differisce da quello dei proprietari registrati',
  '#{id}(application.application.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -167,7 +167,7 @@ values('applicant-name-to-owner-name-check', 'warning', 'validate', 'application
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
 values('app-current-caveat-and-no-remove-or-vary', 'sql', 
-'There is a current or pending caveat registered on this title and this application does not include a cancel or waiver/vary caveat service::::Per questo titolo siste un diritto di prelazione pendente o corrente e la pratica non include un servizio di cancellazione o di variazione prelazione ',
+'The identified property has a current or pending caveat registered on the title. The application must include a cancel or waiver/vary caveat service for registration to proceed.::::Per questo titolo siste un diritto di prelazione pendente o corrente e la pratica non include un servizio di cancellazione o di variazione prelazione ',
  '#{id}(application.application.id) is requested. It checks if there is a caveat (pending or current) registered
  on the title and if the application does not have any service of type remove or vary caveat');
 
@@ -187,9 +187,8 @@ values('app-current-caveat-and-no-remove-or-vary', 'medium', 'validate', 'applic
 
 ----------------------------------------------------------------------------------------------------
 
-
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('app-title-has-primary-right', 'sql', 'Start title for the new title service in this application must have a primary right::::Il titolo originario del nuovo titolo deve avere un diritto primario',
+values('app-title-has-primary-right', 'sql', 'A primary right (such as ownership) must be identified for a request for a new title::::Il titolo originario del nuovo titolo deve avere un diritto primario',
  '#{id}(application.application.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -218,7 +217,7 @@ values('app-title-has-primary-right', 'critical', 'validate', 'application', 1);
 ----------------------------------------------------------------------------------------------------
 
 insert into system.br(id, technical_type_code, feedback) 
-values('application-on-approve-check-services-status', 'sql', 'All services in the application must have the status cancelled or completed::::Tutti i servizi devono avere lo stato di cancellato o completato');
+values('application-on-approve-check-services-status', 'sql', 'All services in the application must have the status ''cancelled'' or ''completed''.::::Tutti i servizi devono avere lo stato di cancellato o completato');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('application-on-approve-check-services-status', now(), 'infinity', 
@@ -230,7 +229,7 @@ values('application-on-approve-check-services-status', 'critical', 'approve', 'a
 
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback) 
-values('application-on-approve-check-services-without-transaction', 'sql', 'All services with the status ''completed'' must have done changes in the system::::Tutti i servizi con stato completato devono aver prodotto modifiche nel sistema');
+values('application-on-approve-check-services-without-transaction', 'sql', 'Changes on the system must have been made for all services in the application.::::Tutti i servizi con stato completato devono aver prodotto modifiche nel sistema');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('application-on-approve-check-services-without-transaction', now(), 'infinity', 
@@ -243,7 +242,7 @@ values('application-on-approve-check-services-without-transaction', 'critical', 
 
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('applicant-identification-check', 'sql', 'No personal identification details recorded for application::::Non esistono dettagli identificativi registrati per la pratica',
+values('applicant-identification-check', 'sql', 'Personal identification details should be recorded for the applicant.::::Non esistono dettagli identificativi registrati per la pratica',
  '#{id}(application.application.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -258,7 +257,7 @@ values('applicant-identification-check', 'medium', 'approve', 'application', 13)
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
 values('newtitle-br24-check-rrr-accounted', 'sql', 
-'Not all rights and restrictions have been accounted for in the new title::::non tutti i diritti e le restrizioni sono stati trasferiti al nuovo titolo', 
+'All rights and restrictions from existing title(s) must be accounted for in the new titles created in this application.::::non tutti i diritti e le restrizioni sono stati trasferiti al nuovo titolo', 
 '#{id}(application_id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -304,7 +303,7 @@ values('newtitle-br24-check-rrr-accounted', 'critical', 'validate', 'application
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback) 
 values('application-for-new-title-has-cancel-property-service', 'sql', 
-'There is no cancel title service in this application. Add a cancel title service to your application.::::Non esiste nella pratica un servizio di cancellazione titolo. Aggiungere questo servizio alla pratica' );
+'When a new title is created there must be a cancel title service in the application for the parent title.::::Non esiste nella pratica un servizio di cancellazione titolo. Aggiungere questo servizio alla pratica' );
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('application-for-new-title-has-cancel-property-service', now(), 'infinity', 
@@ -327,7 +326,7 @@ values('application-for-new-title-has-cancel-property-service', 'critical', 'val
 
 insert into system.br(id, technical_type_code, feedback) 
 values('application-cancel-property-service-before-new-title', 'sql', 
-'New Freehold title service must come before Cancel Title service in the application. Please change order of the services in this application.::::Il servizio di cancellazione titolo deve venire prima di quello di creazione nuovo titolo. Cambiare ordine servizi nella pratica' );
+'New Freehold title service must come before Cancel Title service in the application.::::Il servizio di cancellazione titolo deve venire prima di quello di creazione nuovo titolo. Cambiare ordine servizi nella pratica' );
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('application-cancel-property-service-before-new-title', now(), 'infinity', 
@@ -354,7 +353,7 @@ values('application-cancel-property-service-before-new-title', 'critical', 'vali
 
 insert into system.br(id, technical_type_code, feedback) 
 values('application-approve-cancel-old-titles', 'sql', 
-'Cancel identified existing title(s). Please Terminate existing title using Cancel Title service.::::Identificati titoli esistenti. Prego terminare i titoli esistenti usando il servizio di Cancellazione Titolo' );
+'An application including a new freehold service must also terminate the parent title(s) with a cancel title service.::::Identificati titoli esistenti. Prego terminare i titoli esistenti usando il servizio di Cancellazione Titolo' );
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('application-approve-cancel-old-titles', now(), 'infinity', 
