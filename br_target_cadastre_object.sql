@@ -15,18 +15,17 @@ values('target-parcels-present', 'warning', 'current', 'cadastre_object', 2);
 ----------------------------------------------------------------------------------------------------
 
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('target-parcels-check-nopending', 'sql', 'There should be no pending changes for any oftarget parcels::::Vi sono modifiche pendenti che bloccano la unione delle Particelle',
+values('target-parcels-check-nopending', 'sql', 'There should be no pending changes for any of target parcels::::Vi sono modifiche pendenti che bloccano la unione delle Particelle',
  '#{id}(cadastre.cadastre_object.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('target-parcels-check-nopending', now(), 'infinity', 
- 'select count(*) = 0 as vl
-from cadastre.cadastre_object_target co_target, cadastre.cadastre_object_target co_target_also
+ 'select (select count(*)=0 
+  from cadastre.cadastre_object_target target_also inner join transaction.transaction t 
+    on target_also.transaction_id = t.id and t.status_code not in (''approved'')
+  where co_target.transaction_id != target_also.transaction_id) as vl
+from cadastre.cadastre_object_target co_target
 where co_target.transaction_id = #{id}
-and co_target.transaction_id != co_target_also.transaction_id
-and co_target.cadastre_object_id = co_target_also.cadastre_object_id
-and co_target_also.transaction_id  in (select id from transaction.transaction 
-                                        where status_code not in (''approved''))
  ');
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
@@ -60,8 +59,8 @@ values('cadastre-redefinition-union-old-new-the-same', 'sql',
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('cadastre-redefinition-union-old-new-the-same', now(), 'infinity', 
-'select coalesce(st_equals(geom_to_snap,target_geom), true) as vl
-from snap_geometry_to_geometry(
+'select st_equals(geom_to_snap,target_geom) as vl
+from cadastre.snap_geometry_to_geometry(
 (select st_union(co.geom_polygon) 
 from cadastre.cadastre_object co 
 where id in (select cadastre_object_id from cadastre.cadastre_object_target co_t 
@@ -69,7 +68,7 @@ where id in (select cadastre_object_id from cadastre.cadastre_object_target co_t
 , (select st_union(co_t.geom_polygon)
 from cadastre.cadastre_object_target co_t 
 where transaction_id = #{id}), 
-  coalesce(system.get_setting(''map-tolerance'')::double precision, 0.01), true)');
+  system.get_setting(''map-tolerance'')::double precision, true)');
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
 values('cadastre-redefinition-union-old-new-the-same', 'warning', 'pending', 'cadastre_object', 'redefineCadastre', 1);
@@ -179,7 +178,7 @@ values('target-parcels-check-isapolygon', 'sql', 'The union of the target parcel
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('target-parcels-check-isapolygon', now(), 'infinity', 
-'select coalesce(St_GeometryType(ST_Union(co.geom_polygon)), ''ST_Polygon'') = ''ST_Polygon'' as vl
+'select St_GeometryType(ST_Union(co.geom_polygon)) = ''ST_Polygon'' as vl
  from cadastre.cadastre_object co 
   inner join cadastre.cadastre_object_target co_target
    on co.id = co_target.cadastre_object_id
@@ -215,15 +214,15 @@ values('target-and-new-union-the-same', 'sql', 'The union of new parcel polygons
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('target-and-new-union-the-same', now(), 'infinity', 
- 'select coalesce(st_equals(geom_to_snap,target_geom), true) as vl
-from snap_geometry_to_geometry(
+ 'select st_equals(geom_to_snap,target_geom) as vl
+from cadastre.snap_geometry_to_geometry(
 (select st_union(co.geom_polygon) 
 from cadastre.cadastre_object co where transaction_id = #{id})
 , (select st_union(co.geom_polygon)
 from cadastre.cadastre_object co 
 where id in (select cadastre_object_id 
   from cadastre.cadastre_object_target  where transaction_id = #{id})), 
-  coalesce((select cast(vl as float) from system.setting where name=''map-tolerance''), 0.01), true)
+  system.get_setting(''map-tolerance'')::double precision, true)
  ');
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
