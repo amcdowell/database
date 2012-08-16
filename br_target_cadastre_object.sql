@@ -23,7 +23,8 @@ values('target-parcels-check-nopending', now(), 'infinity',
  'select (select count(*)=0 
   from cadastre.cadastre_object_target target_also inner join transaction.transaction t 
     on target_also.transaction_id = t.id and t.status_code not in (''approved'')
-  where co_target.transaction_id != target_also.transaction_id) as vl
+  where co_target.transaction_id != target_also.transaction_id
+    and co_target.cadastre_object_id= target_also.cadastre_object_id) as vl
 from cadastre.cadastre_object_target co_target
 where co_target.transaction_id = #{id}
  ');
