@@ -304,7 +304,7 @@ il valore delle vecchie aree ufficiali in percentuale non dovrebbe essere superi
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('area-check-percentage-newareas-oldareas', now(), 'infinity', 
-'select abs((select coalesce(cast(sum(a.size)as float),0)
+'select abs((select cast(sum(a.size)as float)
 	from cadastre.spatial_value_area a
 	where a.type_code = ''officialArea''
         and a.spatial_unit_id in (
@@ -312,14 +312,14 @@ values('area-check-percentage-newareas-oldareas', now(), 'infinity',
 		from cadastre.cadastre_object co_new 
 		where co_new.transaction_id = #{id}))
  -
-   (select coalesce(cast(sum(a.size)as float),0)
+   (select cast(sum(a.size)as float)
 	from cadastre.spatial_value_area a
 	where a.type_code = ''officialArea''
 	and a.spatial_unit_id in ( 
 	      select co_target.cadastre_object_id
 		from cadastre.cadastre_object_target co_target
 		    where co_target.transaction_id = #{id})) 
- ) /(select coalesce(cast(sum(a.size)as float),1)
+ ) /(select cast(sum(a.size)as float)
 	from cadastre.spatial_value_area a
 	where a.type_code = ''officialArea''
 	and a.spatial_unit_id in ( 
