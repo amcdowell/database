@@ -1125,8 +1125,8 @@ CREATE TABLE source.administrative_source_type(
     code varchar(20) NOT NULL,
     display_value varchar(250) NOT NULL,
     status char(1) NOT NULL,
-    has_status bool NOT NULL DEFAULT (false),
     description varchar(555),
+    is_for_registration bool DEFAULT (false),
 
     -- Internal constraints
     
@@ -1142,24 +1142,24 @@ LADM Definition
 Not Defined';
     
  -- Data for the table source.administrative_source_type -- 
-insert into source.administrative_source_type(code, display_value, status, has_status) values('agriConsent', 'Agricultural Consent::::Permesso Agricolo', 'x', false);
-insert into source.administrative_source_type(code, display_value, status, has_status) values('agriLease', 'Agricultural Lease::::Contratto Affitto Agricolo', 'x', false);
-insert into source.administrative_source_type(code, display_value, status, has_status) values('agriNotaryStatement', 'Agricultural Notary Statement::::Dichiarazione Agricola Notaio', 'x', false);
-insert into source.administrative_source_type(code, display_value, status, has_status) values('deed', 'Deed', 'c', false);
-insert into source.administrative_source_type(code, display_value, status, has_status) values('lease', 'Lease::::Affitto', 'c', false);
-insert into source.administrative_source_type(code, display_value, status, has_status) values('mortgage', 'Mortgage::::Ipoteca', 'c', false);
-insert into source.administrative_source_type(code, display_value, status, has_status) values('title', 'Title::::Titolo', 'c', false);
-insert into source.administrative_source_type(code, display_value, status, has_status, description) values('proclamation', 'Proclamation::::Bando', 'c', false, 'Extension to LADM');
-insert into source.administrative_source_type(code, display_value, status, has_status, description) values('courtOrder', 'Court Order::::Ordine Tribunale', 'c', false, 'Extension to LADM');
-insert into source.administrative_source_type(code, display_value, status, has_status, description) values('agreement', 'Agreement::::Accordo', 'c', false, 'Extension to LADM');
-insert into source.administrative_source_type(code, display_value, status, has_status, description) values('contractForSale', 'Contract for Sale::::Contratto di vendita', 'c', false, 'Extension to LADM');
-insert into source.administrative_source_type(code, display_value, status, has_status, description) values('will', 'Will::::Testamento', 'c', false, 'Extension to LADM');
-insert into source.administrative_source_type(code, display_value, status, has_status, description) values('powerOfAttorney', 'Power of Attorney::::Procura', 'c', true, 'Extension to LADM');
-insert into source.administrative_source_type(code, display_value, status, has_status, description) values('standardDocument', 'Standard Document::::Documento Standard', 'c', false, 'Extension to LADM');
-insert into source.administrative_source_type(code, display_value, status, has_status, description) values('cadastralMap', 'Cadastral Map::::Mappa Catastale', 'c', false, 'Extension to LADM');
-insert into source.administrative_source_type(code, display_value, status, has_status, description) values('cadastralSurvey', 'Cadastral Survey::::Rilevamento Catastale', 'c', false, 'Extension to LADM');
-insert into source.administrative_source_type(code, display_value, status, has_status, description) values('waiver', 'Waiver to Caveat or other requirement', 'c', false, 'Extension to LADM');
-insert into source.administrative_source_type(code, display_value, status, has_status, description) values('idVerification', 'Form of Identification including Personal ID', 'c', false, 'Extension to LADM');
+insert into source.administrative_source_type(code, display_value, status) values('agriConsent', 'Agricultural Consent::::Permesso Agricolo', 'x');
+insert into source.administrative_source_type(code, display_value, status) values('agriLease', 'Agricultural Lease::::Contratto Affitto Agricolo', 'x');
+insert into source.administrative_source_type(code, display_value, status) values('agriNotaryStatement', 'Agricultural Notary Statement::::Dichiarazione Agricola Notaio', 'x');
+insert into source.administrative_source_type(code, display_value, status) values('deed', 'Deed', 'c');
+insert into source.administrative_source_type(code, display_value, status) values('lease', 'Lease::::Affitto', 'c');
+insert into source.administrative_source_type(code, display_value, status) values('mortgage', 'Mortgage::::Ipoteca', 'c');
+insert into source.administrative_source_type(code, display_value, status) values('title', 'Title::::Titolo', 'c');
+insert into source.administrative_source_type(code, display_value, status, description) values('proclamation', 'Proclamation::::Bando', 'c', 'Extension to LADM');
+insert into source.administrative_source_type(code, display_value, status, description) values('courtOrder', 'Court Order::::Ordine Tribunale', 'c', 'Extension to LADM');
+insert into source.administrative_source_type(code, display_value, status, description) values('agreement', 'Agreement::::Accordo', 'c', 'Extension to LADM');
+insert into source.administrative_source_type(code, display_value, status, description) values('contractForSale', 'Contract for Sale::::Contratto di vendita', 'c', 'Extension to LADM');
+insert into source.administrative_source_type(code, display_value, status, description) values('will', 'Will::::Testamento', 'c', 'Extension to LADM');
+insert into source.administrative_source_type(code, display_value, status, description) values('powerOfAttorney', 'Power of Attorney::::Procura', 'c', 'Extension to LADM');
+insert into source.administrative_source_type(code, display_value, status, description) values('standardDocument', 'Standard Document::::Documento Standard', 'c', 'Extension to LADM');
+insert into source.administrative_source_type(code, display_value, status, description) values('cadastralMap', 'Cadastral Map::::Mappa Catastale', 'c', 'Extension to LADM');
+insert into source.administrative_source_type(code, display_value, status, description) values('cadastralSurvey', 'Cadastral Survey::::Rilevamento Catastale', 'c', 'Extension to LADM');
+insert into source.administrative_source_type(code, display_value, status, description) values('waiver', 'Waiver to Caveat or other requirement', 'c', 'Extension to LADM');
+insert into source.administrative_source_type(code, display_value, status, description) values('idVerification', 'Form of Identification including Personal ID', 'c', 'Extension to LADM');
 
 
 
@@ -1908,7 +1908,8 @@ insert into application.request_type(code, request_category_code, display_value,
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, type_action_code) values('removeRestriction', 'registrationServices', 'Remove Restriction (General)::::Rimozione restrizione (generica)', 'c', 5, 5.00, 0.00, 0, 1, '<restriction> <reference> cancelled', 'cancel');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, type_action_code) values('cancelProperty', 'registrationServices', 'Cancel title::::Cancella prioprieta', 'c', 5, 5, 0, 0, 1, '', 'cancel');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('varyCaveat', 'registrationServices', 'Vary caveat', 'c', 5, 5, 0, 0, 1, '<Caveat> <reference>', 'caveat', 'vary');
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, type_action_code) values('cnclPowerOfAttorney', 'registrationServices', 'Cancel Power of Attorney', 'c', 1, 0, 0, 0, 0, 'cancel');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, type_action_code) values('cnclPowerOfAttorney', 'registrationServices', 'Cancel Power of Attorney', 'c', 1, 5.00, 0, 0, 0, 'cancel');
+insert into application.request_type(code, request_category_code, display_value, description, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('cnclStandardDocument', 'registrationServices', 'Withdraw Standard Document', 'To withdraw from use any standard document (such as standard mortgage or standard lease)', 'c', 1, 5.00, 0, 0, 0);
 
 
 
@@ -4751,7 +4752,7 @@ insert into application.request_type_requires_source_type(source_type_code, requ
 insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('deed', 'regnDeeds');
 insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('lease', 'registerLease');
 insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('powerOfAttorney', 'regnPowerOfAttorney');
-insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('deed', 'regnStandardDocument');
+insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('standardDocument', 'regnStandardDocument');
 insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('title', 'noteOccupation');
 insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('deed', 'noteOccupation');
 insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('deed', 'usufruct');
@@ -4777,6 +4778,8 @@ insert into application.request_type_requires_source_type(source_type_code, requ
 insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('title', 'removeRight');
 insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('deed', 'removeRestriction');
 insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('title', 'removeRestriction');
+insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('deed', 'cnclPowerOfAttorney');
+insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('deed', 'cnclStandardDocument');
 
 
 

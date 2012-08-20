@@ -38,22 +38,6 @@ values('target-parcels-check-nopending', 'critical', 'current', 'cadastre_object
 ----------------------------------------------------------------------------------------------------
 
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('documents-present', 'sql', 'There are documents (source files) attached::::Vi sono documenti allegati',
- '#{id}(transaction_id) is requested');
-
-insert into system.br_definition(br_id, active_from, active_until, body) 
-values('documents-present', now(), 'infinity', 
- 'select count (*) > 0 as vl from transaction.transaction_source where transaction_id= #{id}');
-
-insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
-values('documents-present', 'warning', 'pending', 'cadastre_object', 5);
-
-insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
-values('documents-present', 'warning', 'current', 'cadastre_object', 5);
-
-----------------------------------------------------------------------------------------------------
-
-insert into system.br(id, technical_type_code, feedback, technical_description) 
 values('cadastre-redefinition-union-old-new-the-same', 'sql', 
     'The union of the new polygons must be the same as the union of the old polygons::::La unione dei nuovi poligoni deve esser la stessa di quella dei vecchi poligoni',
  '#{id} is the parameter asked. It is the transaction id.');

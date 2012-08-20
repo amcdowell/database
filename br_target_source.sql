@@ -33,4 +33,18 @@ values('source-attach-in-transaction-allowed-type', 'critical', 'pending', 'sour
 
 ----------------------------------------------------------------------------------------------------
 
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES('documents-present', 'sql', 'Documents associated with a service must have a scanned image file (or other source file) attached::::Vi sono documenti allegati',
+ '#{id}(service_id) is requested');
+
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('documents-present', now(), 'infinity', 
+ 'SELECT (SUM(1) > 0) AS vl FROM transaction.transaction_source ts
+	INNER JOIN transaction.transaction tn ON(ts.transaction_id = tn.id)
+	WHERE tn.from_service_id= #{id}');
+
+INSERT INTO system.br_validation(br_id, severity_code, target_service_moment, target_code, order_of_execution) 
+VALUES('documents-present', 'critical', 'complete', 'service', 5);
+
+--------------------------------------------------------------------------------------
 update system.br set display_name = id where display_name !=id;
