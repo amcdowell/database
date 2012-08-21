@@ -21,7 +21,7 @@ VALUES('source-attach-in-transaction-allowed-type', 'sql', 'Document to be regis
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES('source-attach-in-transaction-allowed-type', now(), 'infinity', 
-'SELECT (COUNT(*) > 0) AS vl 
+'SELECT (COUNT(*) > 0) AS vl FROM source.source ss
 INNER JOIN source.administrative_source_type st ON (ss.type_code = st.code)
 WHERE id = #{id} 
 AND is_for_registration

@@ -86,21 +86,21 @@ insert into system.br_validation(br_id, severity_code, target_application_moment
 values('application-br3-check-properties-are-not-historic', 'critical', 'validate', 'application', 5);
 
 ----------------------------------------------------------------------------------------------------
-insert into system.br(id, technical_type_code, feedback) 
-values('application-br4-check-sources-date-not-in-the-future', 'sql', 
-'Documents should have submission dates that are not in the future.::::Nessun documento ha le date di inoltro per il futuro' );
 
-insert into system.br_definition(br_id, active_from, active_until, body) 
-values('application-br4-check-sources-date-not-in-the-future', now(), 'infinity', 
-'select s.submission < now() as vl
-from application.application_uses_source a_s inner join source.source s on a_s.source_id= s.id
-where a_s.application_id = #{id}
-order by 1
-limit 1
-');
+INSERT INTO system.br(id, technical_type_code, feedback) 
+VALUES('application-br4-check-sources-date-not-in-the-future', 'sql', 
+'Documents should have dates formalised by source agency that are not in the future.::::Nessun documento ha le date di inoltro per il futuro' );
 
-insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-values('application-br4-check-sources-date-not-in-the-future', 'warning', 'validate', 'application', 6);
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('application-br4-check-sources-date-not-in-the-future', now(), 'infinity', 
+'SELECT ss.recordation < NOW() as vl FROM application.application_uses_source a_s
+	INNER JOIN source.source ss ON (a_s.source_id = ss.id)
+	WHERE a_s.application_id = #{id}
+ORDER BY 1
+LIMIT 1');
+
+INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
+VALUES('application-br4-check-sources-date-not-in-the-future', 'warning', 'validate', 'application', 6);
 
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback) 
