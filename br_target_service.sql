@@ -78,7 +78,7 @@ VALUES('current-rrr-for-variation-or-cancellation-check', 'sql', 'For cancellati
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES('current-rrr-for-variation-or-cancellation-check', now(), 'infinity', 
 'SELECT (SUM(1)) AS vl FROM application.service sv 
-			INNER JOINT application.application_property ap ON (sv.application_id = ap.application_id )
+			INNER JOIN application.application_property ap ON (sv.application_id = ap.application_id )
 			  INNER JOIN administrative.ba_unit ba ON (ap.name_firstpart, ap.name_lastpart) = (ba.name_firstpart, ba.name_lastpart)
 			  INNER JOIN administrative.rrr rr ON rr.ba_unit_id = ba.id
 			  WHERE sv.id = #{id}
