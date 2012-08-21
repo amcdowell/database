@@ -1154,8 +1154,8 @@ insert into source.administrative_source_type(code, display_value, status, descr
 insert into source.administrative_source_type(code, display_value, status, description) values('agreement', 'Agreement::::Accordo', 'c', 'Extension to LADM');
 insert into source.administrative_source_type(code, display_value, status, description) values('contractForSale', 'Contract for Sale::::Contratto di vendita', 'c', 'Extension to LADM');
 insert into source.administrative_source_type(code, display_value, status, description) values('will', 'Will::::Testamento', 'c', 'Extension to LADM');
-insert into source.administrative_source_type(code, display_value, status, description) values('powerOfAttorney', 'Power of Attorney::::Procura', 'c', 'Extension to LADM');
-insert into source.administrative_source_type(code, display_value, status, description) values('standardDocument', 'Standard Document::::Documento Standard', 'c', 'Extension to LADM');
+insert into source.administrative_source_type(code, display_value, status, description, is_for_registration) values('powerOfAttorney', 'Power of Attorney::::Procura', 'c', 'Extension to LADM', true);
+insert into source.administrative_source_type(code, display_value, status, description, is_for_registration) values('standardDocument', 'Standard Document::::Documento Standard', 'c', 'Extension to LADM', true);
 insert into source.administrative_source_type(code, display_value, status, description) values('cadastralMap', 'Cadastral Map::::Mappa Catastale', 'c', 'Extension to LADM');
 insert into source.administrative_source_type(code, display_value, status, description) values('cadastralSurvey', 'Cadastral Survey::::Rilevamento Catastale', 'c', 'Extension to LADM');
 insert into source.administrative_source_type(code, display_value, status, description) values('waiver', 'Waiver to Caveat or other requirement', 'c', 'Extension to LADM');

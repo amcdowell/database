@@ -12,9 +12,10 @@ insert into system.br_validation(br_id, severity_code, target_application_moment
 values('application-br8-check-has-services', 'critical', 'validate', 'application', 1);
 
 ----------------------------------------------------------------------------------------------------
-insert into system.br(id, technical_type_code, feedback) 
-values('application-br7-check-sources-have-documents', 'sql', 
-'Documents attached to this application should have an attached scanned image::::Alcuni dei documenti per questa pratica non hanno una immagine scannerizzata allegata' );
+
+INSERT INTO system.br(id, technical_type_code, feedback) 
+VALUES('application-br7-check-sources-have-documents', 'sql', 
+'Documents lodged with an application should have a scanned image file (or other source file) attached::::Alcuni dei documenti per questa pratica non hanno una immagine scannerizzata allegata' );
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('application-br7-check-sources-have-documents', now(), 'infinity', 
@@ -379,9 +380,5 @@ values('application-approve-cancel-old-titles', 'critical', 'approve', 'applicat
 update system.br set display_name = id where display_name !=id;
 
 ----------------------------------------------------------------------------------------------------
---delete from system.br_validation where br_id = 'newtitle-br24-check-rrr-accounted';
 
---delete from system.br_definition where br_id = 'newtitle-br24-check-rrr-accounted';
-
---delete from system.br where id = 'newtitle-br24-check-rrr-accounted';
 ----------------------------------------------------------------------------------------------------
