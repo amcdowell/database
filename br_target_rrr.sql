@@ -14,7 +14,7 @@ values('rrr-must-have-parties', 'critical', 'current', 'rrr', 3);
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
 values('rrr-shares-total-check', 'sql', 'The sum of the shares (in ownership rights) must total to 1::::Le quote non raggiungono 1',
- '#{id}(application.application.id) is requested');
+ '#{id}(administrative.rrr.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('rrr-shares-total-check', now(), 'infinity', 

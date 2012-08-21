@@ -132,5 +132,41 @@ LIMIT 1');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_service_moment, target_code, order_of_execution) 
 VALUES('document-supporting-rrr-is-current', 'critical', 'complete', 'service',  1);
+----------------------------------------------------------------------------------------------------
+
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES('documents-present', 'sql', 'Documents associated with a service must have a scanned image file (or other source file) attached::::Vi sono documenti allegati',
+ '#{id}(service_id) is requested');
+
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('documents-present', now(), 'infinity', 
+ 'WITH cadastreDocs AS 	(SELECT DISTINCT ON (id) ss.id, ext_archive_id FROM source.source ss
+				INNER JOIN transaction.transaction_source ts ON (ss.id = ts.source_id)
+				INNER JOIN transaction.transaction tn ON(ts.transaction_id = tn.id)
+				WHERE tn.from_service_id = #{id}
+				ORDER BY 1),
+	rrrDocs AS	(SELECT DISTINCT ON (id) ss.id, ext_archive_id FROM source.source ss
+				INNER JOIN administrative.source_describes_rrr sr ON (ss.id = sr.source_id)
+				INNER JOIN administrative.rrr rr ON (sr.rrr_id = rr.id)
+				INNER JOIN transaction.transaction tn ON(rr.transaction_id = tn.id)
+				WHERE tn.from_service_id = #{id}
+				ORDER BY 1),
+     titleDocs AS	(SELECT DISTINCT ON (id) ss.id, ext_archive_id FROM source.source ss
+				INNER JOIN administrative.source_describes_ba_unit su ON (ss.id = su.source_id)
+				WHERE su.ba_unit_id IN (SELECT  ba_unit_id FROM rrrDocs)
+				ORDER BY 1),
+     regDocs AS		(SELECT DISTINCT ON (id) ss.id, ext_archive_id FROM source.source ss
+				INNER JOIN transaction.transaction tn ON (ss.transaction_id = tn.id)
+				INNER JOIN application.service sv ON (tn.from_service_id = sv.id)
+				WHERE sv.id = #{id}
+				AND sv.request_type_code IN (''regnPowerOfAttorney'', ''regnStandardDocument'', ''cnclPowerOfAttorney'', ''cnclStandardDocument'')
+				ORDER BY 1),
+     serviceDocs AS	((SELECT * FROM rrrDocs) UNION (SELECT * FROM cadastreDocs) UNION (SELECT * FROM titleDocs) UNION (SELECT * FROM regDocs))
+     
+     
+ SELECT (((SELECT COUNT(*) FROM serviceDocs) - (SELECT COUNT(*) FROM serviceDocs WHERE ext_archive_id IS NOT NULL)) = 0) AS vl');
+
+INSERT INTO system.br_validation(br_id, severity_code, target_service_moment, target_code, order_of_execution) 
+VALUES('documents-present', 'critical', 'complete', 'service', 5);
 --------------------------------------------------------------------------------------------------
 update system.br set display_name = id where display_name is null;
