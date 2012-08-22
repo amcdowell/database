@@ -173,20 +173,23 @@ VALUES('documents-present', 'critical', 'complete', 'service', 5);
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
 VALUES('power-of-attorney-owner-check', 'sql', 'Name of person identified in Power of Attorney should match a (one of the) current owner(s)::::ITALIANO',
   '#{id}(application.service.id)');
- 
+--delete from system.br_definition where br_id =  'power-of-attorney-owner-check'
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES('power-of-attorney-owner-check', NOW(), 'infinity', 
-'SELECT (COUNT(*) > 0) AS vl FROM transaction.transaction tn
-	INNER JOIN administrative.rrr rr ON (tn.id = rr.transaction_id) 
-	INNER JOIN administrative.ba_unit ba ON (rr.ba_unit_id = ba.id)
-	INNER JOIN administrative.rrr r2 ON ((ba.id = r2.ba_unit_id) AND (r2.status_code = ''current'') AND r2.is_primary)
-	INNER JOIN administrative.rrr_share rs ON (r2.id = rs.rrr_id)
-	INNER JOIN administrative.party_for_rrr pr ON (rs.rrr_id = pr.rrr_id)
-	INNER JOIN party.party py ON (pr.party_id = py.id)
-	INNER JOIN administrative.source_describes_rrr sr ON (rr.id = sr.rrr_id)
-	INNER JOIN source.power_of_attorney pa ON (sr.source_id = pa.id)
-WHERE tn.from_service_id = #{id}
-AND compare_strings(person_name, COALESCE(py.name, '''') || '' '' || COALESCE(py.last_name, ''''))
+'WITH poaQuery AS (SELECT person_name, py.name AS firstName, py.last_name AS lastName FROM transaction.transaction tn
+			INNER JOIN administrative.rrr rr ON (tn.id = rr.transaction_id) 
+			INNER JOIN administrative.ba_unit ba ON (rr.ba_unit_id = ba.id)
+			INNER JOIN administrative.rrr r2 ON ((ba.id = r2.ba_unit_id) AND (r2.status_code = ''current'') AND r2.is_primary)
+			INNER JOIN administrative.rrr_share rs ON (r2.id = rs.rrr_id)
+			INNER JOIN administrative.party_for_rrr pr ON (rs.rrr_id = pr.rrr_id)
+			INNER JOIN party.party py ON (pr.party_id = py.id)
+			INNER JOIN administrative.source_describes_rrr sr ON (rr.id = sr.rrr_id)
+			INNER JOIN source.power_of_attorney pa ON (sr.source_id = pa.id)
+		WHERE tn.from_service_id = #{id})
+SELECT CASE WHEN (COUNT(*) > 0) THEN TRUE
+		ELSE NULL
+	END AS vl FROM poaQuery
+WHERE compare_strings(person_name, COALESCE(firstName, '''') || '' '' || COALESCE(lastName, ''''))
 ORDER BY vl
 LIMIT 1');
 

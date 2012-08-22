@@ -148,21 +148,27 @@ INSERT INTO system.br(id, technical_type_code, feedback, technical_description)
 VALUES('applicant-name-to-owner-name-check', 'sql', 
 'The applicants name should be the same as (one of) the current owner(s)::::Il nome del richiedente differisce da quello dei proprietari registrati',
  '#{id}(application.application.id) is requested');
-
+--delete from system.br_definition where br_id = 'applicant-name-to-owner-name-check'
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES('applicant-name-to-owner-name-check', NOW(), 'infinity', 
 'WITH apStr AS (SELECT  COALESCE(name, '''') || '' '' || COALESCE(last_name, '''') AS searchStr FROM party.party pty
 		INNER JOIN application.application ap ON (ap.contact_person_id = pty.id)
+		WHERE ap.id = #{id}),
+     apStr2 AS (SELECT  COALESCE(last_name, '''') AS searchStr FROM party.party pty
+		INNER JOIN application.application ap ON (ap.contact_person_id = pty.id)
+		WHERE ap.id = #{id}),
+    poaQuery AS (SELECT pty.name AS firstName, pty.last_name AS lastName FROM application.application_property ap
+			INNER JOIN administrative.ba_unit ba ON ((ap.name_firstpart, ap.name_lastpart) = (ba.name_firstpart, ba.name_lastpart))
+			INNER JOIN administrative.rrr rr ON ((ba.id = rr.ba_unit_id) AND (rr.status_code = ''current'') AND rr.is_primary)
+			INNER JOIN administrative.rrr_share rs ON (rr.id = rs.rrr_id)
+			INNER JOIN administrative.party_for_rrr pr ON (rs.rrr_id = pr.rrr_id)
+			INNER JOIN party.party pty ON (pr.party_id = pty.id)
 		WHERE ap.id = #{id})
 
-SELECT (COUNT(*) > 0) AS vl FROM application.application_property ap
-	INNER JOIN administrative.ba_unit ba ON ((ap.name_firstpart, ap.name_lastpart) = (ba.name_firstpart, ba.name_lastpart))
-	INNER JOIN administrative.rrr rr ON ((ba.id = rr.ba_unit_id) AND (rr.status_code = ''current'') AND rr.is_primary)
-	INNER JOIN administrative.rrr_share rs ON (rr.id = rs.rrr_id)
-	INNER JOIN administrative.party_for_rrr pr ON (rs.rrr_id = pr.rrr_id)
-	INNER JOIN party.party pty ON (pr.party_id = pty.id)
-WHERE ap.id = #{id}
-AND compare_strings((SELECT searchStr FROM apStr), COALESCE(pty.name, '''') || '' '' || COALESCE(pty.last_name, ''''))
+SELECT CASE WHEN (COUNT(*) > 0) THEN TRUE
+		ELSE NULL
+	END AS vl FROM poaQuery
+WHERE (compare_strings((SELECT searchStr FROM apStr), COALESCE(firstName, '''') || '' '' || COALESCE(lastName, '''')) OR compare_strings((SELECT searchStr FROM apStr2), COALESCE(firstName, '''') || '' '' || COALESCE(lastName, '''')))
 ORDER BY vl
 LIMIT 1');
 
