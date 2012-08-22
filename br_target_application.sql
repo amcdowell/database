@@ -50,19 +50,20 @@ insert into system.br_validation(br_id, severity_code, target_application_moment
 values('application-br1-check-required-sources-are-present', 'critical', 'validate', 'application', 3);
 
 ----------------------------------------------------------------------------------------------------
-insert into system.br(id, technical_type_code, feedback) 
-values('application-br2-check-title-documents-not-old', 'sql', 
+INSERT INTO system.br(id, technical_type_code, feedback) 
+VALUES('application-br2-check-title-documents-not-old', 'sql', 
 'The scanned image of the title should be less than one week old.::::Tutte le immagini scannerizzate del titolo hanno al massimo una settimana' );
 
-insert into system.br_definition(br_id, active_from, active_until, body) 
-values('application-br2-check-title-documents-not-old', now(), 'infinity', 
-'select s.submission + 1 * interval ''1 week'' > now() as vl
-from application.application_uses_source a_s inner join source.source s on a_s.source_id= s.id
-where a_s.application_id = #{id}
-and s.type_code in (''title'')');
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('application-br2-check-title-documents-not-old', NOW(), 'infinity', 
+'SELECT s.recordation + 1 * interval ''1 week'' > now() AS vl
+FROM application.application_uses_source a_s 
+	INNER JOIN source.source s ON (a_s.source_id= s.id)
+WHERE a_s.application_id = #{id}
+AND s.type_code = ''title''');
 
-insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-values('application-br2-check-title-documents-not-old', 'medium', 'validate', 'application', 4);
+INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
+VALUES('application-br2-check-title-documents-not-old', 'medium', 'validate', 'application', 4);
 
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback) 
@@ -143,27 +144,30 @@ insert into system.br_validation(br_id, severity_code, target_application_moment
 values('application-br6-check-new-title-service-is-needed', 'warning', 'validate', 'application', 8);
 
 ----------------------------------------------------------------------------------------------------
-insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('applicant-name-to-owner-name-check', 'sql', 
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES('applicant-name-to-owner-name-check', 'sql', 
 'The applicants name should be the same as (one of) the current owner(s)::::Il nome del richiedente differisce da quello dei proprietari registrati',
  '#{id}(application.application.id) is requested');
 
-insert into system.br_definition(br_id, active_from, active_until, body) 
-values('applicant-name-to-owner-name-check', now(), 'infinity', 
-'select (select string_agg(name || '' '' || last_name, ''#'') 
-  from party.party inner join administrative.party_for_rrr prrr on party.id= prrr.party_id) = 
-  (cp.name || '' '' || cp.last_name) as vl
-from application.application a inner join party.party cp on a.contact_person_id= cp.id
-inner join application.application_property ap on a.id = ap.application_id 
-  INNER JOIN administrative.ba_unit ba ON (ap.name_firstpart, ap.name_lastpart) = (ba.name_firstpart, ba.name_lastpart)
-  INNER JOIN administrative.rrr ON rrr.ba_unit_id = ba.id and rrr.status_code in (''current'') and rrr.is_primary
-where a.id=#{id}
-order by vl
-limit 1
-');
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('applicant-name-to-owner-name-check', NOW(), 'infinity', 
+'WITH apStr AS (SELECT  COALESCE(name, '''') || '' '' || COALESCE(last_name, '''') AS searchStr FROM party.party pty
+		INNER JOIN application.application ap ON (ap.contact_person_id = pty.id)
+		WHERE ap.id = #{id})
 
-insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-values('applicant-name-to-owner-name-check', 'warning', 'validate', 'application', 25);
+SELECT (COUNT(*) > 0) AS vl FROM application.application_property ap
+	INNER JOIN administrative.ba_unit ba ON ((ap.name_firstpart, ap.name_lastpart) = (ba.name_firstpart, ba.name_lastpart))
+	INNER JOIN administrative.rrr rr ON ((ba.id = rr.ba_unit_id) AND (rr.status_code = ''current'') AND rr.is_primary)
+	INNER JOIN administrative.rrr_share rs ON (rr.id = rs.rrr_id)
+	INNER JOIN administrative.party_for_rrr pr ON (rs.rrr_id = pr.rrr_id)
+	INNER JOIN party.party pty ON (pr.party_id = pty.id)
+WHERE ap.id = #{id}
+AND compare_strings((SELECT searchStr FROM apStr), COALESCE(pty.name, '''') || '' '' || COALESCE(pty.last_name, ''''))
+ORDER BY vl
+LIMIT 1');
+
+INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
+VALUES('applicant-name-to-owner-name-check', 'warning', 'validate', 'application', 25);
 
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
