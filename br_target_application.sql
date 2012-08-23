@@ -1,15 +1,17 @@
 ﻿----------------------------------------------------------------------------------------------------
-insert into system.br(id, technical_type_code, feedback) 
-values('application-br8-check-has-services', 'sql', 
+INSERT INTO system.br(id, technical_type_code, feedback) 
+VALUES('application-br8-check-has-services', 'sql', 
 'An application must have at least one service::::La Pratica ha almeno un documento allegato');
 
-insert into system.br_definition(br_id, active_from, active_until, body) 
-values('application-br8-check-has-services', now(), 'infinity', 
-'select count(*)>0 as vl
-from application.service s where s.application_id = #{id}');
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('application-br8-check-has-services', now(), 'infinity', 
+'SELECT (COUNT(*) > 0) as vl
+FROM application.service sv 
+WHERE sv.application_id = #{id}
+AND sv.status_code != ''cancelled''');
 
-insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-values('application-br8-check-has-services', 'critical', 'validate', 'application', 1);
+INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
+VALUES('application-br8-check-has-services', 'critical', 'validate', 'application', 1);
 
 ----------------------------------------------------------------------------------------------------
 
@@ -17,37 +19,36 @@ INSERT INTO system.br(id, technical_type_code, feedback)
 VALUES('application-br7-check-sources-have-documents', 'sql', 
 'Documents lodged with an application should have a scanned image file (or other source file) attached::::Alcuni dei documenti per questa pratica non hanno una immagine scannerizzata allegata' );
 
-insert into system.br_definition(br_id, active_from, active_until, body) 
-values('application-br7-check-sources-have-documents', now(), 'infinity', 
-'select ext_archive_id is not null as vl
-from source.source 
-where id in (select source_id 
-    from application.application_uses_source
-    where application_id= #{id})');
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('application-br7-check-sources-have-documents', now(), 'infinity', 
+'SELECT ext_archive_id IS NOT NULL AS vl
+FROM source.source 
+WHERE id IN (SELECT source_id FROM application.application_uses_source WHERE application_id= #{id})');
 
-insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-values('application-br7-check-sources-have-documents', 'warning', 'validate', 'application', 2);
+INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
+VALUES('application-br7-check-sources-have-documents', 'warning', 'validate', 'application', 2);
 
 ----------------------------------------------------------------------------------------------------
-insert into system.br(id, technical_type_code, feedback) 
-values('application-br1-check-required-sources-are-present', 'sql', 
+INSERT INTO system.br(id, technical_type_code, feedback) 
+VALUES('application-br1-check-required-sources-are-present', 'sql', 
 'All documents required for the services in this application are present.::::Sono presenti tutti i documenti richiesti per il servizio' );
+--delete from system.br_definition where br_id = 'application-br1-check-required-sources-are-present'
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('application-br1-check-required-sources-are-present', now(), 'infinity', 
+'WITH reqForAp AS 	(SELECT DISTINCT ON (r_s.source_type_code) r_s.source_type_code AS typeCode
+			FROM application.request_type_requires_source_type r_s 
+				INNER JOIN application.service sv ON((r_s.request_type_code = sv.request_type_code) AND (sv.status_code != ''cancelled''))
+			WHERE sv.application_id = #{id}),
+     inclInAp AS	(SELECT typeCode FROM reqForAp req
+				INNER JOIN source.source sc ON (req.typeCode = sc.type_code)
+				INNER JOIN application.application_uses_source a_s ON ((sc.id = a_s.source_id) AND (a_s.application_id = #{id})))
+SELECT 	CASE 	WHEN (SELECT (SUM(1) IS NULL) FROM reqForAp) THEN NULL
+		WHEN ((SELECT COUNT(*) FROM reqForAp) - (SELECT COUNT(*) FROM inclInAp) = 0) THEN TRUE
+		ELSE FALSE
+	END AS vl');
 
-insert into system.br_definition(br_id, active_from, active_until, body) 
-values('application-br1-check-required-sources-are-present', now(), 'infinity', 
-'select count(*) =0  as vl
-from application.request_type_requires_source_type r_s 
-where request_type_code in (
-  select request_type_code 
-  from application.service where application_id=#{id} and status_code != ''cancelled'')
-and not exists (
-  select s.type_code
-  from application.application_uses_source a_s inner join source.source s on a_s.source_id= s.id
-  where a_s.application_id= #{id} and s.type_code = r_s.source_type_code
-)');
-
-insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-values('application-br1-check-required-sources-are-present', 'critical', 'validate', 'application', 3);
+INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
+VALUES('application-br1-check-required-sources-are-present', 'critical', 'validate', 'application', 3);
 
 ----------------------------------------------------------------------------------------------------
 INSERT INTO system.br(id, technical_type_code, feedback) 
@@ -104,21 +105,21 @@ INSERT INTO system.br_validation(br_id, severity_code, target_application_moment
 VALUES('application-br4-check-sources-date-not-in-the-future', 'warning', 'validate', 'application', 6);
 
 ----------------------------------------------------------------------------------------------------
-insert into system.br(id, technical_type_code, feedback) 
-values('application-br5-check-there-are-front-desk-services', 'sql', 
-'There are services that should  be dealt in the front office. These services are of type: serviceEnquiry, documentCopy, cadastrePrint, surveyPlanCopy, titleSearch.::::Ci sono servizi che dovrebbero essere svolti dal front office. Questi servizi sono di tipo:Richiesta Servizio, Copia Documento, Stampa Catastale, Copia Piano Perizia, Ricerca Titolo' );
+INSERT INTO system.br(id, technical_type_code, feedback) 
+VALUES('application-br5-check-there-are-front-desk-services', 'sql', 
+'There are services in this application that should  be dealt in the front office. These services are of type: serviceEnquiry, documentCopy, cadastrePrint, surveyPlanCopy, titleSearch.::::Ci sono servizi che dovrebbero essere svolti dal front office. Questi servizi sono di tipo:Richiesta Servizio, Copia Documento, Stampa Catastale, Copia Piano Perizia, Ricerca Titolo' );
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('application-br5-check-there-are-front-desk-services', now(), 'infinity', 
+'SELECT CASE WHEN (COUNT(*)= 0) THEN NULL
+	ELSE FALSE 
+	end AS vl
+FROM application.service
+WHERE application_id = #{id} 
+AND action_code != ''cancel''
+AND request_type_code IN (''serviceEnquiry'', ''documentCopy'', ''cadastrePrint'', ''surveyPlanCopy'', ''titleSearch'')');
 
-insert into system.br_definition(br_id, active_from, active_until, body) 
-values('application-br5-check-there-are-front-desk-services', now(), 'infinity', 
-'select count(*)=0 as vl
-from application.service
-where application_id = #{id} 
-  and request_type_code in (''serviceEnquiry'', ''documentCopy'', ''cadastrePrint'', 
-    ''surveyPlanCopy'', ''titleSearch'')
-');
-
-insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-values('application-br5-check-there-are-front-desk-services', 'warning', 'validate', 'application', 7);
+INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
+VALUES('application-br5-check-there-are-front-desk-services', 'warning', 'validate', 'application', 7);
 
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback) 
@@ -252,18 +253,23 @@ insert into system.br_validation(br_id, severity_code, target_application_moment
 values('application-on-approve-check-services-without-transaction', 'critical', 'approve', 'application', 20);
 
 ----------------------------------------------------------------------------------------------------
-insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('applicant-identification-check', 'sql', 'Personal identification details should be recorded for the applicant.::::Non esistono dettagli identificativi registrati per la pratica',
+--delete from system.br_definition where br_id = 'application-verifies-identification';
+--delete from system.br_validation where br_id = 'application-verifies-identification';
+--delete from system.br where id = 'application-verifies-identification';
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES('application-verifies-identification', 'sql', 'Personal identification verification should be attached to the application.::::Non esistono dettagli identificativi registrati per la pratica',
  '#{id}(application.application.id) is requested');
 
-insert into system.br_definition(br_id, active_from, active_until, body) 
-values('applicant-identification-check', now(), 'infinity', 
-'Select count(*) > 0 as vl 
-FROM application.application
-WHERE id = #{id} and contact_person_id is not null');
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('application-verifies-identification', now(), 'infinity', 
+'SELECT (COUNT(*) > 0) AS vl FROM source.source sc
+	INNER JOIN application.application_uses_source aus ON (sc.id = aus.source_id)
+WHERE aus.application_id= #{id}
+AND sc.type_code = ''idVerification''');
 
-insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-values('applicant-identification-check', 'medium', 'approve', 'application', 13);
+
+INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
+VALUES('application-verifies-identification', 'medium', 'validate', 'application', 13);
 
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
