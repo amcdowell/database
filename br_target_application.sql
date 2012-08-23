@@ -1,11 +1,12 @@
 ﻿----------------------------------------------------------------------------------------------------
-INSERT INTO system.br(id, technical_type_code, feedback) 
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
 VALUES('application-br8-check-has-services', 'sql', 
-'An application must have at least one service::::La Pratica ha almeno un documento allegato');
+'An application must have at least one service::::La Pratica ha almeno un documento allegato',
+'Checks that an application has at least one service. When this rule fails you should add a service to the application or cancel the application.');
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES('application-br8-check-has-services', now(), 'infinity', 
-'SELECT (COUNT(*) > 0) as vl
+'SELECT (COUNT(*) > 0) AS vl
 FROM application.service sv 
 WHERE sv.application_id = #{id}
 AND sv.status_code != ''cancelled''');
@@ -15,9 +16,10 @@ VALUES('application-br8-check-has-services', 'critical', 'validate', 'applicatio
 
 ----------------------------------------------------------------------------------------------------
 
-INSERT INTO system.br(id, technical_type_code, feedback) 
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
 VALUES('application-br7-check-sources-have-documents', 'sql', 
-'Documents lodged with an application should have a scanned image file (or other source file) attached::::Alcuni dei documenti per questa pratica non hanno una immagine scannerizzata allegata' );
+'Documents lodged with an application should have a scanned image file (or other source file) attached::::Alcuni dei documenti per questa pratica non hanno una immagine scannerizzata allegata',
+'Checks that each document lodged with the application has a scanned image file (or other digital source file) stored in the SOLA database. To remedy the failure of the business rule add the scanned image to the document record through the Document Tab in the Application form or use the Document Toolbar item in the Main form.' );
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES('application-br7-check-sources-have-documents', now(), 'infinity', 
@@ -29,9 +31,10 @@ INSERT INTO system.br_validation(br_id, severity_code, target_application_moment
 VALUES('application-br7-check-sources-have-documents', 'warning', 'validate', 'application', 2);
 
 ----------------------------------------------------------------------------------------------------
-INSERT INTO system.br(id, technical_type_code, feedback) 
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
 VALUES('application-br1-check-required-sources-are-present', 'sql', 
-'All documents required for the services in this application are present.::::Sono presenti tutti i documenti richiesti per il servizio' );
+'All documents required for the services in this application are present.::::Sono presenti tutti i documenti richiesti per il servizio',
+'Checks that all required documents for any of the services in an application are recorded. Null value is returned if there are no required documents' );
 --delete from system.br_definition where br_id = 'application-br1-check-required-sources-are-present'
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES('application-br1-check-required-sources-are-present', now(), 'infinity', 
@@ -51,13 +54,14 @@ INSERT INTO system.br_validation(br_id, severity_code, target_application_moment
 VALUES('application-br1-check-required-sources-are-present', 'critical', 'validate', 'application', 3);
 
 ----------------------------------------------------------------------------------------------------
-INSERT INTO system.br(id, technical_type_code, feedback) 
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
 VALUES('application-br2-check-title-documents-not-old', 'sql', 
-'The scanned image of the title should be less than one week old.::::Tutte le immagini scannerizzate del titolo hanno al massimo una settimana' );
+'The scanned image of the title should be less than one week old.::::Tutte le immagini scannerizzate del titolo hanno al massimo una settimana',
+'Checks recorded date (recordation) against date at time of validation. Current allowable date difference is one week.' );
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES('application-br2-check-title-documents-not-old', NOW(), 'infinity', 
-'SELECT s.recordation + 1 * interval ''1 week'' > now() AS vl
+'SELECT s.recordation + 1 * interval ''1 week'' > NOW() AS vl
 FROM application.application_uses_source a_s 
 	INNER JOIN source.source s ON (a_s.source_id= s.id)
 WHERE a_s.application_id = #{id}
@@ -67,31 +71,34 @@ INSERT INTO system.br_validation(br_id, severity_code, target_application_moment
 VALUES('application-br2-check-title-documents-not-old', 'medium', 'validate', 'application', 4);
 
 ----------------------------------------------------------------------------------------------------
-insert into system.br(id, technical_type_code, feedback) 
-values('application-br3-check-properties-are-not-historic', 'sql', 
-'All the titles identified for the application must be current.::::Tutte le proprieta identificate per la pratica non sono storiche' );
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES('application-br3-check-properties-are-not-historic', 'sql', 
+'All the titles identified for the application must be current.::::Tutte le proprieta identificate per la pratica non sono storiche',
+'Checks the title reference recorded at lodgement against titles in the database and if there is a ba_unit record it checks if it is current (PASS)' );
 
-insert into system.br_definition(br_id, active_from, active_until, body) 
-values('application-br3-check-properties-are-not-historic', now(), 'infinity', 
-'select false as vl
-from application.application_property  
-where application_id=#{id}
-and (name_firstpart, name_lastpart) 
-    in (select name_firstpart, name_lastpart 
-      from administrative.ba_unit where status_code in (''historic''))
-order by 1
-limit 1
-');
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('application-br3-check-properties-are-not-historic', now(), 'infinity', 
+'WITH baUnitRecs AS	(SELECT ba.status_code AS status FROM application.application_property ap
+				INNER JOIN administrative.ba_unit ba ON ((ap.name_lastpart = ba.name_lastpart) AND (ap.name_firstpart = ba.name_firstpart))
+			WHERE application_id= #{id})
 
+SELECT	CASE 	WHEN (SELECT (COUNT(*) = 0) FROM baUnitRecs) THEN NULL
+		WHEN (COUNT(*) = 0) THEN TRUE
+		ELSE  FALSE
+	END AS vl FROM baUnitRecs
+WHERE status = ''historic''
+ORDER BY 1
+LIMIT 1 ');
 
-insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-values('application-br3-check-properties-are-not-historic', 'critical', 'validate', 'application', 5);
+INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
+VALUES('application-br3-check-properties-are-not-historic', 'critical', 'validate', 'application', 5);
 
 ----------------------------------------------------------------------------------------------------
 
-INSERT INTO system.br(id, technical_type_code, feedback) 
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
 VALUES('application-br4-check-sources-date-not-in-the-future', 'sql', 
-'Documents should have dates formalised by source agency that are not in the future.::::Nessun documento ha le date di inoltro per il futuro' );
+'Documents should have dates formalised by source agency that are not in the future.::::Nessun documento ha le date di inoltro per il futuro',
+'Checks the date of the document as recorded at lodgement (source.recordation) and checks it is not a date in the future' );
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES('application-br4-check-sources-date-not-in-the-future', now(), 'infinity', 
@@ -105,9 +112,10 @@ INSERT INTO system.br_validation(br_id, severity_code, target_application_moment
 VALUES('application-br4-check-sources-date-not-in-the-future', 'warning', 'validate', 'application', 6);
 
 ----------------------------------------------------------------------------------------------------
-INSERT INTO system.br(id, technical_type_code, feedback) 
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
 VALUES('application-br5-check-there-are-front-desk-services', 'sql', 
-'There are services in this application that should  be dealt in the front office. These services are of type: serviceEnquiry, documentCopy, cadastrePrint, surveyPlanCopy, titleSearch.::::Ci sono servizi che dovrebbero essere svolti dal front office. Questi servizi sono di tipo:Richiesta Servizio, Copia Documento, Stampa Catastale, Copia Piano Perizia, Ricerca Titolo' );
+'There are services in this application that should  be dealt in the front office. These services are of type: serviceEnquiry, documentCopy, cadastrePrint, surveyPlanCopy, titleSearch.::::Ci sono servizi che dovrebbero essere svolti dal front office. Questi servizi sono di tipo:Richiesta Servizio, Copia Documento, Stampa Catastale, Copia Piano Perizia, Ricerca Titolo',
+'Checks the services in the applications to see if they are amongst services considered as front office services' );
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES('application-br5-check-there-are-front-desk-services', now(), 'infinity', 
 'SELECT CASE WHEN (COUNT(*)= 0) THEN NULL
@@ -122,27 +130,24 @@ INSERT INTO system.br_validation(br_id, severity_code, target_application_moment
 VALUES('application-br5-check-there-are-front-desk-services', 'warning', 'validate', 'application', 7);
 
 ----------------------------------------------------------------------------------------------------
-insert into system.br(id, technical_type_code, feedback) 
-values('application-br6-check-new-title-service-is-needed', 'sql', 
-'An application can be associated with a property which should have a digital title record.::::Non esiste un formato digitale per questa proprieta. Aggiungere un Nuovo Titolo Digitale alla vostra pratica' );
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES('application-br6-check-new-title-service-is-needed', 'sql', 
+'An application can be associated with a property which should have a digital title record.::::Non esiste un formato digitale per questa proprieta. Aggiungere un Nuovo Titolo Digitale alla vostra pratica',
+'Rule checks to see if there is a ba_unit record for the property identified for the application at lodgement' );
 
-insert into system.br_definition(br_id, active_from, active_until, body) 
-values('application-br6-check-new-title-service-is-needed', now(), 'infinity', 
-'select 
-      case 
-        when (name_firstpart, name_lastpart) not
-            in (select name_firstpart, name_lastpart from administrative.ba_unit)
-        then (select count(*)>0 from application.service
-            where request_type_code = ''newFreehold'')
-        else true
-      end as vl
-from application.application_property  
-where application_id=#{id}
-order by 1
-limit 1');
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('application-br6-check-new-title-service-is-needed', now(), 'infinity', 
+'SELECT	CASE	WHEN (name_firstpart, name_lastpart) NOT IN (SELECT name_firstpart, name_lastpart FROM administrative.ba_unit)
+			THEN (SELECT (COUNT(*) > 0) FROM application.service WHERE request_type_code = ''newFreehold'')
+		ELSE TRUE
+	END AS vl
+FROM application.application_property  
+WHERE application_id=#{id}
+ORDER BY 1
+LIMIT 1');
 
-insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-values('application-br6-check-new-title-service-is-needed', 'warning', 'validate', 'application', 8);
+INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
+VALUES('application-br6-check-new-title-service-is-needed', 'warning', 'validate', 'application', 8);
 
 ----------------------------------------------------------------------------------------------------
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
@@ -223,34 +228,39 @@ SELECT CASE WHEN fhCheck IS TRUE THEN (SELECT sum(1) FROM start_primary_rrr)> 0
 		ELSE NULL
 	END AS vl FROM newTitleApp');
 
-insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-values('app-title-has-primary-right', 'critical', 'validate', 'application', 1);
+INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
+VALUES('app-title-has-primary-right', 'critical', 'validate', 'application', 1);
 
 ----------------------------------------------------------------------------------------------------
 
-insert into system.br(id, technical_type_code, feedback) 
-values('application-on-approve-check-services-status', 'sql', 'All services in the application must have the status ''cancelled'' or ''completed''.::::Tutti i servizi devono avere lo stato di cancellato o completato');
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES('application-on-approve-check-services-status', 'sql', 'All services in the application must have the status ''cancelled'' or ''completed''.::::Tutti i servizi devono avere lo stato di cancellato o completato',
+'Checks the service.status_code for all instances of service related to the application');
 
-insert into system.br_definition(br_id, active_from, active_until, body) 
-values('application-on-approve-check-services-status', now(), 'infinity', 
-'select count(*)=0  as vl
-from application.service s where s.application_id = #{id} and status_code not in (''completed'', ''cancelled'')');
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('application-on-approve-check-services-status', now(), 'infinity', 
+'SELECT (COUNT(*) = 0)  AS vl FROM application.service sv 
+WHERE sv.application_id = #{id} 
+AND sv.status_code NOT IN (''completed'', ''cancelled'')');
 
-insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-values('application-on-approve-check-services-status', 'critical', 'approve', 'application', 1);
+INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
+VALUES('application-on-approve-check-services-status', 'critical', 'approve', 'application', 1);
 
 ----------------------------------------------------------------------------------------------------
-insert into system.br(id, technical_type_code, feedback) 
-values('application-on-approve-check-services-without-transaction', 'sql', 'Changes on the system must have been made for all services in the application.::::Tutti i servizi con stato completato devono aver prodotto modifiche nel sistema');
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES('application-on-approve-check-services-without-transaction', 'sql', 
+'Within an application,all services making changes to core records must be completed and have utilised an instance of transaction before application can be approved.::::Tutti i servizi con stato completato devono aver prodotto modifiche nel sistema',
+'Checks that all services have the status of completed and that there is a transaction record referring to each service record through the field from_service_id');
 
-insert into system.br_definition(br_id, active_from, active_until, body) 
-values('application-on-approve-check-services-without-transaction', now(), 'infinity', 
-'select count(*)=0 as vl 
-from application.service s where s.application_id = #{id} and status_code = ''completed'' 
-and id not in (select from_service_id from transaction.transaction)');
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('application-on-approve-check-services-without-transaction', NOW(), 'infinity', 
+'SELECT (COUNT(*) = 0) AS vl FROM application.service sv 
+	INNER JOIN transaction.transaction tn ON (sv.id = tn.from_service_id)
+WHERE sv.application_id = #{id} 
+AND sv.status_code = ''completed''');
 
-insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-values('application-on-approve-check-services-without-transaction', 'critical', 'approve', 'application', 20);
+INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
+VALUES('application-on-approve-check-services-without-transaction', 'critical', 'approve', 'application', 20);
 
 ----------------------------------------------------------------------------------------------------
 --delete from system.br_definition where br_id = 'application-verifies-identification';
