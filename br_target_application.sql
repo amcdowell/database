@@ -163,7 +163,7 @@ VALUES('applicant-name-to-owner-name-check', NOW(), 'infinity',
 			INNER JOIN administrative.rrr_share rs ON (rr.id = rs.rrr_id)
 			INNER JOIN administrative.party_for_rrr pr ON (rs.rrr_id = pr.rrr_id)
 			INNER JOIN party.party pty ON (pr.party_id = pty.id)
-		WHERE ap.id = #{id})
+		WHERE ap.application_id = #{id})
 
 SELECT CASE WHEN (COUNT(*) > 0) THEN TRUE
 		ELSE NULL
