@@ -30,22 +30,24 @@ insert into system.br_validation(br_id, severity_code, target_service_moment, ta
 values('service-check-no-previous-digital-title-service', 'warning', 'complete', 'service', 'newDigitalTitle', 10);
 
 ----------------------------------------------------------------------------------------------------
-insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('baunit-has-multiple-mortgages', 'sql', 'For the Register Mortgage service the identified title has no existing mortgages::::Il titolo ha una ipoteca corrente',
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES('baunit-has-multiple-mortgages', 'sql', 'For the Register Mortgage service the identified title has no existing mortgages::::Il titolo ha una ipoteca corrente',
  '#{id}(administrative.ba_unit.id) is requested');
+--delete from system.br_definition where br_id = 'baunit-has-multiple-mortgages'
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('baunit-has-multiple-mortgages', now(), 'infinity', 
+'SELECT	(SELECT (COUNT(*) = 0) FROM application.service sv2
+		 INNER JOIN transaction.transaction tn ON (sv2.id = tn.from_service_id)
+		 INNER JOIN administrative.rrr rr ON (tn.id = rr.transaction_id)
+		 INNER JOIN administrative.rrr rr2 ON ((rr.ba_unit_id = rr2.ba_unit_id) AND (rr2.type_code = ''mortgage'') AND (rr2.status_code =''current'') ) 
+	WHERE sv.id = #{id}) AS vl FROM application.service sv
+WHERE sv.id = #{id}
+AND sv.request_type_code = ''mortgage''
+ORDER BY 1
+LIMIT 1');
 
-insert into system.br_definition(br_id, active_from, active_until, body) 
-values('baunit-has-multiple-mortgages', now(), 'infinity', 
-'SELECT (select count(*)=0 from administrative.rrr 
-  where rrr.ba_unit_id = ba.id and rrr.type_code= ''mortgage'' and rrr.status_code =''current'' ) AS vl 
-  from application.service s inner join application.application_property ap on s.application_id = ap.application_id 
- INNER JOIN administrative.ba_unit ba ON (ap.name_firstpart, ap.name_lastpart) = (ba.name_firstpart, ba.name_lastpart)
-WHERE s.id =#{id}
-order by 1
-limit 1');
-
-insert into system.br_validation(br_id, severity_code, target_service_moment, target_code, target_request_type_code, order_of_execution) 
-values('baunit-has-multiple-mortgages', 'warning', 'complete', 'service', 'mortgage', 1);
+INSERT INTO system.br_validation(br_id, severity_code, target_service_moment, target_code, target_request_type_code, order_of_execution) 
+VALUES('baunit-has-multiple-mortgages', 'warning', 'complete', 'service', 'mortgage', 1);
 
 ----------------------------------------------------------------------------------------------------
 

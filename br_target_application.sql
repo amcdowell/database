@@ -182,14 +182,14 @@ INSERT INTO system.br_validation(br_id, severity_code, target_application_moment
 VALUES('applicant-name-to-owner-name-check', 'warning', 'validate', 'application', 25);
 
 ----------------------------------------------------------------------------------------------------
-insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('app-current-caveat-and-no-remove-or-vary', 'sql', 
+INSERT INTO.br(id, technical_type_code, feedback, technical_description) 
+VALUES('app-current-caveat-and-no-remove-or-vary', 'sql', 
 'The identified property has a current or pending caveat registered on the title. The application must include a cancel or waiver/vary caveat service for registration to proceed.::::Per questo titolo siste un diritto di prelazione pendente o corrente e la pratica non include un servizio di cancellazione o di variazione prelazione ',
  '#{id}(application.application.id) is requested. It checks if there is a caveat (pending or current) registered
  on the title and if the application does not have any service of type remove or vary caveat');
 
-insert into system.br_definition(br_id, active_from, active_until, body) 
-values('app-current-caveat-and-no-remove-or-vary', now(), 'infinity', 
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('app-current-caveat-and-no-remove-or-vary', now(), 'infinity', 
 'SELECT (select count(*) > 0 from application.service s 
   where s.application_id= ap.application_id and s.request_type_code in (''varyCaveat'', ''removeCaveat'')) as vl
 FROM application.application_property ap 
@@ -199,9 +199,33 @@ WHERE ap.application_id = #{id} and rrr.type_code = ''caveat'' and rrr.status_co
 order by 1 desc
 limit 1');
 
-insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-values('app-current-caveat-and-no-remove-or-vary', 'medium', 'validate', 'application', 1);
+INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
+VALUES('app-current-caveat-and-no-remove-or-vary', 'medium', 'validate', 'application', 11);
 
+--INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
+--values('app-current-caveat-and-no-remove-or-vary', 'critical', 'approve', 'application', 1);
+----------------------------------------------------------------------------------------------------
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES('app-other-app-with-caveat', 'sql', 
+'The identified property is affected by another live application that includes a service to register a caveat. An application with a cancel or waiver/vary caveat service must be registered before this application can proceed.::::ITALIANO ',
+ '#{id}(application.application.id) is requested.');
+
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('app-other-app-with-caveat', now(), 'infinity', 
+'SELECT (SELECT COUNT(*) > 0 FROM application.service sv WHERE sv.application_id = ap.application_id AND sv.request_type_code IN (''varyCaveat'', ''removeCaveat'')) AS vl
+FROM application.application_property ap
+	INNER JOIN application.application_property ap2 ON (((ap.name_firstpart, ap.name_lastpart) = (ap2.name_firstpart, ap2.name_lastpart)) AND (ap.id != ap2.id))
+	INNER JOIN application.application app2 ON (ap2.application_id = app2.id)
+	INNER JOIN application.service sv2 ON ((app2.id = sv2.application_id) AND (sv2.request_type_code = ''caveat'') AND (sv2.status_code != ''cancelled'') AND (app2.status_code NOT IN (''completed'', ''annulled'')))
+WHERE ap.application_id = #{id} 
+ORDER BY 1
+LIMIT 1');
+
+INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
+VALUES('app-other-app-with-caveat', 'medium', 'validate', 'application', 10);
+
+INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
+VALUES('app-other-app-with-caveat', 'critical', 'approve', 'application', 2);
 ----------------------------------------------------------------------------------------------------
 
 insert into system.br(id, technical_type_code, feedback, technical_description) 

@@ -29,20 +29,20 @@ insert into system.br_validation(br_id, severity_code, target_reg_moment, target
 values('rrr-shares-total-check', 'critical', 'current', 'rrr', 16);
 
 ----------------------------------------------------------------------------------------------------
-insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('ba_unit-has-several-mortgages-with-same-rank', 'sql', 'The rank of a new mortgage must not be the same as an existing mortgage registered on the same title::::Il titolo ha una ipoteca corrente con lo stesso grado di priorita',
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES('ba_unit-has-several-mortgages-with-same-rank', 'sql', 'The rank of a new mortgage must not be the same as an existing mortgage registered on the same title::::Il titolo ha una ipoteca corrente con lo stesso grado di priorita',
  '#{id}(administrative.rrr.id) is requested.');
-
-insert into system.br_definition(br_id, active_from, active_until, body) 
-values('ba_unit-has-several-mortgages-with-same-rank', now(), 'infinity', 
+--delete from system.br_definition where br_id = 'ba_unit-has-several-mortgages-with-same-rank'
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('ba_unit-has-several-mortgages-with-same-rank', now(), 'infinity', 
 'select not (rrr1.mortgage_ranking = rrr2.mortgage_ranking) as vl
 from administrative.rrr rrr1 inner join administrative.rrr rrr2 on rrr1.ba_unit_id= rrr2.ba_unit_id
-where rrr2.id= #{id} and rrr1.status_code!=''historic'' and rrr1.type_code=''mortgage'' and rrr1.nr!=rrr2.nr
+where rrr2.id= #{id} and rrr1.status_code=''current'' and rrr1.type_code=''mortgage'' and rrr1.nr!=rrr2.nr
 order by 1
 limit 1');
 
-insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
-values('ba_unit-has-several-mortgages-with-same-rank', 'critical', 'current', 'rrr', 19);
+INSERT INTO system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
+VALUES('ba_unit-has-several-mortgages-with-same-rank', 'critical', 'current', 'rrr', 19);
 
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
