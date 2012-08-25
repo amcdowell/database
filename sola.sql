@@ -1160,6 +1160,7 @@ insert into source.administrative_source_type(code, display_value, status, descr
 insert into source.administrative_source_type(code, display_value, status, description) values('cadastralSurvey', 'Cadastral Survey::::Rilevamento Catastale', 'c', 'Extension to LADM');
 insert into source.administrative_source_type(code, display_value, status, description) values('waiver', 'Waiver to Caveat or other requirement', 'c', 'Extension to LADM');
 insert into source.administrative_source_type(code, display_value, status, description) values('idVerification', 'Form of Identification including Personal ID', 'c', 'Extension to LADM');
+insert into source.administrative_source_type(code, display_value, status, description) values('caveat', 'Caveat::::', 'c', 'Extension to LADM');
 
 
 
@@ -4764,7 +4765,6 @@ insert into application.request_type_requires_source_type(source_type_code, requ
 insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('deed', 'lifeEstate');
 insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('deed', 'newApartment');
 insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('deed', 'newState');
-insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('deed', 'caveat');
 insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('title', 'caveat');
 insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('deed', 'removeCaveat');
 insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('title', 'removeCaveat');
@@ -4780,6 +4780,7 @@ insert into application.request_type_requires_source_type(source_type_code, requ
 insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('title', 'removeRestriction');
 insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('deed', 'cnclPowerOfAttorney');
 insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('deed', 'cnclStandardDocument');
+insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('caveat', 'caveat');
 
 
 
