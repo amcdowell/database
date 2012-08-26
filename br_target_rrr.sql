@@ -45,25 +45,49 @@ INSERT INTO system.br_validation(br_id, severity_code, target_reg_moment, target
 VALUES('ba_unit-has-several-mortgages-with-same-rank', 'critical', 'current', 'rrr', 19);
 
 ----------------------------------------------------------------------------------------------------
-insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('ba_unit-has-caveat', 'sql', 'Title is not encumbered by a caveat.::::Il titolo ha un diritto di prelazione attivo',
+--delete from system.br_definition where br_id = 'ba_unit-has-caveat'
+--delete from system.br_validation where br_id = 'ba_unit-has-caveat'
+--delete from system.br where id = 'ba_unit-has-caveat'
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES('ba_unit-has-caveat', 'sql', 'Caveat should not prevent registration proceeding.::::Il titolo ha un diritto di prelazione attivo',
  '#{id}(administrative.rrr.id) is requested.');
 
-insert into system.br_definition(br_id, active_from, active_until, body) 
-values('ba_unit-has-caveat', now(), 'infinity', 
-'select not (rrr1.status_code = ''current'' 
-  and (select count(*)=0 from administrative.rrr rrr3 inner join transaction.transaction t on rrr3.transaction_id = t.id 
-  inner join application.service s on s.id= t.from_service_id
-  inner join application.request_type rt on s.request_type_code= rt.code
-  where (rrr3.ba_unit_id, rrr3.nr)= (rrr1.ba_unit_id, rrr1.nr) and rrr3.status_code=''pending'' and rt.type_action_code = ''cancel'')) as vl
-from administrative.rrr rrr1 inner join administrative.rrr rrr2 on rrr1.ba_unit_id= rrr2.ba_unit_id
-where rrr2.id= #{id} and rrr1.status_code in (''current'', ''pending'') and rrr1.nr!=rrr2.nr
-and rrr1.type_code = ''caveat''
-order by 1
-limit 1');
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('ba_unit-has-caveat', now(), 'infinity', 
+'WITH caveatCheck AS	(SELECT COUNT(*) AS present FROM administrative.rrr rr2 
+				 INNER JOIN administrative.ba_unit ba ON (rr2.ba_unit_id = ba.id)
+				 INNER JOIN administrative.rrr rr1 ON (ba.id = rr1.ba_unit_id)
+			 WHERE rr2.id = #{id}
+			 AND rr1.type_code = ''caveat''
+			 AND rr1.status_code IN (''pending'', ''current'')
+			 ORDER BY 1
+			 LIMIT 1),
+    changeCheck AS	(SELECT (COUNT(*) > 0) AS caveatChange FROM administrative.rrr rr2 
+				 INNER JOIN administrative.ba_unit ba ON (rr2.ba_unit_id = ba.id)
+				 INNER JOIN administrative.rrr rr3 ON (ba.id = rr3.ba_unit_id)
+				 INNER JOIN transaction.transaction tn ON (rr3.transaction_id = tn.id)
+				 INNER JOIN application.service sv1 ON (tn.from_service_id = sv1.id)
+			 WHERE rr2.id = #{id}
+			 AND sv1.request_type_code IN (''varyCaveat'', ''removeCaveat'')),
+     caveatRegn AS	(SELECT (COUNT(*) > 0) AS caveat FROM administrative.rrr rr4
+				 INNER JOIN transaction.transaction tn ON (rr4.transaction_id = tn.id)
+				 INNER JOIN application.service sv2 ON (tn.from_service_id = sv2.id)
+			WHERE rr4.id = #{id}
+			AND rr4.status_code = ''pending''
+			AND rr4.type_code = ''caveat''
+			AND (SELECT (COUNT(*) = 0) FROM application.service sv3 WHERE ((sv3.application_id = sv2.application_id) AND (sv3.status_code != ''cancelled'') AND (sv3.request_type_code != ''caveat'')))
+			ORDER BY 1
+			LIMIT 1)
+			
+SELECT (SELECT	CASE 	WHEN (SELECT caveat FROM caveatRegn) THEN TRUE
+			WHEN (SELECT caveatChange FROM changeCheck) THEN TRUE
+			WHEN (SELECT (present = 0) FROM caveatCheck)THEN NULL
+			WHEN (SELECT (present > 0) FROM caveatCheck) THEN FALSE
+			ELSE TRUE
+		END) AS vl');
 
-insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
-values('ba_unit-has-caveat', 'critical', 'current', 'rrr', 19);
+INSERT INTO system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
+VALUES('ba_unit-has-caveat', 'critical', 'current', 'rrr', 19);
 
 ----------------------------------------------------------------------------------------------------
 

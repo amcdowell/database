@@ -38,15 +38,15 @@ VALUES('application-br1-check-required-sources-are-present', 'sql',
 --delete from system.br_definition where br_id = 'application-br1-check-required-sources-are-present'
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES('application-br1-check-required-sources-are-present', now(), 'infinity', 
-'WITH reqForAp AS 	(SELECT DISTINCT ON (r_s.source_type_code) r_s.source_type_code AS typeCode
+'WITH reqForAp AS 	(SELECT r_s.source_type_code AS typeCode
 			FROM application.request_type_requires_source_type r_s 
 				INNER JOIN application.service sv ON((r_s.request_type_code = sv.request_type_code) AND (sv.status_code != ''cancelled''))
 			WHERE sv.application_id = #{id}),
-     inclInAp AS	(SELECT typeCode FROM reqForAp req
+     inclInAp AS	(SELECT DISTINCT ON (sc.id) sc.id FROM reqForAp req
 				INNER JOIN source.source sc ON (req.typeCode = sc.type_code)
 				INNER JOIN application.application_uses_source a_s ON ((sc.id = a_s.source_id) AND (a_s.application_id = #{id})))
 SELECT 	CASE 	WHEN (SELECT (SUM(1) IS NULL) FROM reqForAp) THEN NULL
-		WHEN ((SELECT COUNT(*) FROM reqForAp) - (SELECT COUNT(*) FROM inclInAp) = 0) THEN TRUE
+		WHEN ((SELECT COUNT(*) FROM inclInAp) - (SELECT COUNT(*) FROM reqForAp) >= 0) THEN TRUE
 		ELSE FALSE
 	END AS vl');
 
@@ -224,8 +224,6 @@ LIMIT 1');
 INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
 VALUES('app-other-app-with-caveat', 'medium', 'validate', 'application', 10);
 
-INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-VALUES('app-other-app-with-caveat', 'critical', 'approve', 'application', 2);
 ----------------------------------------------------------------------------------------------------
 
 insert into system.br(id, technical_type_code, feedback, technical_description) 
