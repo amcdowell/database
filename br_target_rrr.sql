@@ -56,31 +56,34 @@ INSERT INTO system.br_definition(br_id, active_from, active_until, body)
 VALUES('ba_unit-has-caveat', now(), 'infinity', 
 'WITH caveatCheck AS	(SELECT COUNT(*) AS present FROM administrative.rrr rr2 
 				 INNER JOIN administrative.ba_unit ba ON (rr2.ba_unit_id = ba.id)
-				 INNER JOIN administrative.rrr rr1 ON (ba.id = rr1.ba_unit_id)
+				 INNER JOIN administrative.rrr rr1 ON ((ba.id = rr1.ba_unit_id) AND (rr1.type_code = ''caveat'') AND (rr1.status_code IN (''pending'', ''current'')))
 			 WHERE rr2.id = #{id}
-			 AND rr1.type_code = ''caveat''
-			 AND rr1.status_code IN (''pending'', ''current'')
 			 ORDER BY 1
 			 LIMIT 1),
     changeCheck AS	(SELECT (COUNT(*) > 0) AS caveatChange FROM administrative.rrr rr2 
 				 INNER JOIN administrative.ba_unit ba ON (rr2.ba_unit_id = ba.id)
 				 INNER JOIN administrative.rrr rr3 ON (ba.id = rr3.ba_unit_id)
 				 INNER JOIN transaction.transaction tn ON (rr3.transaction_id = tn.id)
-				 INNER JOIN application.service sv1 ON (tn.from_service_id = sv1.id)
-			 WHERE rr2.id = #{id}
-			 AND sv1.request_type_code IN (''varyCaveat'', ''removeCaveat'')),
+				 INNER JOIN application.service sv1 ON ((tn.from_service_id = sv1.id) AND sv1.request_type_code IN (''varyCaveat'', ''removeCaveat''))
+			 WHERE rr2.id = #{id}),
+	varyCheck AS 	(SELECT ((SELECT present FROM caveatCheck) - (SELECT COUNT(*) FROM (SELECT DISTINCT ON (rr4.nr) rr4.nr FROM administrative.rrr rr2 
+									 INNER JOIN administrative.ba_unit ba ON (rr2.ba_unit_id = ba.id) 
+									 INNER JOIN administrative.rrr rr3 ON ((ba.id = rr3.ba_unit_id) AND (rr3.type_code = ''caveat'') AND (rr3.status_code = ''current''))
+									 INNER JOIN transaction.transaction tn ON (rr3.transaction_id = tn.id) 
+									 INNER JOIN application.service sv1 ON ((tn.from_service_id = sv1.id) AND (sv1.request_type_code = ''varyCaveat''))
+									 INNER JOIN administrative.rrr rr4 ON ((ba.id = rr4.ba_unit_id) AND (rr3.nr = rr4.nr))
+								WHERE rr2.id = #{id}) AS vary) = 0) AS withoutVary), 
      caveatRegn AS	(SELECT (COUNT(*) > 0) AS caveat FROM administrative.rrr rr4
-				 INNER JOIN transaction.transaction tn ON (rr4.transaction_id = tn.id)
+				 INNER JOIN transaction.transaction tn ON ((rr4.transaction_id = tn.id)	AND (rr4.status_code = ''pending'') AND (rr4.type_code = ''caveat''))
 				 INNER JOIN application.service sv2 ON (tn.from_service_id = sv2.id)
 			WHERE rr4.id = #{id}
-			AND rr4.status_code = ''pending''
-			AND rr4.type_code = ''caveat''
 			AND (SELECT (COUNT(*) = 0) FROM application.service sv3 WHERE ((sv3.application_id = sv2.application_id) AND (sv3.status_code != ''cancelled'') AND (sv3.request_type_code != ''caveat'')))
 			ORDER BY 1
 			LIMIT 1)
 			
 SELECT (SELECT	CASE 	WHEN (SELECT caveat FROM caveatRegn) THEN TRUE
 			WHEN (SELECT caveatChange FROM changeCheck) THEN TRUE
+			WHEN (SELECT withoutVary FROM varyCheck) THEN TRUE
 			WHEN (SELECT (present = 0) FROM caveatCheck)THEN NULL
 			WHEN (SELECT (present > 0) FROM caveatCheck) THEN FALSE
 			ELSE TRUE
