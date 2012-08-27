@@ -104,15 +104,22 @@ CREATE OR REPLACE FUNCTION public.f_for_trg_track_history(
 ) RETURNS trigger 
 AS $$
 DECLARE
-    table_name varchar;
+    table_name_main varchar;
     table_name_historic varchar;
+    insert_col_part varchar;
+    values_part varchar;
 BEGIN
-    table_name = TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME;
-    table_name_historic = table_name || '_historic';
+    table_name_main = TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME;
+    table_name_historic = table_name_main || '_historic';
+    insert_col_part = (select string_agg(column_name, ',') 
+      from information_schema.columns  
+      where table_schema= TG_TABLE_SCHEMA and table_name = TG_TABLE_NAME);
+    values_part = '$1.' || replace(insert_col_part, ',' , ',$1.');
+
     IF (TG_OP = 'DELETE') THEN
         OLD.change_action := 'd';
     END IF;
-    EXECUTE 'INSERT INTO ' || table_name_historic || ' SELECT $1.*;' USING OLD;
+    EXECUTE 'INSERT INTO ' || table_name_historic || '(' || insert_col_part || ') SELECT ' || values_part || ';' USING OLD;
     IF (TG_OP = 'DELETE') THEN
         RETURN OLD;
     ELSE
