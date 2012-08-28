@@ -190,14 +190,14 @@ VALUES('app-current-caveat-and-no-remove-or-vary', 'sql',
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES('app-current-caveat-and-no-remove-or-vary', now(), 'infinity', 
-'SELECT (select count(*) > 0 from application.service s 
-  where s.application_id= ap.application_id and s.request_type_code in (''varyCaveat'', ''removeCaveat'')) as vl
+'SELECT (SELECT (COUNT(*) > 0) FROM application.service sv 
+  WHERE ((sv.application_id = ap.application_id) AND (sv.request_type_code IN (''varyCaveat'', ''removeCaveat'')))) AS vl
 FROM application.application_property ap 
-  INNER JOIN administrative.ba_unit ba ON (ap.name_firstpart, ap.name_lastpart) = (ba.name_firstpart, ba.name_lastpart)
-  LEFT JOIN administrative.rrr ON rrr.ba_unit_id = ba.id
-WHERE ap.application_id = #{id} and rrr.type_code = ''caveat'' and rrr.status_code != ''historic''
-order by 1 desc
-limit 1');
+  INNER JOIN administrative.ba_unit ba ON ((ap.name_firstpart, ap.name_lastpart) = (ba.name_firstpart, ba.name_lastpart))
+  LEFT JOIN administrative.rrr ON (rrr.ba_unit_id = ba.id)
+WHERE ((ap.application_id = #{id}) AND (rrr.type_code = ''caveat'') AND (rrr.status_code IN (''pending'', ''current'')))
+ORDER BY 1 desc
+LIMIT 1');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
 VALUES('app-current-caveat-and-no-remove-or-vary', 'medium', 'validate', 'application', 11);

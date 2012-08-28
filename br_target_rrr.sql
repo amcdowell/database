@@ -77,7 +77,7 @@ VALUES('ba_unit-has-caveat', now(), 'infinity',
 				 INNER JOIN transaction.transaction tn ON ((rr4.transaction_id = tn.id)	AND (rr4.status_code IN (''pending'', ''current'')) AND (rr4.type_code = ''caveat''))
 				 INNER JOIN application.service sv2 ON (tn.from_service_id = sv2.id)
 			WHERE rr4.id = #{id}
-			AND (SELECT (COUNT(*) = 0) FROM application.service sv3 WHERE ((sv3.application_id = sv2.application_id) AND (sv3.status_code != ''cancelled'') AND (sv3.request_type_code != ''caveat'')))
+			AND (SELECT (COUNT(*) = 0) FROM application.service sv3 WHERE ((sv3.application_id = sv2.application_id) AND (sv3.status_code != ''cancelled'') AND (sv3.request_type_code NOT IN (''caveat'', ''varyCaveat'', ''removeCaveat''))))
 			ORDER BY 1
 			LIMIT 1)
 			
