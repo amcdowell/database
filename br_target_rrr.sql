@@ -62,11 +62,11 @@ VALUES('ba_unit-has-caveat', now(), 'infinity',
 			 LIMIT 1),
     changeCheck AS	(SELECT (COUNT(*) > 0) AS caveatChange FROM administrative.rrr rr2 
 				 INNER JOIN administrative.ba_unit ba ON (rr2.ba_unit_id = ba.id)
-				 INNER JOIN administrative.rrr rr3 ON (ba.id = rr3.ba_unit_id)
+				 INNER JOIN administrative.rrr rr3 ON ((ba.id = rr3.ba_unit_id) AND (rr3.type_code = ''caveat'') AND (rr3.status_code = ''current''))
 				 INNER JOIN transaction.transaction tn ON (rr3.transaction_id = tn.id)
-				 INNER JOIN application.service sv1 ON ((tn.from_service_id = sv1.id) AND sv1.request_type_code IN (''varyCaveat'', ''removeCaveat''))
+				 INNER JOIN application.service sv1 ON ((tn.from_service_id = sv1.id) AND sv1.request_type_code IN (''varyCaveat'', ''removeCaveat'') AND sv1.status_code IN (''lodged'', ''pending''))
 			 WHERE rr2.id = #{id}),
-	varyCheck AS 	(SELECT ((SELECT present FROM caveatCheck) - (SELECT COUNT(*) FROM (SELECT DISTINCT ON (rr4.nr) rr4.nr FROM administrative.rrr rr2 
+	varyCheck AS 	(SELECT ((SELECT present FROM caveatCheck) - (SELECT SUM(1) FROM (SELECT DISTINCT ON (rr4.nr) rr4.nr FROM administrative.rrr rr2 
 									 INNER JOIN administrative.ba_unit ba ON (rr2.ba_unit_id = ba.id) 
 									 INNER JOIN administrative.rrr rr3 ON ((ba.id = rr3.ba_unit_id) AND (rr3.type_code = ''caveat'') AND (rr3.status_code = ''current''))
 									 INNER JOIN transaction.transaction tn ON (rr3.transaction_id = tn.id) 
@@ -74,7 +74,7 @@ VALUES('ba_unit-has-caveat', now(), 'infinity',
 									 INNER JOIN administrative.rrr rr4 ON ((ba.id = rr4.ba_unit_id) AND (rr3.nr = rr4.nr))
 								WHERE rr2.id = #{id}) AS vary) = 0) AS withoutVary), 
      caveatRegn AS	(SELECT (COUNT(*) > 0) AS caveat FROM administrative.rrr rr4
-				 INNER JOIN transaction.transaction tn ON ((rr4.transaction_id = tn.id)	AND (rr4.status_code = ''pending'') AND (rr4.type_code = ''caveat''))
+				 INNER JOIN transaction.transaction tn ON ((rr4.transaction_id = tn.id)	AND (rr4.status_code IN (''pending'', ''current'')) AND (rr4.type_code = ''caveat''))
 				 INNER JOIN application.service sv2 ON (tn.from_service_id = sv2.id)
 			WHERE rr4.id = #{id}
 			AND (SELECT (COUNT(*) = 0) FROM application.service sv3 WHERE ((sv3.application_id = sv2.application_id) AND (sv3.status_code != ''cancelled'') AND (sv3.request_type_code != ''caveat'')))

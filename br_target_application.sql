@@ -35,10 +35,10 @@ INSERT INTO system.br(id, technical_type_code, feedback, technical_description)
 VALUES('application-br1-check-required-sources-are-present', 'sql', 
 'All documents required for the services in this application are present.::::Sono presenti tutti i documenti richiesti per il servizio',
 'Checks that all required documents for any of the services in an application are recorded. Null value is returned if there are no required documents' );
---delete from system.br_definition where br_id = 'application-br1-check-required-sources-are-present'
+
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES('application-br1-check-required-sources-are-present', now(), 'infinity', 
-'WITH reqForAp AS 	(SELECT r_s.source_type_code AS typeCode
+'WITH reqForAp AS 	(SELECT DISTINCT ON(r_s.source_type_code) r_s.source_type_code AS typeCode
 			FROM application.request_type_requires_source_type r_s 
 				INNER JOIN application.service sv ON((r_s.request_type_code = sv.request_type_code) AND (sv.status_code != ''cancelled''))
 			WHERE sv.application_id = #{id}),
@@ -182,7 +182,7 @@ INSERT INTO system.br_validation(br_id, severity_code, target_application_moment
 VALUES('applicant-name-to-owner-name-check', 'warning', 'validate', 'application', 25);
 
 ----------------------------------------------------------------------------------------------------
-INSERT INTO.br(id, technical_type_code, feedback, technical_description) 
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
 VALUES('app-current-caveat-and-no-remove-or-vary', 'sql', 
 'The identified property has a current or pending caveat registered on the title. The application must include a cancel or waiver/vary caveat service for registration to proceed.::::Per questo titolo siste un diritto di prelazione pendente o corrente e la pratica non include un servizio di cancellazione o di variazione prelazione ',
  '#{id}(application.application.id) is requested. It checks if there is a caveat (pending or current) registered

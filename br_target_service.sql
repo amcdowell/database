@@ -198,5 +198,35 @@ LIMIT 1');
 INSERT INTO system.br_validation(br_id, severity_code, target_service_moment, target_code, order_of_execution) 
 VALUES('power-of-attorney-owner-check', 'warning', 'complete', 'service', 10);
 
+----------------------------------------------------------------------------------------------------
+
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES('required-sources-are-present', 'sql', 
+'All documents required for the service ''req_type'' are present.::::Sono presenti tutti i documenti richiesti per il servizio',
+'Checks that all required documents for any of the services in an application are recorded. Null value is returned if there are no required documents' );
+
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('required-sources-are-present', now(), 'infinity', 
+'WITH reqForSv AS 	(SELECT r_s.source_type_code AS typeCode
+			FROM application.request_type_requires_source_type r_s 
+				INNER JOIN application.service sv ON((r_s.request_type_code = sv.request_type_code) AND (sv.status_code != ''cancelled''))
+			WHERE sv.id = #{id}),
+     inclInSv AS	(SELECT DISTINCT ON (sc.id) get_translation(rt.display_value, #{lng}) AS req_type FROM reqForSv req
+				INNER JOIN source.source sc ON (req.typeCode = sc.type_code)
+				INNER JOIN application.application_uses_source a_s ON (sc.id = a_s.source_id)
+				INNER JOIN application.service sv ON ((a_s.application_id = sv.application_id) AND (sv.id = #{id}))
+				INNER JOIN application.request_type rt ON (sv.request_type_code = rt.code))
+
+SELECT 	CASE 	WHEN (SELECT (SUM(1) IS NULL) FROM reqForSv) THEN NULL
+		WHEN ((SELECT COUNT(*) FROM inclInSv) - (SELECT COUNT(*) FROM reqForSv) >= 0) THEN TRUE
+		ELSE FALSE
+	END AS vl, req_type FROM inclInSv
+ORDER BY vl
+LIMIT 1');
+
+
+INSERT INTO system.br_validation(br_id, severity_code, target_service_moment, target_code, order_of_execution) 
+VALUES('required-sources-are-present', 'critical', 'complete', 'service', 3);
+
 ------------------------------------------------------------------------------------------------
 update system.br set display_name = id where display_name is null;
