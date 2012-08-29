@@ -279,7 +279,7 @@ VALUES('application-on-approve-check-services-without-transaction', NOW(), 'infi
 'SELECT (COUNT(*) = 0) AS vl FROM application.service sv 
 	INNER JOIN transaction.transaction tn ON (sv.id = tn.from_service_id)
 WHERE sv.application_id = #{id} 
-AND sv.status_code = ''completed''');
+AND sv.status_code NOT IN (''completed'', ''cancelled'')');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
 VALUES('application-on-approve-check-services-without-transaction', 'critical', 'approve', 'application', 20);

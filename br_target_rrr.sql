@@ -35,11 +35,18 @@ VALUES('ba_unit-has-several-mortgages-with-same-rank', 'sql', 'The rank of a new
 --delete from system.br_definition where br_id = 'ba_unit-has-several-mortgages-with-same-rank'
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES('ba_unit-has-several-mortgages-with-same-rank', now(), 'infinity', 
-'select not (rrr1.mortgage_ranking = rrr2.mortgage_ranking) as vl
-from administrative.rrr rrr1 inner join administrative.rrr rrr2 on rrr1.ba_unit_id= rrr2.ba_unit_id
-where rrr2.id= #{id} and rrr1.status_code=''current'' and rrr1.type_code=''mortgage'' and rrr1.nr!=rrr2.nr
-order by 1
-limit 1');
+'WITH	repeatedRank   (SELECT rr1.nr,rr2.nr, rr1.mortgage_ranking AS rank, rr2.status_code FROM administrative.rrr rr1
+				INNER JOIN administrative.rrr rr2 ON ((rr1.ba_unit_id = rr2.ba_unit_id) AND (rr1.nr != rr2.nr) AND (rr1.mortgage_ranking = rr2.mortgage_ranking))
+			WHERE rr2.id = #{id} 
+			AND rr1.status_code = ''current'' 
+			AND rr1.type_code = ''mortgage'' 
+			ORDER BY 1
+			LIMIT 1)
+SELECT	CASE	WHEN (SELECT rr3.id FROM administrative.rrr rr3 WHERE rr3.id = #{id} AND rr3.type_code = ''mortgage'') IS NULL) THEN NULL
+		WHEN (SELECT (COUNT(*) = 0) FROM repeatedRank) THEN TRUE
+	
+			
+');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
 VALUES('ba_unit-has-several-mortgages-with-same-rank', 'critical', 'current', 'rrr', 19);

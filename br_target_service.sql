@@ -229,4 +229,25 @@ INSERT INTO system.br_validation(br_id, severity_code, target_service_moment, ta
 VALUES('required-sources-are-present', 'critical', 'complete', 'service', 3);
 
 ------------------------------------------------------------------------------------------------
+
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES('service-has-person-verification', 'sql', 'Within the application personal identification verification should be attached.::::Non esistono dettagli identificativi registrati per la pratica',
+ '#{id}(application.service.id) is requested');
+
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('service-has-person-verification', now(), 'infinity', 
+'SELECT (COUNT(*) > 0) AS vl FROM source.source sc
+	INNER JOIN application.application_uses_source aus ON ((sc.id = aus.source_id) AND (sc.type_code = ''idVerification''))
+	INNER JOIN application.service sv ON (aus.application_id = sv.application_id)
+WHERE sv.id= #{id}
+ORDER BY vl
+LIMIT 1');
+
+INSERT INTO system.br_validation(br_id, severity_code, target_service_moment, target_code, order_of_execution) 
+VALUES('service-has-person-verification', 'critical', 'complete', 'service', 13);
+
+
+----------------------------------------------------------------------------------------------
+
+
 update system.br set display_name = id where display_name is null;
