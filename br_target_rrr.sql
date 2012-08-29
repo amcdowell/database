@@ -35,18 +35,25 @@ VALUES('ba_unit-has-several-mortgages-with-same-rank', 'sql', 'The rank of a new
 --delete from system.br_definition where br_id = 'ba_unit-has-several-mortgages-with-same-rank'
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES('ba_unit-has-several-mortgages-with-same-rank', now(), 'infinity', 
-'WITH	repeatedRank   (SELECT rr1.nr,rr2.nr, rr1.mortgage_ranking AS rank, rr2.status_code FROM administrative.rrr rr1
-				INNER JOIN administrative.rrr rr2 ON ((rr1.ba_unit_id = rr2.ba_unit_id) AND (rr1.nr != rr2.nr) AND (rr1.mortgage_ranking = rr2.mortgage_ranking))
-			WHERE rr2.id = #{id} 
-			AND rr1.status_code = ''current'' 
-			AND rr1.type_code = ''mortgage'' 
-			ORDER BY 1
-			LIMIT 1)
-SELECT	CASE	WHEN (SELECT rr3.id FROM administrative.rrr rr3 WHERE rr3.id = #{id} AND rr3.type_code = ''mortgage'') IS NULL) THEN NULL
-		WHEN (SELECT (COUNT(*) = 0) FROM repeatedRank) THEN TRUE
-	
-			
-');
+'WITH	simple	AS	(SELECT rr1.id, rr1.nr FROM administrative.rrr rr1
+				INNER JOIN administrative.ba_unit ba1 ON (rr1.ba_unit_id = ba1.id)
+				INNER JOIN administrative.rrr rr2 ON (ba1.id = rr2.ba_unit_id)
+			WHERE rr2.id = #{id}
+			AND rr1.type_code = ''mortgage''
+			AND rr1.status_code = ''current''),
+	complex	AS	(SELECT rr3.id, rr3.nr FROM administrative.rrr rr3
+				INNER JOIN administrative.ba_unit ba2 ON (rr3.ba_unit_id = ba2.id)
+				INNER JOIN administrative.rrr rr4 ON (ba2.id = rr4.ba_unit_id)
+			WHERE rr4.id = #{id}
+			AND rr3.type_code = ''mortgage''
+			AND rr3.status_code != ''current''
+			AND rr3.nr IN (SELECT nr FROM simple))
+
+SELECT CASE 	WHEN	((SELECT rr5.id FROM administrative.rrr rr5 WHERE rr5.id = #{id} AND rr5.type_code = ''mortgage'') IS NULL) THEN NULL
+		WHEN 	(SELECT (COUNT(*) = 0) FROM simple) THEN TRUE
+		WHEN 	(((SELECT COUNT(*) FROM simple) - (SELECT COUNT(*) FROM complex) = 0)) THEN TRUE
+		ELSE	FALSE
+	END AS vl');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
 VALUES('ba_unit-has-several-mortgages-with-same-rank', 'critical', 'current', 'rrr', 19);
