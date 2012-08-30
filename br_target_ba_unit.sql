@@ -63,22 +63,6 @@ values('ba_unit-spatial_unit-area-comparison', 'medium', 'current', 'ba_unit', 2
 ----------------------------------------------------------------------------------------------------
 
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('baunit-has-primary-right', 'sql', 'Title must have a primary (ownership) right::::Il titolo deve avere un diritto primario',
- '#{id}(administrative.ba_unit.id) is requested');
-
-insert into system.br_definition(br_id, active_from, active_until, body) 
-values('baunit-has-primary-right', now(), 'infinity', 
-'SELECT COUNT(*) > 0 as vl FROM administrative.rrr 
-WHERE ba_unit_id = #{id}
-	AND is_primary
-	AND status_code in (''pending'', ''current'')');
-
-insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
-values('baunit-has-primary-right', 'critical', 'current', 'ba_unit', 6);
-
-----------------------------------------------------------------------------------------------------
-
-insert into system.br(id, technical_type_code, feedback, technical_description) 
 values('ba_unit-has-cadastre-object', 'sql', 'Title must have an associated parcel (or cadastre object)::::Il titolo deve avere particelle (oggetti catastali) associati',
  '#{id}(administrative.ba_unit.id) is requested');
 
@@ -166,6 +150,28 @@ WHERE tg.ba_unit_id  = #{id}');
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
 values('target-ba_unit-check-if-pending', 'critical', 'current', 'ba_unit', 18);
+----------------------------------------------------------------------------------------------------
+--delete from system.br_validation where br_id = 'ba_unit-has-a-valid-primary-right';
+--delete from system.br_definition where br_id = 'ba_unit-has-a-valid-primary-right';
+--delete from system.br where id = 'ba_unit-has-a-valid-primary-right';
+
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES('ba_unit-has-a-valid-primary-right', 'sql', 
+'A title must have a valid primary right::::ITALIANO',
+ '#{id}(baunit_id) is requested.');
+
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('ba_unit-has-a-valid-primary-right', now(), 'infinity', 
+'SELECT (COUNT(*) = 1) AS vl FROM administrative.rrr rr1 
+	 INNER JOIN administrative.ba_unit ba ON (rr1.ba_unit_id = ba.id)
+			 WHERE ba.id = #{id}
+			 AND rr1.status_code != ''cancelled''
+			 AND rr1.is_primary
+			 AND rr1.type_code IN (''ownership'', ''apartment'', ''stateOwnership'', ''lease'')');
+
+INSERT INTO system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
+VALUES('ba_unit-has-a-valid-primary-right', 'critical', 'current', 'ba_unit', 28);
+
 ----------------------------------------------------------------------------------------------------
 
 update system.br set display_name = id where display_name !=id;

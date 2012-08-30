@@ -37,16 +37,18 @@ INSERT INTO system.br_definition(br_id, active_from, active_until, body)
 VALUES('ba_unit-has-several-mortgages-with-same-rank', now(), 'infinity', 
 'WITH	simple	AS	(SELECT rr1.id, rr1.nr FROM administrative.rrr rr1
 				INNER JOIN administrative.ba_unit ba1 ON (rr1.ba_unit_id = ba1.id)
-				INNER JOIN administrative.rrr rr2 ON (ba1.id = rr2.ba_unit_id)
+				INNER JOIN administrative.rrr rr2 ON ((ba1.id = rr2.ba_unit_id) AND (rr1.mortgage_ranking = rr2.mortgage_ranking))
 			WHERE rr2.id = #{id}
 			AND rr1.type_code = ''mortgage''
-			AND rr1.status_code = ''current''),
+			AND rr1.status_code = ''current''
+			AND (rr1.mortgage_ranking = rr2.mortgage_ranking)),
 	complex	AS	(SELECT rr3.id, rr3.nr FROM administrative.rrr rr3
 				INNER JOIN administrative.ba_unit ba2 ON (rr3.ba_unit_id = ba2.id)
 				INNER JOIN administrative.rrr rr4 ON (ba2.id = rr4.ba_unit_id)
 			WHERE rr4.id = #{id}
 			AND rr3.type_code = ''mortgage''
 			AND rr3.status_code != ''current''
+			AND rr3.mortgage_ranking = rr4.mortgage_ranking
 			AND rr3.nr IN (SELECT nr FROM simple))
 
 SELECT CASE 	WHEN	((SELECT rr5.id FROM administrative.rrr rr5 WHERE rr5.id = #{id} AND rr5.type_code = ''mortgage'') IS NULL) THEN NULL
