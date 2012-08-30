@@ -1,4 +1,4 @@
-
+﻿
 -- Starting up the database script generation
 ALTER DATABASE sola SET bytea_output TO 'escape';
     
@@ -390,6 +390,51 @@ $$ LANGUAGE plpgsql;
 COMMENT ON FUNCTION administrative.get_calculated_area_size_action(
  baunit_id varchar
 ) IS 'It returns the sum of parcel areas for the selected ba unit id if any';
+
+-- Function: administrative.get_concatenated_name(character varying)
+CREATE OR REPLACE FUNCTION administrative.get_concatenated_name(baunit_id character varying)
+  RETURNS character varying AS
+$BODY$
+
+declare
+  rec record;
+  name character varying;
+  
+BEGIN
+  name = '';
+   
+	for rec in 
+           Select pippo.firstpart||'/'||pippo.lastpart || ' ' || pippo.cadtype  as value
+   from 
+   administrative.ba_unit bu join
+	   (select co.name_firstpart firstpart,
+	   co.name_lastpart lastpart,
+	    get_translation(cot.display_value, null) cadtype,
+	   bsu.ba_unit_id unit_id
+	   from administrative.ba_unit_contains_spatial_unit  bsu
+	   join cadastre.cadastre_object co on (bsu.spatial_unit_id = co.id)
+	   join cadastre.cadastre_object_type cot on (co.type_code = cot.code)) pippo
+           on (bu.id = pippo.unit_id)
+	   where bu.id = baunit_id
+	loop
+           name = name || ', ' || rec.value;
+	end loop;
+
+        if name = '' then
+	  name = 'PROPERTY';
+	end if;
+
+	if substr(name, 1, 1) = ',' then
+          name = substr(name,2);
+        end if;
+return name;
+END;
+
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION administrative.get_concatenated_name(character varying) OWNER TO postgres;
+COMMENT ON FUNCTION administrative.get_concatenated_name(character varying) IS 'It returns the name of the property or of parcels for the selected rrr if any';
     
 -- Function cadastre.cadastre_object_name_is_valid --
 CREATE OR REPLACE FUNCTION cadastre.cadastre_object_name_is_valid(
