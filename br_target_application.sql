@@ -227,14 +227,14 @@ VALUES('app-other-app-with-caveat', 'medium', 'validate', 'application', 10);
 ----------------------------------------------------------------------------------------------------
 
 insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('app-title-has-primary-right', 'sql', 'A primary right (such as ownership) must be identified for a request for a new title::::Il titolo originario del nuovo titolo deve avere un diritto primario',
+values('app-title-has-primary-right', 'sql', 'A single primary right (such as ownership) must be identified whenever a new title record is created::::Il titolo originario del nuovo titolo deve avere un diritto primario',
  '#{id}(application.application.id) is requested');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('app-title-has-primary-right', now(), 'infinity', 
 'WITH 	newTitleApp	AS	(SELECT (SUM(1) > 0) AS fhCheck FROM application.service se
 				WHERE se.application_id = #{id}
-				AND se.request_type_code IN (''newFreehold'', ''newApartment'', ''newState'')),
+				AND se.request_type_code IN (''newFreehold'', ''newApartment'', ''newState'', ''newDigitalTitle'')),
 	start_titles	AS	(SELECT DISTINCT ON (pt.from_ba_unit_id) pt.from_ba_unit_id, s.application_id FROM administrative.rrr rr 
 				INNER JOIN administrative.required_relationship_baunit pt ON (rr.ba_unit_id = pt.to_ba_unit_id)
 				INNER JOIN transaction.transaction tn ON (rr.transaction_id = tn.id)
@@ -246,12 +246,53 @@ values('app-title-has-primary-right', now(), 'infinity',
 				AND pp.is_primary
 				AND pp.ba_unit_id IN (SELECT from_ba_unit_id  FROM start_titles))
 
-SELECT CASE WHEN fhCheck IS TRUE THEN (SELECT sum(1) FROM start_primary_rrr)> 0
+SELECT CASE WHEN fhCheck IS TRUE THEN (SELECT sum(1) FROM start_primary_rrr) = 1
 		ELSE NULL
 	END AS vl FROM newTitleApp');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
 VALUES('app-title-has-primary-right', 'critical', 'validate', 'application', 1);
+
+----------------------------------------------------------------------------------------------------
+--delete from system.br_definition where br_id = 'app-allowable-primary-right-for-new-title'
+--delete from system.br_validation where br_id = 'app-allowable-primary-right-for-new-title'
+--delete from system.br where id = 'app-allowable-primary-right-for-new-title'
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES('app-allowable-primary-right-for-new-title', 'sql', 'An allowable primary right (ownership, apartment, State ownership, lease) must be identified for a new title::::ITALIANO',
+ '#{id}(application.application.id) is requested');
+
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('app-allowable-primary-right-for-new-title', now(), 'infinity', 
+'WITH 	newTitleApp	AS	(SELECT (SUM(1) > 0) AS fhCheck FROM application.service se
+				WHERE se.application_id = #{id}
+				AND se.request_type_code IN (''newFreehold'', ''newApartment'', ''newState'')),
+	existTitleApp	AS	(SELECT (SUM(1) > 0) AS fhCheck FROM application.application_property prp1
+					INNER JOIN application.service sv ON (prp1.application_id = sv.application_id)
+				WHERE prp1.application_id = #{id}
+				AND sv.request_type_code = ''newDigitalTitle''),
+	start_titles	AS	((SELECT DISTINCT ON (pt.from_ba_unit_id) pt.from_ba_unit_id AS titleID, s.application_id AS apID FROM administrative.rrr rr 
+				INNER JOIN administrative.required_relationship_baunit pt ON (rr.ba_unit_id = pt.to_ba_unit_id)
+				INNER JOIN transaction.transaction tn ON (rr.transaction_id = tn.id)
+				INNER JOIN application.service s ON (tn.from_service_id = s.id) 
+				INNER JOIN application.application ap ON (s.application_id = ap.id)
+				WHERE ap.id = #{id})
+				UNION
+				(SELECT prp2.ba_unit_id AS titleID, prp2.application_id AS apID FROM application.application_property prp2
+				WHERE prp2.application_id = #{id})),
+	start_primary_rrr AS 	(SELECT DISTINCT ON(pp.nr) pp.nr FROM administrative.rrr pp 
+				WHERE pp.status_code != ''cancelled''
+				AND pp.is_primary
+				AND pp.type_code IN (''ownership'', ''apartment'', ''stateOwnership'', ''lease'')
+				AND pp.ba_unit_id IN (SELECT titleID  FROM start_titles))
+
+
+SELECT CASE 	WHEN (((SELECT * FROM newTitleApp) OR (SELECT * FROM existTitleApp)) IS NULL) THEN NULL
+		WHEN ((SELECT COUNT(*) FROM start_primary_rrr) = 1) THEN TRUE
+		ELSE FALSE
+	END AS vl');
+
+INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
+VALUES('app-allowable-primary-right-for-new-title', 'critical', 'validate', 'application', 100);
 
 ----------------------------------------------------------------------------------------------------
 
@@ -424,6 +465,44 @@ SELECT CASE WHEN fhCheck IS TRUE THEN (SELECT COUNT(liveTitle) FROM parent_title
 
 insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
 values('application-approve-cancel-old-titles', 'critical', 'approve', 'application', 12);
+
+----------------------------------------------------------------------------------------------------
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES('cancel-title-check-rrr-cancelled', 'sql', 
+'All rights and restrictions on the title to be cancelled must be transfered or cancelled in this application.::::ITALIANO', 
+'#{id}(application_id) is requested');
+delete from system.br_definition where br_id = 'cancel-title-check-rrr-cancelled'
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('cancel-title-check-rrr-cancelled', now(), 'infinity', 
+'WITH 	pending_property_rrr AS (SELECT DISTINCT ON(rr1.nr) rr1.nr FROM administrative.rrr rr1 
+				INNER JOIN transaction.transaction tn ON (rr1.transaction_id = tn.id)
+				INNER JOIN application.service sv1 ON (tn.from_service_id = sv1.id) 
+				WHERE sv1.application_id = #{id}
+				AND rr1.status_code = ''pending''),
+								
+	target_title	AS	(SELECT prp.ba_unit_id AS liveTitle FROM application.application_property prp
+				WHERE prp.application_id = #{id}),
+				
+	cancelPropApp	AS	(SELECT sv3.id AS fhCheck, sv3.request_type_code FROM application.service sv3
+				WHERE sv3.application_id = #{id}
+				AND sv3.request_type_code = ''cancelProperty''),
+					
+	current_rrr AS 		(SELECT DISTINCT ON(rr2.nr) rr2.nr FROM administrative.rrr rr2 
+				WHERE rr2.status_code = ''current''
+				AND rr2.ba_unit_id IN (SELECT liveTitle FROM target_title)),
+
+	rem_property_rrr AS	(SELECT nr FROM current_rrr WHERE nr NOT IN (SELECT nr FROM pending_property_rrr))
+				
+SELECT CASE 	WHEN (SELECT (COUNT(*) = 0) FROM cancelPropApp) THEN NULL
+		WHEN (SELECT (COUNT(*) = 0) FROM pending_property_rrr) THEN FALSE
+		WHEN (SELECT (COUNT(*) = 0) FROM rem_property_rrr) THEN TRUE
+		ELSE FALSE
+	END AS vl');
+
+INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
+VALUES('cancel-title-check-rrr-cancelled', 'critical', 'validate', 'application', 22);
+
+
 ----------------------------------------------------------------------------------------------------------------------
 update system.br set display_name = id where display_name !=id;
 
