@@ -159,15 +159,17 @@ INSERT INTO system.br(id, technical_type_code, feedback, technical_description)
 VALUES('ba_unit-has-a-valid-primary-right', 'sql', 
 'A title must have a valid primary right::::ITALIANO',
  '#{id}(baunit_id) is requested.');
-
+--delete from system.br_definition where br_id = 'ba_unit-has-a-valid-primary-right'
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES('ba_unit-has-a-valid-primary-right', now(), 'infinity', 
 'SELECT (COUNT(*) = 1) AS vl FROM administrative.rrr rr1 
 	 INNER JOIN administrative.ba_unit ba ON (rr1.ba_unit_id = ba.id)
-			 WHERE ba.id = #{id}
-			 AND rr1.status_code != ''cancelled''
-			 AND rr1.is_primary
-			 AND rr1.type_code IN (''ownership'', ''apartment'', ''stateOwnership'', ''lease'')');
+	 INNER JOIN transaction.transaction tn ON (rr1.transaction_id = tn.id)
+	 INNER JOIN application.service sv ON ((tn.from_service_id = sv.id) AND (sv.request_type_code != ''cancelProperty''))
+ WHERE ba.id = #{id}
+ AND rr1.status_code != ''cancelled''
+ AND rr1.is_primary
+ AND rr1.type_code IN (''ownership'', ''apartment'', ''stateOwnership'', ''lease'')');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
 VALUES('ba_unit-has-a-valid-primary-right', 'critical', 'current', 'ba_unit', 28);

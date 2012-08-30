@@ -471,7 +471,6 @@ INSERT INTO system.br(id, technical_type_code, feedback, technical_description)
 VALUES('cancel-title-check-rrr-cancelled', 'sql', 
 'All rights and restrictions on the title to be cancelled must be transfered or cancelled in this application.::::ITALIANO', 
 '#{id}(application_id) is requested');
-delete from system.br_definition where br_id = 'cancel-title-check-rrr-cancelled'
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES('cancel-title-check-rrr-cancelled', now(), 'infinity', 
 'WITH 	pending_property_rrr AS (SELECT DISTINCT ON(rr1.nr) rr1.nr FROM administrative.rrr rr1 

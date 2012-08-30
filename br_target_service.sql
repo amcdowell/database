@@ -246,8 +246,33 @@ LIMIT 1');
 INSERT INTO system.br_validation(br_id, severity_code, target_service_moment, target_code, order_of_execution) 
 VALUES('service-has-person-verification', 'critical', 'complete', 'service', 13);
 
+------------------------------------------------------------------------------------------------
+--delete from system.br_definition where br_id = 'service-title-terminated';
+--delete from system.br_validation where br_id = 'service-title-terminated';
+--delete from system.br where id = 'service-title-terminated';
 
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES('service-title-terminated', 'sql', 'For the service ''req_type'' the title must be terminated (after all rights recorded on the title are transferred or cancelled).::::ITALIANO',
+ '#{id}(application.service.id) is requested');
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('service-title-terminated', now(), 'infinity', 
+'WITH reqForSv AS 	(SELECT sv.id, get_translation(rt.display_value, #{lng}) AS req_type FROM application.service sv 
+				INNER JOIN application.request_type rt ON (sv.request_type_code = rt.code)
+			WHERE sv.id = #{id} 
+			AND sv.request_type_code = ''cancelProperty''),
+     checkTitle AS	(SELECT tg.ba_unit_id FROM application.service sv
+				INNER JOIN transaction.transaction tn ON (sv.id = tn.from_service_id)
+				INNER JOIN administrative.ba_unit_target tg ON (tn.id = tg.transaction_id)
+			WHERE sv.id = #{id})
+SELECT 	CASE 	WHEN (SELECT (COUNT(*) = 0) FROM reqForSv) THEN NULL
+		WHEN (SELECT (COUNT(*) > 0) FROM checkTitle) THEN TRUE
+		ELSE FALSE
+	END AS vl, req_type FROM reqForSv
+ORDER BY vl
+LIMIT 1');
+
+INSERT INTO system.br_validation(br_id, severity_code, target_service_moment, target_code, order_of_execution) 
+VALUES('service-title-terminated', 'critical', 'complete', 'service', 13);
 ----------------------------------------------------------------------------------------------
-
 
 update system.br set display_name = id where display_name is null;
