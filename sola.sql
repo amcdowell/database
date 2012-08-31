@@ -1,4 +1,4 @@
-﻿
+
 -- Starting up the database script generation
 ALTER DATABASE sola SET bytea_output TO 'escape';
     
@@ -390,12 +390,12 @@ $$ LANGUAGE plpgsql;
 COMMENT ON FUNCTION administrative.get_calculated_area_size_action(
  baunit_id varchar
 ) IS 'It returns the sum of parcel areas for the selected ba unit id if any';
-
--- Function: administrative.get_concatenated_name(character varying)
-CREATE OR REPLACE FUNCTION administrative.get_concatenated_name(baunit_id character varying)
-  RETURNS character varying AS
-$BODY$
-
+    
+-- Function administrative.get_concatenated_name --
+CREATE OR REPLACE FUNCTION administrative.get_concatenated_name(
+ baunit_id varchar
+) RETURNS varchar 
+AS $$
 declare
   rec record;
   name character varying;
@@ -430,11 +430,11 @@ BEGIN
 return name;
 END;
 
-$BODY$
-  LANGUAGE plpgsql VOLATILE
-  COST 100;
-ALTER FUNCTION administrative.get_concatenated_name(character varying) OWNER TO postgres;
-COMMENT ON FUNCTION administrative.get_concatenated_name(character varying) IS 'It returns the name of the property or of parcels for the selected rrr if any';
+$$ LANGUAGE plpgsql;
+COMMENT ON FUNCTION administrative.get_concatenated_name(
+ baunit_id varchar
+) IS 'This function returns the concatenated list of spatial objects contained in a ba_unit for each rrr, if any.
+If there are no spatial objects then it only returns that it is a property.';
     
 -- Function cadastre.cadastre_object_name_is_valid --
 CREATE OR REPLACE FUNCTION cadastre.cadastre_object_name_is_valid(
