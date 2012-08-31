@@ -254,9 +254,6 @@ INSERT INTO system.br_validation(br_id, severity_code, target_application_moment
 VALUES('app-title-has-primary-right', 'critical', 'validate', 'application', 1);
 
 ----------------------------------------------------------------------------------------------------
---delete from system.br_definition where br_id = 'app-allowable-primary-right-for-new-title'
---delete from system.br_validation where br_id = 'app-allowable-primary-right-for-new-title'
---delete from system.br where id = 'app-allowable-primary-right-for-new-title'
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
 VALUES('app-allowable-primary-right-for-new-title', 'sql', 'An allowable primary right (ownership, apartment, State ownership, lease) must be identified for a new title::::ITALIANO',
  '#{id}(application.application.id) is requested');
@@ -326,9 +323,6 @@ INSERT INTO system.br_validation(br_id, severity_code, target_application_moment
 VALUES('application-on-approve-check-services-without-transaction', 'critical', 'approve', 'application', 20);
 
 ----------------------------------------------------------------------------------------------------
---delete from system.br_definition where br_id = 'application-verifies-identification';
---delete from system.br_validation where br_id = 'application-verifies-identification';
---delete from system.br where id = 'application-verifies-identification';
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
 VALUES('application-verifies-identification', 'sql', 'Personal identification verification should be attached to the application.::::Non esistono dettagli identificativi registrati per la pratica',
  '#{id}(application.application.id) is requested');
@@ -345,13 +339,13 @@ INSERT INTO system.br_validation(br_id, severity_code, target_application_moment
 VALUES('application-verifies-identification', 'medium', 'validate', 'application', 13);
 
 ----------------------------------------------------------------------------------------------------
-insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('newtitle-br24-check-rrr-accounted', 'sql', 
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES('newtitle-br24-check-rrr-accounted', 'sql', 
 'All rights and restrictions from existing title(s) must be accounted for in the new titles created in this application.::::non tutti i diritti e le restrizioni sono stati trasferiti al nuovo titolo', 
 '#{id}(application_id) is requested');
 
-insert into system.br_definition(br_id, active_from, active_until, body) 
-values('newtitle-br24-check-rrr-accounted', now(), 'infinity', 
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('newtitle-br24-check-rrr-accounted', now(), 'infinity', 
 '
 WITH 	pending_property_rrr AS (SELECT DISTINCT ON(rp.nr) rp.nr FROM administrative.rrr rp 
 				INNER JOIN transaction.transaction tn ON (rp.transaction_id = tn.id)
@@ -384,19 +378,18 @@ WITH 	pending_property_rrr AS (SELECT DISTINCT ON(rp.nr) rp.nr FROM administrati
 				
 SELECT CASE WHEN fhCheck IS TRUE THEN (SELECT COUNT(nr) FROM rem_property_rrr) = 0
 		ELSE NULL
-	END AS vl FROM newFreeholdApp
-');
+	END AS vl FROM newFreeholdApp');
 
-insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-values('newtitle-br24-check-rrr-accounted', 'critical', 'validate', 'application', 12);
+INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
+VALUES('newtitle-br24-check-rrr-accounted', 'critical', 'validate', 'application', 12);
 
 ----------------------------------------------------------------------------------------------------
-insert into system.br(id, technical_type_code, feedback) 
-values('application-for-new-title-has-cancel-property-service', 'sql', 
+INSERT INTO system.br(id, technical_type_code, feedback) 
+VALUES('application-for-new-title-has-cancel-property-service', 'sql', 
 'When a new title is created there must be a cancel title service in the application for the parent title.::::Non esiste nella pratica un servizio di cancellazione titolo. Aggiungere questo servizio alla pratica' );
 
-insert into system.br_definition(br_id, active_from, active_until, body) 
-values('application-for-new-title-has-cancel-property-service', now(), 'infinity', 
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('application-for-new-title-has-cancel-property-service', now(), 'infinity', 
 '
 WITH 	newFreeholdApp	AS	(SELECT (SUM(1) > 0) AS fhCheck FROM application.service se
 				WHERE se.application_id = #{id}
@@ -407,19 +400,18 @@ SELECT CASE WHEN fhCheck IS TRUE THEN (SELECT COUNT(id) FROM application.service
 					WHERE sv.application_id = #{id}
 					AND sv.request_type_code = ''cancelProperty'') > 0
 		ELSE NULL
-	END AS vl FROM newFreeholdApp
-');
+	END AS vl FROM newFreeholdApp');
 
-insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-values('application-for-new-title-has-cancel-property-service', 'critical', 'validate', 'application', 10);
+INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
+VALUES('application-for-new-title-has-cancel-property-service', 'critical', 'validate', 'application', 10);
 ----------------------------------------------------------------------------------------------------
 
-insert into system.br(id, technical_type_code, feedback) 
-values('application-cancel-property-service-before-new-title', 'sql', 
+INSERT INTO system.br(id, technical_type_code, feedback) 
+VALUES('application-cancel-property-service-before-new-title', 'sql', 
 'New Freehold title service must come before Cancel Title service in the application.::::Il servizio di cancellazione titolo deve venire prima di quello di creazione nuovo titolo. Cambiare ordine servizi nella pratica' );
 
-insert into system.br_definition(br_id, active_from, active_until, body) 
-values('application-cancel-property-service-before-new-title', now(), 'infinity', 
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('application-cancel-property-service-before-new-title', now(), 'infinity', 
 '
 WITH 	newFreeholdApp	AS	(SELECT (SUM(1) > 0) AS fhCheck FROM application.service se
 				WHERE se.application_id = #{id}
@@ -433,20 +425,19 @@ WITH 	newFreeholdApp	AS	(SELECT (SUM(1) > 0) AS fhCheck FROM application.service
 				
 SELECT CASE WHEN fhCheck IS TRUE THEN ((SELECT cancelSequence FROM orderCancel) - (SELECT newSequence FROM orderNew)) > 0
 		ELSE NULL
-	END AS vl FROM newFreeholdApp
-');
+	END AS vl FROM newFreeholdApp');
 
-insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-values('application-cancel-property-service-before-new-title', 'critical', 'validate', 'application', 11);
+INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
+VALUES('application-cancel-property-service-before-new-title', 'critical', 'validate', 'application', 11);
 
 ----------------------------------------------------------------------------------------------------
 
-insert into system.br(id, technical_type_code, feedback) 
-values('application-approve-cancel-old-titles', 'sql', 
+INSERT INTO system.br(id, technical_type_code, feedback) 
+VALUES('application-approve-cancel-old-titles', 'sql', 
 'An application including a new freehold service must also terminate the parent title(s) with a cancel title service.::::Identificati titoli esistenti. Prego terminare i titoli esistenti usando il servizio di Cancellazione Titolo' );
 
-insert into system.br_definition(br_id, active_from, active_until, body) 
-values('application-approve-cancel-old-titles', now(), 'infinity', 
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('application-approve-cancel-old-titles', now(), 'infinity', 
 '
 WITH 	newFreeholdApp	AS	(SELECT (SUM(1) > 0) AS fhCheck FROM application.service se
 				WHERE se.application_id = #{id}
@@ -463,8 +454,8 @@ SELECT CASE WHEN fhCheck IS TRUE THEN (SELECT COUNT(liveTitle) FROM parent_title
 	END AS vl FROM newFreeholdApp
 ');
 
-insert into system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-values('application-approve-cancel-old-titles', 'critical', 'approve', 'application', 12);
+INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
+VALUES('application-approve-cancel-old-titles', 'critical', 'approve', 'application', 12);
 
 ----------------------------------------------------------------------------------------------------
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
@@ -503,7 +494,7 @@ VALUES('cancel-title-check-rrr-cancelled', 'critical', 'validate', 'application'
 
 
 ----------------------------------------------------------------------------------------------------------------------
-update system.br set display_name = id where display_name !=id;
+UPDATE system.br SET display_name = id WHERE display_name !=id;
 
 ----------------------------------------------------------------------------------------------------
 

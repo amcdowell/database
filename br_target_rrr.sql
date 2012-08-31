@@ -5,7 +5,7 @@ insert into system.br_definition(br_id, active_from, active_until, body)
 values('rrr-must-have-parties', now(), 'infinity', 
 'select count(*) = 0 as vl
 from administrative.rrr r
-where id= #{id} and type_code in (select code from administrative.rrr_type where party_required)
+where r.id= #{id} and type_code in (select code from administrative.rrr_type where party_required)
 and (select count(*) from administrative.party_for_rrr where rrr_id= r.id) = 0');
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
@@ -61,9 +61,7 @@ INSERT INTO system.br_validation(br_id, severity_code, target_reg_moment, target
 VALUES('ba_unit-has-several-mortgages-with-same-rank', 'critical', 'current', 'rrr', 19);
 
 ----------------------------------------------------------------------------------------------------
---delete from system.br_definition where br_id = 'ba_unit-has-caveat'
---delete from system.br_validation where br_id = 'ba_unit-has-caveat'
---delete from system.br where id = 'ba_unit-has-caveat'
+
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
 VALUES('ba_unit-has-caveat', 'sql', 'Caveat should not prevent registration proceeding.::::Il titolo ha un diritto di prelazione attivo',
  '#{id}(administrative.rrr.id) is requested.');

@@ -93,7 +93,6 @@ INSERT INTO system.br_validation(br_id, severity_code, target_service_moment, ta
 VALUES('current-rrr-for-variation-or-cancellation-check', 'medium', 'complete', 'service', 11);
 
 ----------------------------------------------------------------------------------------------------
---PROBABLY REDUNDANT BR
 
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
 VALUES('power-of-attorney-service-has-document', 'sql', 'Service ''req_type'' must have must have an associated Power of Attorney document::::ITALIANO',
@@ -247,9 +246,6 @@ INSERT INTO system.br_validation(br_id, severity_code, target_service_moment, ta
 VALUES('service-has-person-verification', 'critical', 'complete', 'service', 13);
 
 ------------------------------------------------------------------------------------------------
---delete from system.br_definition where br_id = 'service-title-terminated';
---delete from system.br_validation where br_id = 'service-title-terminated';
---delete from system.br where id = 'service-title-terminated';
 
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
 VALUES('service-title-terminated', 'sql', 'For the service ''req_type'' the title must be terminated (after all rights recorded on the title are transferred or cancelled).::::ITALIANO',
@@ -273,6 +269,43 @@ LIMIT 1');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_service_moment, target_code, order_of_execution) 
 VALUES('service-title-terminated', 'critical', 'complete', 'service', 13);
+
+----------------------------------------------------------------------------------------------------
+
+
+insert into system.br(id, technical_type_code, feedback, technical_description) 
+values('application-baunit-check-area', 'sql', 'Title has the same area as the combined area of its associated parcels::::La Area della BA Unit (Unita Amministrativa di Base) non ha la stessa estensione di quella delle sue particelle',
+ '#{id}(ba_unit_id) is requested');
+
+insert into system.br_definition(br_id, active_from, active_until, body) 
+values('application-baunit-check-area', now(), 'infinity', 
+'select
+       ( 
+         select coalesce(cast(sum(a.size)as float),0)
+	 from administrative.ba_unit_area a
+         inner join administrative.ba_unit ba
+         on a.ba_unit_id = ba.id
+         where ba.transaction_id = #{id}
+         and a.type_code =  ''officialArea''
+       ) 
+   = 
+
+       (
+         select coalesce(cast(sum(a.size)as float),0)
+	 from cadastre.spatial_value_area a
+	 where  a.type_code = ''officialArea''
+	 and a.spatial_unit_id in
+           (  select b.spatial_unit_id
+              from administrative.ba_unit_contains_spatial_unit b
+              inner join administrative.ba_unit ba
+	      on b.ba_unit_id = ba.id
+	      where ba.transaction_id = #{id}
+           )
+
+        ) as vl');
+
+insert into system.br_validation(br_id, severity_code, target_service_moment, target_code, target_request_type_code, order_of_execution) 
+values('application-baunit-check-area', 'warning', null, 'service', 'cadastreChange', 9);
 ----------------------------------------------------------------------------------------------
 
 update system.br set display_name = id where display_name is null;

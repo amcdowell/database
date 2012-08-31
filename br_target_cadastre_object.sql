@@ -44,16 +44,10 @@ values('cadastre-redefinition-union-old-new-the-same', 'sql',
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('cadastre-redefinition-union-old-new-the-same', now(), 'infinity', 
-'select st_equals(geom_to_snap,target_geom) as vl
-from cadastre.snap_geometry_to_geometry(
-(select st_union(co.geom_polygon) 
-from cadastre.cadastre_object co 
-where id in (select cadastre_object_id from cadastre.cadastre_object_target co_t 
-              where transaction_id = #{id}))
-, (select st_union(co_t.geom_polygon)
-from cadastre.cadastre_object_target co_t 
-where transaction_id = #{id}), 
-  system.get_setting(''map-tolerance'')::double precision, true)');
+'select st_equals(geom_to_snap,target_geom) as vl from cadastre.snap_geometry_to_geometry((select st_union(co.geom_polygon) from cadastre.cadastre_object co 
+ where id in (select cadastre_object_id from cadastre.cadastre_object_target co_t where transaction_id = #{id})), 
+(select st_union(co_t.geom_polygon) from cadastre.cadastre_object_target co_t where transaction_id = #{id}), 
+ system.get_setting(''map-tolerance'')::double precision, true)');
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
 values('cadastre-redefinition-union-old-new-the-same', 'warning', 'pending', 'cadastre_object', 'redefineCadastre', 1);
@@ -87,11 +81,12 @@ values('application-baunit-has-parcels', 'sql', 'Title must have Parcels::::Tito
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('application-baunit-has-parcels', now(), 'infinity', 
-'select (select count(*)>0 
-  from administrative.ba_unit_contains_spatial_unit ba_su inner join cadastre.cadastre_object co on ba_su.spatial_unit_id= co.id
-  where co.status_code in (''current'') and co.geom_polygon is not null and ba_su.ba_unit_id= ba.id) as vl
-from application.service s inner join application.application_property ap on (s.application_id= ap.application_id)
-  INNER JOIN administrative.ba_unit ba ON (ap.name_firstpart, ap.name_lastpart) = (ba.name_firstpart, ba.name_lastpart)
+'select (select count(*)>0 from administrative.ba_unit_contains_spatial_unit ba_su 
+		inner join cadastre.cadastre_object co on ba_su.spatial_unit_id= co.id
+	where co.status_code in (''current'') and co.geom_polygon is not null and ba_su.ba_unit_id= ba.id) as vl
+from application.service s 
+	inner join application.application_property ap on (s.application_id= ap.application_id)
+	INNER JOIN administrative.ba_unit ba ON (ap.name_firstpart, ap.name_lastpart) = (ba.name_firstpart, ba.name_lastpart)
 where s.id = #{id}
 order by 1
 limit 1');
@@ -102,41 +97,6 @@ values('application-baunit-has-parcels', 'critical', 'complete', 'service', 'cad
 insert into system.br_validation(br_id, severity_code, target_service_moment, target_code, target_request_type_code, order_of_execution) 
 values('application-baunit-has-parcels', 'critical', 'complete', 'service', 'redefineCadastre', 1);
 
-----------------------------------------------------------------------------------------------------
-
-insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('application-baunit-check-area', 'sql', 'Title has the same area as the combined area of its associated parcels::::La Area della BA Unit (Unita Amministrativa di Base) non ha la stessa estensione di quella delle sue particelle',
- '#{id}(ba_unit_id) is requested');
-
-insert into system.br_definition(br_id, active_from, active_until, body) 
-values('application-baunit-check-area', now(), 'infinity', 
-'select
-       ( 
-         select coalesce(cast(sum(a.size)as float),0)
-	 from administrative.ba_unit_area a
-         inner join administrative.ba_unit ba
-         on a.ba_unit_id = ba.id
-         where ba.transaction_id = #{id}
-         and a.type_code =  ''officialArea''
-       ) 
-   = 
-
-       (
-         select coalesce(cast(sum(a.size)as float),0)
-	 from cadastre.spatial_value_area a
-	 where  a.type_code = ''officialArea''
-	 and a.spatial_unit_id in
-           (  select b.spatial_unit_id
-              from administrative.ba_unit_contains_spatial_unit b
-              inner join administrative.ba_unit ba
-	      on b.ba_unit_id = ba.id
-	      where ba.transaction_id = #{id}
-           )
-
-        ) as vl');
-
-insert into system.br_validation(br_id, severity_code, target_service_moment, target_code, target_request_type_code, order_of_execution) 
-values('application-baunit-check-area', 'warning', null, 'service', 'cadastreChange', 9);
 
 ----------------------------------------------------------------------------------------------------
 
