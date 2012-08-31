@@ -95,7 +95,7 @@ VALUES('current-rrr-for-variation-or-cancellation-check', 'medium', 'complete', 
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES('power-of-attorney-service-has-document', 'sql', 'Service ''req_type'' must have must have an associated Power of Attorney document::::ITALIANO',
+VALUES('power-of-attorney-service-has-document', 'sql', 'Service ''req_type'' must have must have one associated Power of Attorney document::::ITALIANO',
   '#{id}(application.service.id)');
  
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
@@ -305,7 +305,7 @@ values('application-baunit-check-area', now(), 'infinity',
         ) as vl');
 
 insert into system.br_validation(br_id, severity_code, target_service_moment, target_code, target_request_type_code, order_of_execution) 
-values('application-baunit-check-area', 'warning', null, 'service', 'cadastreChange', 9);
+values('application-baunit-check-area', 'warning', null, 'service', 'cadastreChange', 520);
 ----------------------------------------------------------------------------------------------
 
 update system.br set display_name = id where display_name is null;

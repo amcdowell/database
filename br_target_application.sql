@@ -12,7 +12,7 @@ WHERE sv.application_id = #{id}
 AND sv.status_code != ''cancelled''');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-VALUES('application-br8-check-has-services', 'critical', 'validate', 'application', 1);
+VALUES('application-br8-check-has-services', 'critical', 'validate', 'application', 260);
 
 ----------------------------------------------------------------------------------------------------
 
@@ -28,7 +28,7 @@ FROM source.source
 WHERE id IN (SELECT source_id FROM application.application_uses_source WHERE application_id= #{id})');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-VALUES('application-br7-check-sources-have-documents', 'warning', 'validate', 'application', 2);
+VALUES('application-br7-check-sources-have-documents', 'warning', 'validate', 'application', 570);
 
 ----------------------------------------------------------------------------------------------------
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
@@ -51,7 +51,7 @@ SELECT 	CASE 	WHEN (SELECT (SUM(1) IS NULL) FROM reqForAp) THEN NULL
 	END AS vl');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-VALUES('application-br1-check-required-sources-are-present', 'critical', 'validate', 'application', 3);
+VALUES('application-br1-check-required-sources-are-present', 'critical', 'validate', 'application', 210);
 
 ----------------------------------------------------------------------------------------------------
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
@@ -68,7 +68,7 @@ WHERE a_s.application_id = #{id}
 AND s.type_code = ''title''');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-VALUES('application-br2-check-title-documents-not-old', 'medium', 'validate', 'application', 4);
+VALUES('application-br2-check-title-documents-not-old', 'medium', 'validate', 'application', 510);
 
 ----------------------------------------------------------------------------------------------------
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
@@ -91,7 +91,7 @@ ORDER BY 1
 LIMIT 1 ');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-VALUES('application-br3-check-properties-are-not-historic', 'critical', 'validate', 'application', 5);
+VALUES('application-br3-check-properties-are-not-historic', 'critical', 'validate', 'application', 180);
 
 ----------------------------------------------------------------------------------------------------
 
@@ -109,7 +109,7 @@ ORDER BY 1
 LIMIT 1');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-VALUES('application-br4-check-sources-date-not-in-the-future', 'warning', 'validate', 'application', 6);
+VALUES('application-br4-check-sources-date-not-in-the-future', 'warning', 'validate', 'application', 710);
 
 ----------------------------------------------------------------------------------------------------
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
@@ -127,7 +127,7 @@ AND action_code != ''cancel''
 AND request_type_code IN (''serviceEnquiry'', ''documentCopy'', ''cadastrePrint'', ''surveyPlanCopy'', ''titleSearch'')');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-VALUES('application-br5-check-there-are-front-desk-services', 'warning', 'validate', 'application', 7);
+VALUES('application-br5-check-there-are-front-desk-services', 'warning', 'validate', 'application', 740);
 
 ----------------------------------------------------------------------------------------------------
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
@@ -147,7 +147,7 @@ ORDER BY 1
 LIMIT 1');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-VALUES('application-br6-check-new-title-service-is-needed', 'warning', 'validate', 'application', 8);
+VALUES('application-br6-check-new-title-service-is-needed', 'warning', 'validate', 'application', 730);
 
 ----------------------------------------------------------------------------------------------------
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
@@ -179,7 +179,7 @@ ORDER BY vl
 LIMIT 1');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-VALUES('applicant-name-to-owner-name-check', 'warning', 'validate', 'application', 25);
+VALUES('applicant-name-to-owner-name-check', 'warning', 'validate', 'application', 410);
 
 ----------------------------------------------------------------------------------------------------
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
@@ -200,10 +200,8 @@ ORDER BY 1 desc
 LIMIT 1');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-VALUES('app-current-caveat-and-no-remove-or-vary', 'medium', 'validate', 'application', 11);
+VALUES('app-current-caveat-and-no-remove-or-vary', 'medium', 'validate', 'application', 550);
 
---INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
---values('app-current-caveat-and-no-remove-or-vary', 'critical', 'approve', 'application', 1);
 ----------------------------------------------------------------------------------------------------
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
 VALUES('app-other-app-with-caveat', 'sql', 
@@ -222,7 +220,7 @@ ORDER BY 1
 LIMIT 1');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-VALUES('app-other-app-with-caveat', 'medium', 'validate', 'application', 10);
+VALUES('app-other-app-with-caveat', 'medium', 'validate', 'application', 590);
 
 ----------------------------------------------------------------------------------------------------
 
@@ -251,7 +249,7 @@ SELECT CASE WHEN fhCheck IS TRUE THEN (SELECT sum(1) FROM start_primary_rrr) = 1
 	END AS vl FROM newTitleApp');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-VALUES('app-title-has-primary-right', 'critical', 'validate', 'application', 1);
+VALUES('app-title-has-primary-right', 'critical', 'validate', 'application', 100);
 
 ----------------------------------------------------------------------------------------------------
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
@@ -289,7 +287,7 @@ SELECT CASE 	WHEN (((SELECT * FROM newTitleApp) OR (SELECT * FROM existTitleApp)
 	END AS vl');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-VALUES('app-allowable-primary-right-for-new-title', 'critical', 'validate', 'application', 100);
+VALUES('app-allowable-primary-right-for-new-title', 'critical', 'validate', 'application', 10);
 
 ----------------------------------------------------------------------------------------------------
 
@@ -304,7 +302,7 @@ WHERE sv.application_id = #{id}
 AND sv.status_code NOT IN (''completed'', ''cancelled'')');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-VALUES('application-on-approve-check-services-status', 'critical', 'approve', 'application', 1);
+VALUES('application-on-approve-check-services-status', 'critical', 'approve', 'application', 270);
 
 ----------------------------------------------------------------------------------------------------
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
@@ -320,7 +318,7 @@ WHERE sv.application_id = #{id}
 AND sv.status_code NOT IN (''completed'', ''cancelled'')');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-VALUES('application-on-approve-check-services-without-transaction', 'critical', 'approve', 'application', 20);
+VALUES('application-on-approve-check-services-without-transaction', 'critical', 'approve', 'application', 330);
 
 ----------------------------------------------------------------------------------------------------
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
@@ -336,7 +334,7 @@ AND sc.type_code = ''idVerification''');
 
 
 INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-VALUES('application-verifies-identification', 'medium', 'validate', 'application', 13);
+VALUES('application-verifies-identification', 'medium', 'validate', 'application', 530);
 
 ----------------------------------------------------------------------------------------------------
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
@@ -403,7 +401,7 @@ SELECT CASE WHEN fhCheck IS TRUE THEN (SELECT COUNT(id) FROM application.service
 	END AS vl FROM newFreeholdApp');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-VALUES('application-for-new-title-has-cancel-property-service', 'critical', 'validate', 'application', 10);
+VALUES('application-for-new-title-has-cancel-property-service', 'critical', 'validate', 'application', 1);
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO system.br(id, technical_type_code, feedback) 
@@ -428,7 +426,7 @@ SELECT CASE WHEN fhCheck IS TRUE THEN ((SELECT cancelSequence FROM orderCancel) 
 	END AS vl FROM newFreeholdApp');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-VALUES('application-cancel-property-service-before-new-title', 'critical', 'validate', 'application', 11);
+VALUES('application-cancel-property-service-before-new-title', 'critical', 'validate', 'application', 390);
 
 ----------------------------------------------------------------------------------------------------
 
@@ -455,7 +453,7 @@ SELECT CASE WHEN fhCheck IS TRUE THEN (SELECT COUNT(liveTitle) FROM parent_title
 ');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
-VALUES('application-approve-cancel-old-titles', 'critical', 'approve', 'application', 12);
+VALUES('application-approve-cancel-old-titles', 'critical', 'approve', 'application', 250);
 
 ----------------------------------------------------------------------------------------------------
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
