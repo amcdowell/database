@@ -1,4 +1,7 @@
-﻿insert into system.br(id, technical_type_code, feedback, technical_description) 
+﻿
+
+
+insert into system.br(id, technical_type_code, feedback, technical_description) 
 values('target-parcels-present', 'sql', 'Target parcel(s) must be selected::::Esistono particelle originarie selezionate',
  '#{id}(transaction_id) is requested');
 
@@ -7,10 +10,10 @@ values('target-parcels-present', now(), 'infinity',
  'select count (*) > 0 as vl from cadastre.cadastre_object_target where transaction_id= #{id}');
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
-values('target-parcels-present', 'warning', 'pending', 'cadastre_object', 2);
+values('target-parcels-present', 'warning', 'pending', 'cadastre_object', 450);
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
-values('target-parcels-present', 'warning', 'current', 'cadastre_object', 2);
+values('target-parcels-present', 'warning', 'current', 'cadastre_object', 440);
 
 ----------------------------------------------------------------------------------------------------
 
@@ -30,10 +33,10 @@ where co_target.transaction_id = #{id}
  ');
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
-values('target-parcels-check-nopending', 'critical', 'pending', 'cadastre_object', 3);
+values('target-parcels-check-nopending', 'critical', 'pending', 'cadastre_object', 310);
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
-values('target-parcels-check-nopending', 'critical', 'current', 'cadastre_object', 3);
+values('target-parcels-check-nopending', 'critical', 'current', 'cadastre_object', 300);
 
 ----------------------------------------------------------------------------------------------------
 
@@ -49,11 +52,11 @@ values('cadastre-redefinition-union-old-new-the-same', now(), 'infinity',
 (select st_union(co_t.geom_polygon) from cadastre.cadastre_object_target co_t where transaction_id = #{id}), 
  system.get_setting(''map-tolerance'')::double precision, true)');
 
-insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
-values('cadastre-redefinition-union-old-new-the-same', 'warning', 'pending', 'cadastre_object', 'redefineCadastre', 1);
+INSERT INTO system.br_validation(br_id, target_code, target_reg_moment, target_request_type_code, severity_code, order_of_execution)
+VALUES ('cadastre-redefinition-union-old-new-the-same', 'cadastre_object', 'current', 'redefineCadastre', 'warning', 400);
 
-insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
-values('cadastre-redefinition-union-old-new-the-same', 'warning', 'current', 'cadastre_object', 'redefineCadastre', 1);
+INSERT INTO system.br_validation(br_id, target_code, target_reg_moment, target_request_type_code, severity_code, order_of_execution)
+VALUES ('cadastre-redefinition-union-old-new-the-same', 'cadastre_object', 'pending', 'redefineCadastre', 'warning', 420);
 
 ----------------------------------------------------------------------------------------------------
 
@@ -67,36 +70,11 @@ values('cadastre-redefinition-target-geometries-dont-overlap', now(), 'infinity'
 'select coalesce(st_area(st_union(co.geom_polygon)) = sum(st_area(co.geom_polygon)), true) as vl
 from cadastre.cadastre_object_target co where transaction_id = #{id}');
 
-insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
-values('cadastre-redefinition-target-geometries-dont-overlap', 'critical', 'current', 'cadastre_object', 'redefineCadastre', 1);
+INSERT INTO system.br_validation(br_id, target_code, target_reg_moment, target_request_type_code, severity_code, order_of_execution)
+VALUES ('cadastre-redefinition-target-geometries-dont-overlap', 'cadastre_object', 'current', 'redefineCadastre', 'critical', 120);
 
-insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
-values('cadastre-redefinition-target-geometries-dont-overlap', 'warning', 'pending', 'cadastre_object', 'redefineCadastre', 1);
-
-----------------------------------------------------------------------------------------------------
-
-insert into system.br(id, technical_type_code, feedback, technical_description) 
-values('application-baunit-has-parcels', 'sql', 'Title must have Parcels::::Titolo deve avere particelle',
- '#{id}(application.service.id) is requested');
-
-insert into system.br_definition(br_id, active_from, active_until, body) 
-values('application-baunit-has-parcels', now(), 'infinity', 
-'select (select count(*)>0 from administrative.ba_unit_contains_spatial_unit ba_su 
-		inner join cadastre.cadastre_object co on ba_su.spatial_unit_id= co.id
-	where co.status_code in (''current'') and co.geom_polygon is not null and ba_su.ba_unit_id= ba.id) as vl
-from application.service s 
-	inner join application.application_property ap on (s.application_id= ap.application_id)
-	INNER JOIN administrative.ba_unit ba ON (ap.name_firstpart, ap.name_lastpart) = (ba.name_firstpart, ba.name_lastpart)
-where s.id = #{id}
-order by 1
-limit 1');
-
-insert into system.br_validation(br_id, severity_code, target_service_moment, target_code, target_request_type_code, order_of_execution) 
-values('application-baunit-has-parcels', 'critical', 'complete', 'service', 'cadastreChange', 1);
-
-insert into system.br_validation(br_id, severity_code, target_service_moment, target_code, target_request_type_code, order_of_execution) 
-values('application-baunit-has-parcels', 'critical', 'complete', 'service', 'redefineCadastre', 1);
-
+INSERT INTO system.br_validation(br_id, target_code, target_reg_moment, target_request_type_code, severity_code, order_of_execution)
+VALUES ('cadastre-redefinition-target-geometries-dont-overlap', 'cadastre_object', 'pending', 'redefineCadastre', 'warning', 430);
 
 ----------------------------------------------------------------------------------------------------
 
@@ -110,10 +88,10 @@ values('survey-points-present', now(), 'infinity',
  'select count (*) > 2  as vl from cadastre.survey_point where transaction_id= #{id}');
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
-values('survey-points-present', 'warning', 'pending', 'cadastre_object', 'cadastreChange', 1);
+values('survey-points-present', 'warning', 'pending', 'cadastre_object', 'cadastreChange', 380);
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
-values('survey-points-present', 'critical', 'current', 'cadastre_object', 'cadastreChange', 1);
+values('survey-points-present', 'critical', 'current', 'cadastre_object', 'cadastreChange', 70);
 
 ----------------------------------------------------------------------------------------------------
 
@@ -130,10 +108,10 @@ values('target-parcels-check-isapolygon', now(), 'infinity',
     where co_target.transaction_id = #{id}');
     
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
-values('target-parcels-check-isapolygon', 'critical', 'pending', 'cadastre_object', 'cadastreChange', 4);
+values('target-parcels-check-isapolygon', 'critical', 'pending', 'cadastre_object', 'cadastreChange', 90);
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
-values('target-parcels-check-isapolygon', 'critical', 'current', 'cadastre_object', 'cadastreChange', 4);
+values('target-parcels-check-isapolygon', 'critical', 'current', 'cadastre_object', 'cadastreChange', 80);
 
 ----------------------------------------------------------------------------------------------------
 
@@ -146,10 +124,10 @@ values('new-cadastre-objects-present', now(), 'infinity',
  'select count (*) > 0 as vl from cadastre.cadastre_object where transaction_id= #{id}');
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
-values('new-cadastre-objects-present', 'warning', 'pending', 'cadastre_object', 'cadastreChange', 6);
+values('new-cadastre-objects-present', 'warning', 'pending', 'cadastre_object', 'cadastreChange', 370);
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
-values('new-cadastre-objects-present', 'critical', 'current', 'cadastre_object', 'cadastreChange', 6);
+values('new-cadastre-objects-present', 'critical', 'current', 'cadastre_object', 'cadastreChange', 50);
 
 ----------------------------------------------------------------------------------------------------
 
@@ -171,11 +149,11 @@ where id in (select cadastre_object_id
  ');
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
-values('target-and-new-union-the-same', 'warning', 'pending', 'cadastre_object', 'cadastreChange', 7);
+values('target-and-new-union-the-same', 'warning', 'pending', 'cadastre_object', 'cadastreChange', 470);
 
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
-values('target-and-new-union-the-same', 'warning', 'current', 'cadastre_object', 'cadastreChange', 7);
+values('target-and-new-union-the-same', 'warning', 'current', 'cadastre_object', 'cadastreChange', 460);
 
 ----------------------------------------------------------------------------------------------------
 
@@ -190,10 +168,10 @@ from cadastre.cadastre_object co where transaction_id = #{id}
  ');
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
-values('new-cadastre-objects-dont-overlap', 'warning', 'pending', 'cadastre_object', 'cadastreChange', 8);
+values('new-cadastre-objects-dont-overlap', 'warning', 'pending', 'cadastre_object', 'cadastreChange', 60);
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
-values('new-cadastre-objects-dont-overlap', 'critical', 'current', 'cadastre_object', 'cadastreChange', 8);
+values('new-cadastre-objects-dont-overlap', 'critical', 'current', 'cadastre_object', 'cadastreChange', 480);
 
 ----------------------------------------------------------------------------------------------------
 
@@ -214,11 +192,11 @@ where co.transaction_id = #{id} and
 / 
 (case when sa_official.size is null or sa_official.size = 0 then 1 else sa_official.size end)) > 0.01');
 
-insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
-values('area-check-percentage-newofficialarea-calculatednewarea', 'warning', 'pending', 'cadastre_object', 'cadastreChange', 10);
+INSERT INTO system.br_validation(br_id, target_code, target_reg_moment, target_request_type_code, severity_code, order_of_execution)
+VALUES ('area-check-percentage-newofficialarea-calculatednewarea', 'cadastre_object', 'current', 'cadastreChange', 'warning', 610);
 
-insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
-values('area-check-percentage-newofficialarea-calculatednewarea', 'warning', 'current', 'cadastre_object', 'cadastreChange', 10);
+INSERT INTO system.br_validation(br_id, target_code, target_reg_moment, target_request_type_code, severity_code, order_of_execution)
+VALUES ('area-check-percentage-newofficialarea-calculatednewarea', 'cadastre_object', 'pending', 'cadastreChange', 'warning', 620);
 
 
 ----------------------------------------------------------------------------------------------------
@@ -235,11 +213,11 @@ WHERE transaction_id = #{id} and type_code = ''parcel''
 order by 1
 limit 1');
 
-insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
-values('cadastre-object-check-name', 'medium', 'pending', 'cadastre_object', 'cadastreChange', 11);
+INSERT INTO system.br_validation(br_id, target_code, target_reg_moment, target_request_type_code, severity_code, order_of_execution)
+VALUES ('cadastre-object-check-name', 'cadastre_object', 'current', 'cadastreChange', 'medium', 600);
 
-insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
-values('cadastre-object-check-name', 'medium', 'current', 'cadastre_object', 'cadastreChange', 11);
+INSERT INTO system.br_validation(br_id, target_code, target_reg_moment, target_request_type_code, severity_code, order_of_execution)
+VALUES ('cadastre-object-check-name', 'cadastre_object', 'pending', 'cadastreChange', 'medium', 660);
 
 ----------------------------------------------------------------------------------------------------
 
@@ -273,11 +251,11 @@ values('area-check-percentage-newareas-oldareas', now(), 'infinity',
 		    where co_target.transaction_id = #{id})) 
  < 0.001 as vl');
 
-insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
-values('area-check-percentage-newareas-oldareas', 'warning', 'pending', 'cadastre_object', 'cadastreChange', 12);
+INSERT INTO system.br_validation(br_id, target_code, target_reg_moment, target_request_type_code, severity_code, order_of_execution)
+VALUES ('area-check-percentage-newareas-oldareas', 'cadastre_object', 'pending', 'cadastreChange', 'warning', 640);
 
-insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
-values('area-check-percentage-newareas-oldareas', 'warning', 'current', 'cadastre_object', 'cadastreChange', 12);
+INSERT INTO system.br_validation(br_id, target_code, target_reg_moment, target_request_type_code, severity_code, order_of_execution)
+VALUES ('area-check-percentage-newareas-oldareas', 'cadastre_object', 'current', 'cadastreChange', 'warning', 630);
 
 ----------------------------------------------------------------------------------------------------
 

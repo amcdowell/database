@@ -9,7 +9,7 @@ where r.id= #{id} and type_code in (select code from administrative.rrr_type whe
 and (select count(*) from administrative.party_for_rrr where rrr_id= r.id) = 0');
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
-values('rrr-must-have-parties', 'critical', 'current', 'rrr', 3);
+values('rrr-must-have-parties', 'critical', 'current', 'rrr', 110);
 
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
@@ -26,7 +26,7 @@ values('rrr-shares-total-check', now(), 'infinity',
 from administrative.rrr_share rrrsh1 where rrr_id = #{id}');
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
-values('rrr-shares-total-check', 'critical', 'current', 'rrr', 16);
+values('rrr-shares-total-check', 'critical', 'current', 'rrr', 40);
 
 ----------------------------------------------------------------------------------------------------
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
@@ -57,8 +57,8 @@ SELECT CASE 	WHEN	((SELECT rr5.id FROM administrative.rrr rr5 WHERE rr5.id = #{i
 		ELSE	FALSE
 	END AS vl');
 
-INSERT INTO system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
-VALUES('ba_unit-has-several-mortgages-with-same-rank', 'critical', 'current', 'rrr', 19);
+INSERT INTO system.br_validation(br_id, target_code, target_reg_moment, severity_code, order_of_execution)
+VALUES ('ba_unit-has-several-mortgages-with-same-rank', 'rrr', 'current', 'critical', 170);
 
 ----------------------------------------------------------------------------------------------------
 
@@ -103,8 +103,8 @@ SELECT (SELECT	CASE 	WHEN (SELECT caveat FROM caveatRegn) THEN TRUE
 			ELSE TRUE
 		END) AS vl');
 
-INSERT INTO system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
-VALUES('ba_unit-has-caveat', 'critical', 'current', 'rrr', 19);
+INSERT INTO system.br_validation(br_id, target_code, target_reg_moment, severity_code, order_of_execution)
+VALUES ('ba_unit-has-caveat', 'rrr', 'current', 'critical', 30);
 
 ----------------------------------------------------------------------------------------------------
 
@@ -120,7 +120,7 @@ where rrr1.id = #{id} and rrr2.id!=rrr1.id and rrr2.status_code = ''pending''
 ');
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
-values('rrr-has-pending', 'critical', 'current', 'rrr', 1);
+values('rrr-has-pending', 'critical', 'current', 'rrr', 290);
 
 ----------------------------------------------------------------------------------------------------
 

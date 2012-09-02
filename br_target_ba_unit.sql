@@ -1,4 +1,5 @@
-﻿INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+﻿
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
 VALUES('newtitle-br22-check-different-owners', 'sql', 
 'Owners of new titles should be the same as owners of underlying titles::::Gli aventi diritto delle nuove titoli non sono gli stessi delle proprieta/titoli sottostanti',
 '#{id}(baunit_id) is requested.
@@ -37,7 +38,7 @@ from
     ');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
-VALUES('newtitle-br22-check-different-owners', 'warning', 'current', 'ba_unit', 1);
+VALUES('newtitle-br22-check-different-owners', 'warning', 'current', 'ba_unit', 680);
 
 ----------------------------------------------------------------------------------------------------
 
@@ -57,8 +58,8 @@ FROM administrative.ba_unit ba left join administrative.ba_unit_area ba_a
 WHERE ba.id = #{id}
 ');
 
-INSERT INTO system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
-VALUES('ba_unit-spatial_unit-area-comparison', 'medium', 'current', 'ba_unit', 2);
+INSERT INTO system.br_validation(br_id, target_code, target_reg_moment, severity_code, order_of_execution)
+VALUES ('ba_unit-spatial_unit-area-comparison', 'ba_unit', 'current', 'medium', 490);
 
 ----------------------------------------------------------------------------------------------------
 
@@ -72,8 +73,8 @@ VALUES('ba_unit-has-cadastre-object', now(), 'infinity',
 from administrative.ba_unit_contains_spatial_unit ba_s 
 WHERE ba_s.ba_unit_id = #{id}');
 
-INSERT INTO system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
-VALUES('ba_unit-has-cadastre-object', 'medium', 'current', 'ba_unit', 3);
+INSERT INTO system.br_validation(br_id, target_code, target_reg_moment, severity_code, order_of_execution)
+VALUES ('ba_unit-has-cadastre-object', 'ba_unit', 'current', 'medium', 500);
 
 ----------------------------------------------------------------------------------------------------
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
@@ -92,8 +93,9 @@ order by case when co.type_code = ''parcel'' then 0
 	end
 limit 1');
 
-INSERT INTO system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
-VALUES('ba_unit-has-compatible-cadastre-object', 'medium', 'current', 'ba_unit', 4);
+
+INSERT INTO system.br_validation(br_id, target_code, target_reg_moment, severity_code, order_of_execution)
+VALUES ('ba_unit-has-compatible-cadastre-object', 'ba_unit', 'current', 'medium', 540);
 
 ----------------------------------------------------------------------------------------------------
 
@@ -148,7 +150,7 @@ FROM administrative.ba_unit_target tg
 WHERE tg.ba_unit_id  = #{id}');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
-VALUES('target-ba_unit-check-if-pending', 'critical', 'current', 'ba_unit', 18);
+VALUES('target-ba_unit-check-if-pending', 'critical', 'current', 'ba_unit', 280);
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
@@ -167,8 +169,8 @@ VALUES('ba_unit-has-a-valid-primary-right', now(), 'infinity',
  AND rr1.is_primary
  AND rr1.type_code IN (''ownership'', ''apartment'', ''stateOwnership'', ''lease'')');
 
-INSERT INTO system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
-VALUES('ba_unit-has-a-valid-primary-right', 'critical', 'current', 'ba_unit', 28);
+INSERT INTO system.br_validation(br_id, target_code, target_reg_moment, severity_code, order_of_execution)
+VALUES ('ba_unit-has-a-valid-primary-right', 'ba_unit', 'current', 'critical', 20);
 
 ----------------------------------------------------------------------------------------------------
 
