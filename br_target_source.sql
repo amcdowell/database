@@ -20,7 +20,7 @@ SELECT	CASE 	WHEN (SELECT (cnt = 0) FROM checkServiceType) THEN NULL
 	END AS vl');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
-VALUES ('source-attach-in-transaction-no-pendings', 'critical', 'pending', 'source', 4);
+VALUES ('source-attach-in-transaction-no-pendings', 'critical', 'pending', 'source', 220);
 
 ----------------------------------------------------------------------------------------------------
 
@@ -51,7 +51,7 @@ SELECT	CASE 	WHEN (SELECT (cnt = 0) FROM checkServiceType) THEN NULL
 	END AS vl');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_code, target_reg_moment, order_of_execution) 
-VALUES('source-attach-in-transaction-allowed-type', 'critical', 'source', 'pending',  2);
+VALUES('source-attach-in-transaction-allowed-type', 'critical', 'source', 'pending',  560);
 
 
 --------------------------------------------------------------------------------------

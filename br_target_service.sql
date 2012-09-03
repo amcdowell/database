@@ -1,4 +1,29 @@
-﻿insert into system.br(id, technical_type_code, feedback) 
+﻿----------------------------------------------------------------------------------------------------
+
+insert into system.br(id, technical_type_code, feedback, technical_description) 
+values('application-baunit-has-parcels', 'sql', 'Title must have Parcels::::Titolo deve avere particelle',
+ '#{id}(application.service.id) is requested');
+
+insert into system.br_definition(br_id, active_from, active_until, body) 
+values('application-baunit-has-parcels', now(), 'infinity', 
+'select (select count(*)>0 from administrative.ba_unit_contains_spatial_unit ba_su 
+		inner join cadastre.cadastre_object co on ba_su.spatial_unit_id= co.id
+	where co.status_code in (''current'') and co.geom_polygon is not null and ba_su.ba_unit_id= ba.id) as vl
+from application.service s 
+	inner join application.application_property ap on (s.application_id= ap.application_id)
+	INNER JOIN administrative.ba_unit ba ON (ap.name_firstpart, ap.name_lastpart) = (ba.name_firstpart, ba.name_lastpart)
+where s.id = #{id}
+order by 1
+limit 1');
+
+INSERT INTO system.br_validation(br_id, target_code, target_service_moment, target_request_type_code, severity_code, order_of_execution)
+VALUES ('application-baunit-has-parcels', 'service', 'complete', 'cadastreChange', 'critical', 130);
+
+INSERT INTO system.br_validation(br_id, target_code, target_service_moment, target_request_type_code, severity_code, order_of_execution)
+VALUES ('application-baunit-has-parcels', 'service', 'complete', 'redefineCadastre', 'critical', 140);
+
+---------------------------------------------------------------------------------------------------------------------
+insert into system.br(id, technical_type_code, feedback) 
 values('service-on-complete-without-transaction', 'sql', 'Service ''req_type'' must have been started and some changes made in the system::::Service must have been started and some changes made in the system');
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
@@ -9,7 +34,7 @@ from application.service s inner join application.request_type r on s.request_ty
 and s.id= #{id}');
 
 insert into system.br_validation(br_id, severity_code, target_service_moment, target_code, order_of_execution) 
-values('service-on-complete-without-transaction', 'critical', 'complete', 'service', 1);
+values('service-on-complete-without-transaction', 'critical', 'complete', 'service', 360);
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
 values('service-check-no-previous-digital-title-service', 'sql', 
@@ -27,7 +52,7 @@ order by 1 desc
 limit 1');
 
 insert into system.br_validation(br_id, severity_code, target_service_moment, target_code, target_request_type_code, order_of_execution) 
-values('service-check-no-previous-digital-title-service', 'warning', 'complete', 'service', 'newDigitalTitle', 10);
+values('service-check-no-previous-digital-title-service', 'warning', 'complete', 'service', 'newDigitalTitle', 720);
 
 ----------------------------------------------------------------------------------------------------
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
@@ -46,8 +71,8 @@ AND sv.request_type_code = ''mortgage''
 ORDER BY 1
 LIMIT 1');
 
-INSERT INTO system.br_validation(br_id, severity_code, target_service_moment, target_code, target_request_type_code, order_of_execution) 
-VALUES('baunit-has-multiple-mortgages', 'warning', 'complete', 'service', 'mortgage', 1);
+INSERT INTO system.br_validation(br_id, target_code, target_service_moment, target_request_type_code, severity_code, order_of_execution)
+VALUES ('baunit-has-multiple-mortgages', 'service', 'complete', 'mortgage', 'warning', 670);
 
 ----------------------------------------------------------------------------------------------------
 
@@ -66,10 +91,10 @@ order by 1
 limit 1');
 
 insert into system.br_validation(br_id, severity_code, target_service_moment, target_code, target_request_type_code, order_of_execution) 
-values('mortgage-value-check', 'warning', 'complete', 'service', 'mortgage', 2);
+values('mortgage-value-check', 'warning', 'complete', 'service', 'mortgage', 700);
 
 insert into system.br_validation(br_id, severity_code, target_service_moment, target_code, target_request_type_code, order_of_execution) 
-values('mortgage-value-check', 'warning', 'complete', 'service', 'varyMortgage', 2);
+values('mortgage-value-check', 'warning', 'complete', 'service', 'varyMortgage', 690);
 
 ----------------------------------------------------------------------------------------------------
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
@@ -92,6 +117,9 @@ LIMIT 1');
 INSERT INTO system.br_validation(br_id, severity_code, target_service_moment, target_code, order_of_execution) 
 VALUES('current-rrr-for-variation-or-cancellation-check', 'medium', 'complete', 'service', 11);
 
+INSERT INTO system.br_validation(br_id, target_code, target_service_moment, severity_code, order_of_execution)
+VALUES ('current-rrr-for-variation-or-cancellation-check', 'service', 'complete', 'medium', 650);
+
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
@@ -111,7 +139,7 @@ ORDER BY 1
 LIMIT 1');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_service_moment, target_code, target_request_type_code, order_of_execution) 
-VALUES('power-of-attorney-service-has-document', 'critical', 'complete', 'service', 'regnPowerOfAttorney', 1);
+VALUES('power-of-attorney-service-has-document', 'critical', 'complete', 'service', 'regnPowerOfAttorney', 340);
 
 --------------------------------------------------------------------------------------------------
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
@@ -132,7 +160,7 @@ ORDER BY 1
 LIMIT 1');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_service_moment, target_code, order_of_execution) 
-VALUES('document-supporting-rrr-is-current', 'critical', 'complete', 'service',  1);
+VALUES('document-supporting-rrr-is-current', 'critical', 'complete', 'service',  240);
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
@@ -168,7 +196,7 @@ VALUES('documents-present', now(), 'infinity',
  SELECT (((SELECT COUNT(*) FROM serviceDocs) - (SELECT COUNT(*) FROM serviceDocs WHERE ext_archive_id IS NOT NULL)) = 0) AS vl');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_service_moment, target_code, order_of_execution) 
-VALUES('documents-present', 'critical', 'complete', 'service', 5);
+VALUES('documents-present', 'critical', 'complete', 'service', 200);
 --------------------------------------------------------------------------------------------------
 
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
@@ -195,7 +223,7 @@ ORDER BY vl
 LIMIT 1');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_service_moment, target_code, order_of_execution) 
-VALUES('power-of-attorney-owner-check', 'warning', 'complete', 'service', 10);
+VALUES('power-of-attorney-owner-check', 'warning', 'complete', 'service', 580);
 
 ----------------------------------------------------------------------------------------------------
 
@@ -225,7 +253,7 @@ LIMIT 1');
 
 
 INSERT INTO system.br_validation(br_id, severity_code, target_service_moment, target_code, order_of_execution) 
-VALUES('required-sources-are-present', 'critical', 'complete', 'service', 3);
+VALUES('required-sources-are-present', 'critical', 'complete', 'service', 230);
 
 ------------------------------------------------------------------------------------------------
 
@@ -243,7 +271,7 @@ ORDER BY vl
 LIMIT 1');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_service_moment, target_code, order_of_execution) 
-VALUES('service-has-person-verification', 'critical', 'complete', 'service', 13);
+VALUES('service-has-person-verification', 'critical', 'complete', 'service', 350);
 
 ------------------------------------------------------------------------------------------------
 
@@ -268,7 +296,7 @@ ORDER BY vl
 LIMIT 1');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_service_moment, target_code, order_of_execution) 
-VALUES('service-title-terminated', 'critical', 'complete', 'service', 13);
+VALUES('service-title-terminated', 'critical', 'complete', 'service', 190);
 
 ----------------------------------------------------------------------------------------------------
 
@@ -304,8 +332,9 @@ values('application-baunit-check-area', now(), 'infinity',
 
         ) as vl');
 
-insert into system.br_validation(br_id, severity_code, target_service_moment, target_code, target_request_type_code, order_of_execution) 
-values('application-baunit-check-area', 'warning', null, 'service', 'cadastreChange', 520);
+INSERT INTO system.br_validation(br_id, target_code, target_request_type_code, severity_code, order_of_execution)
+VALUES ('application-baunit-check-area', 'service', 'cadastreChange', 'warning', 520);
+
 ----------------------------------------------------------------------------------------------
 
 update system.br set display_name = id where display_name is null;
