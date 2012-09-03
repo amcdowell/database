@@ -6006,11 +6006,11 @@ create or replace function make_function_ST_MakeBox3D() returns void
 as
 $$
 begin
-  if (select count(*)=0 from pg_proc where proname='st_makebox3d') then
-    CREATE OR REPLACE FUNCTION ST_MakeBox3D(geometry, geometry)
-      RETURNS box3d AS 'SELECT ST_3DMakeBox($1, $2)'
-    LANGUAGE 'sql' IMMUTABLE STRICT;
-  end if;
+ if (select count(*)=0 from pg_proc where proname='st_makebox3d') then
+   CREATE OR REPLACE FUNCTION ST_MakeBox3D(geometry, geometry)
+     RETURNS box3d AS 'SELECT ST_3DMakeBox($1, $2)'
+   LANGUAGE 'sql' IMMUTABLE STRICT;
+ end if;
 end;
 $$
 language 'plpgsql';
@@ -6024,12 +6024,13 @@ drop function make_function_ST_MakeBox3D();
 --Based in an example found in http://a-kretschmer.de/diverses.shtml
 
 DROP FUNCTION IF EXISTS multiply_agg_step(int,int) CASCADE;
-CREATE FUNCTION multiply_agg_step(int,int) RETURNS int 
-AS ' select $1 * $2; ' 
-language sql IMMUTABLE STRICT; 
+CREATE FUNCTION multiply_agg_step(int,int) RETURNS int
+AS ' select $1 * $2; '
+language sql IMMUTABLE STRICT;
 
 CREATE AGGREGATE multiply_agg (basetype=int, sfunc=multiply_agg_step, stype=int, initcond=1 ) ;
 
+do $body$ declare user_name varchar; user_password varchar; user_role varchar; rec record; begin user_name = 'sola_super_user'; user_password = 'sola'; user_role = 'sola_super_role'; --Create role if (select count(*) from pg_roles where rolname = user_role)=0 then execute 'create role ' || user_role; end if; -- Create user if (select count(*) from pg_roles where rolname = user_role)=0 then execute 'create user ' || user_name || ' with password ''' || user_password || ''' in role ' || user_role; end if;  for rec in select distinct table_schema from information_schema.tables where table_schema not in ('pg_catalog', 'information_schema') loop execute 'GRANT USAGE ON schema "' || rec.table_schema || '" TO ' || user_role; end loop; -- For each table found in db, assign priv. for rec in select table_schema, table_name from information_schema.tables where table_schema not in ('pg_catalog', 'information_schema') loop  raise notice 'Treating table: %', rec.table_name; if rec.table_name like '%_historic' then execute 'GRANT SELECT, INSERT ON "' || rec.table_schema || '"."' || rec.table_name || '" TO ' || user_role; else execute 'GRANT SELECT, INSERT, UPDATE, DELETE ON "' || rec.table_schema || '"."' || rec.table_name || '" TO ' || user_role; end if; end loop; for rec in select sequence_schema, sequence_name from information_schema.sequences loop execute 'GRANT USAGE ON "' || rec.sequence_schema || '"."' || rec.sequence_name || '" TO ' || user_role; end loop; end; $body$;
 -------View system.user_roles ---------
 DROP VIEW IF EXISTS system.user_roles CASCADE;
 CREATE VIEW system.user_roles AS SELECT u.username, rg.approle_code as rolename
