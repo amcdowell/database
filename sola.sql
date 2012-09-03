@@ -90,12 +90,16 @@ BEGIN
         NEW.rowversion = 1;
     END IF;
     NEW.change_time := now();
+    IF NEW.change_user is null then
+      NEW.change_user = 'db:' || current_user;
+    END IF;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 COMMENT ON FUNCTION public.f_for_trg_track_changes(
 
-) IS 'This function is called from triggers in every table that has the columns to track changes. 
+) IS 'This function is called from triggers in every table that has the columns to track changes. <br/>
+If the change_user is null then it is filled with the value from the database user prefixed by ''db:''.
 It also checks if the record has been already updated from another client application by checking the rowversion.';
     
 -- Function public.f_for_trg_track_history --
