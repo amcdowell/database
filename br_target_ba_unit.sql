@@ -155,7 +155,7 @@ VALUES('target-ba_unit-check-if-pending', 'critical', 'current', 'ba_unit', 280)
 
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
 VALUES('ba_unit-has-a-valid-primary-right', 'sql', 
-'A title must have a valid primary right::::ITALIANO',
+'A title must have a valid primary right::::Un titolo deve avere un diritto primario',
  '#{id}(baunit_id) is requested.');
 --delete from system.br_definition where br_id = 'ba_unit-has-a-valid-primary-right'
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 

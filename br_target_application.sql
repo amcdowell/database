@@ -207,7 +207,7 @@ VALUES ('app-current-caveat-and-no-remove-or-vary', 'application', 'validate', '
 ----------------------------------------------------------------------------------------------------
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
 VALUES('app-other-app-with-caveat', 'sql', 
-'The identified property is affected by another live application that includes a service to register a caveat. An application with a cancel or waiver/vary caveat service must be registered before this application can proceed.::::ITALIANO ',
+'The identified property is affected by another live application that includes a service to register a caveat. An application with a cancel or waiver/vary caveat service must be registered before this application can proceed.::::La proprieta é gravata da una pratica attiva che include un servizio per registrare un diritto di prelazione. Perche questa pratia possa procedere deve essere registrata una pratica per richiedere la cancellazione o la variazione della prelazione',
  '#{id}(application.application.id) is requested.');
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
@@ -255,7 +255,7 @@ VALUES ('app-title-has-primary-right', 'application', 'validate', 'critical', 10
 
 ----------------------------------------------------------------------------------------------------
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES('app-allowable-primary-right-for-new-title', 'sql', 'An allowable primary right (ownership, apartment, State ownership, lease) must be identified for a new title::::ITALIANO',
+VALUES('app-allowable-primary-right-for-new-title', 'sql', 'An allowable primary right (ownership, apartment, State ownership, lease) must be identified for a new title::::Un diritto primario disponibile (proprieta, appartamento o proprieta statale) deve essere identificato per un nuovo titolo',
  '#{id}(application.application.id) is requested');
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
@@ -466,7 +466,7 @@ VALUES ('application-approve-cancel-old-titles', 'application', 'approve', 'crit
 ----------------------------------------------------------------------------------------------------
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
 VALUES('cancel-title-check-rrr-cancelled', 'sql', 
-'All rights and restrictions on the title to be cancelled must be transfered or cancelled in this application.::::ITALIANO', 
+'All rights and restrictions on the title to be cancelled must be transfered or cancelled in this application.::::Tutti i diritti e le restrizioni sul titolo da cancellare devono essere trasferiti o cancellati in questa pratica', 
 '#{id}(application_id) is requested');
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES('cancel-title-check-rrr-cancelled', now(), 'infinity', 

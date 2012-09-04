@@ -123,7 +123,7 @@ VALUES ('current-rrr-for-variation-or-cancellation-check', 'service', 'complete'
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES('power-of-attorney-service-has-document', 'sql', 'Service ''req_type'' must have must have one associated Power of Attorney document::::ITALIANO',
+VALUES('power-of-attorney-service-has-document', 'sql', 'Service ''req_type'' must have must have one associated Power of Attorney document::::''req_type'' del Servizio deve avere un documento di procura legale allegato',
   '#{id}(application.service.id)');
  
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
@@ -143,7 +143,7 @@ VALUES('power-of-attorney-service-has-document', 'critical', 'complete', 'servic
 
 --------------------------------------------------------------------------------------------------
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-	VALUES('document-supporting-rrr-is-current', 'sql', 'Documents supporting rights (or restrictions) must have current status::::ITALIANO',
+	VALUES('document-supporting-rrr-is-current', 'sql', 'Documents supporting rights (or restrictions) must have current status::::I documenti che supportano diritti (o restrizioni) devono avere stato corrente',
 		'#{id}(application.service.id)');
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 	VALUES('document-supporting-rrr-is-current', now(), 'infinity', 
@@ -200,7 +200,7 @@ VALUES('documents-present', 'critical', 'complete', 'service', 200);
 --------------------------------------------------------------------------------------------------
 
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES('power-of-attorney-owner-check', 'sql', 'Name of person identified in Power of Attorney should match a (one of the) current owner(s)::::ITALIANO',
+VALUES('power-of-attorney-owner-check', 'sql', 'Name of person identified in Power of Attorney should match a (one of the) current owner(s)::::Il nome della persona identificato nella procura legale deve corrispondere ad uno dei proprietari correnti',
   '#{id}(application.service.id)');
 --delete from system.br_definition where br_id =  'power-of-attorney-owner-check'
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
@@ -276,7 +276,7 @@ VALUES('service-has-person-verification', 'critical', 'complete', 'service', 350
 ------------------------------------------------------------------------------------------------
 
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES('service-title-terminated', 'sql', 'For the service ''req_type'' the title must be terminated (after all rights recorded on the title are transferred or cancelled).::::ITALIANO',
+VALUES('service-title-terminated', 'sql', 'For the service ''req_type'' the title must be terminated (after all rights recorded on the title are transferred or cancelled).::::Per il servizio ''req_type'' il titolo deve essere terminato (dopo che tutti i diritti registrati per il titolo sono stati trasferiti o cancellati)',
  '#{id}(application.service.id) is requested');
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES('service-title-terminated', now(), 'infinity', 
