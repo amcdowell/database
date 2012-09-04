@@ -1,14 +1,9 @@
-﻿do
+﻿create or replace function db_user_role_and_privs(user_name varchar, user_password varchar, user_role varchar) returns void
+as
 $body$
 declare
-  user_name varchar;
-  user_password varchar;
-  user_role varchar;
   rec record;
 begin
-  user_name = 'sola_super_user';
-  user_password = 'sola';
-  user_role = 'sola_super_role';
  --Create role
   if (select count(*) from pg_roles where rolname = user_role)=0 then
     execute 'create role ' || user_role;
@@ -40,5 +35,7 @@ begin
     execute 'GRANT USAGE ON "'  || rec.sequence_schema || '"."' || rec.sequence_name || '" TO ' || user_role;
   end loop;
 end;
-$body$;
---select sequence_schema, sequence_name from information_schema.sequences
+$body$
+language plpgsql;
+
+select db_user_role_and_privs('sola_super_user', 'sola', 'sola_super_role');

@@ -267,6 +267,60 @@ COMMENT ON FUNCTION public.get_translation(
   , language_code varchar
 ) IS 'This function is used to translate the values that are supposed to be multilingual like the reference data values (display_value)';
     
+-- Function public.db_user_role_and_privs --
+CREATE OR REPLACE FUNCTION public.db_user_role_and_privs(
+ user_name varchar
+  , user_password varchar
+  , user_role varchar
+) RETURNS void 
+AS $$
+declare
+  rec record;
+begin
+ --Create role
+  if (select count(*) from pg_roles where rolname = user_role)=0 then
+    execute 'create role ' || user_role;
+  end if;
+  -- Create user
+  if (select count(*) from pg_roles where rolname = user_role)=0 then
+    execute 'create user ' || user_name || ' with password ''' || user_password || ''' in role ' || user_role;
+  end if;
+
+  for rec in 
+    select distinct table_schema 
+    from information_schema.tables 
+    where table_schema not in ('pg_catalog', 'information_schema') loop
+    execute 'GRANT USAGE ON schema "'  || rec.table_schema || '" TO ' || user_role;
+  end loop;
+  -- For each table found in db, assign priv.
+  for rec in 
+    select table_schema, table_name 
+    from information_schema.tables 
+    where table_schema not in ('pg_catalog', 'information_schema') loop
+
+    if rec.table_name like '%_historic' then
+      execute 'GRANT SELECT, INSERT ON "'  || rec.table_schema || '"."' ||  rec.table_name || '" TO ' || user_role;
+    else
+      execute 'GRANT SELECT, INSERT, UPDATE, DELETE ON "'  || rec.table_schema || '"."' ||  rec.table_name || '" TO ' || user_role;
+    end if;
+  end loop;
+  for rec in select sequence_schema, sequence_name from information_schema.sequences loop
+    execute 'GRANT USAGE ON "'  || rec.sequence_schema || '"."' || rec.sequence_name || '" TO ' || user_role;
+  end loop;
+end;
+$$ LANGUAGE plpgsql;
+COMMENT ON FUNCTION public.db_user_role_and_privs(
+ user_name varchar
+  , user_password varchar
+  , user_role varchar
+) IS 'This function adds a user name, user role and for assigns privileges to the user role. <br/>
+It can be called anytime to refresh the privileges of the role if new objects are added in the database. <br/>
+The privileges are: <br/>
+- SELECT, INSERT, UPDATE, DELETE for each table in the database not finishing with _historic. <br/>
+- SELECT, INSERT for each table finishing with historic. <br/>
+- USAGE for each sequence.
+';
+    
 -- Sequence source.source_la_nr_seq --
 DROP SEQUENCE IF EXISTS source.source_la_nr_seq;
 CREATE SEQUENCE source.source_la_nr_seq
