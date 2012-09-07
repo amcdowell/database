@@ -336,25 +336,5 @@ INSERT INTO system.br_validation(br_id, target_code, target_request_type_code, s
 VALUES ('application-baunit-check-area', 'service', 'cadastreChange', 'warning', 520);
 ----------------------------------------------------------------------------------------------------
 
-INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES('required-role-for-service', 'sql', 'User must be authorised (have the correct role) to start the service, ''req_type''::::ITALIANO',
- '#{id}(service_id) is requested');
-
-INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
-VALUES('required-role-for-service', now(), 'infinity', 
- 'SELECT (SUM(1) > 0) AS vl, get_translation(rt.display_value, #{lng}) AS req_type FROM application.service sv
-	INNER JOIN application.request_type rt ON (sv.request_type_code = rt.code)
-	INNER JOIN system.approle_appgroup rg ON (rt.approle_code = rg.approle_code)
-	INNER JOIN system.appuser_appgroup ug ON (rg.appgroup_id = ug.appgroup_id)
-	INNER JOIN system.appuser au ON (ug.appuser_id = au.id)
-WHERE sv.id = #{id}
-AND au.username = #{username}
-GROUP BY rt.display_value
-ORDER BY 1
-LIMIT 1');
-
-INSERT INTO system.br_validation(br_id, severity_code, target_service_moment, target_code, order_of_execution) 
-VALUES('required-role-for-service', 'critical', 'start', 'service', 1);
-----------------------------------------------------------------------------------------------
 
 update system.br set display_name = id where display_name is null;

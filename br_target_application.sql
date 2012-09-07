@@ -411,7 +411,7 @@ SELECT CASE WHEN fhCheck IS TRUE THEN (SELECT COUNT(id) FROM application.service
 	END AS vl FROM newFreeholdApp');
 
 INSERT INTO system.br_validation(br_id, target_code, target_application_moment, severity_code, order_of_execution)
-VALUES ('application-for-new-title-has-cancel-property-service', 'application', 'validate', 'critical', 5);
+VALUES ('application-for-new-title-has-cancel-property-service', 'application', 'validate', 'critical', 1);
 
 ----------------------------------------------------------------------------------------------------
 
