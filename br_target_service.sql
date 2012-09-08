@@ -334,7 +334,7 @@ values('application-baunit-check-area', now(), 'infinity',
 
 INSERT INTO system.br_validation(br_id, target_code, target_request_type_code, severity_code, order_of_execution)
 VALUES ('application-baunit-check-area', 'service', 'cadastreChange', 'warning', 520);
+----------------------------------------------------------------------------------------------------
 
-----------------------------------------------------------------------------------------------
 
 update system.br set display_name = id where display_name is null;

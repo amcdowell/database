@@ -230,11 +230,12 @@ insert into system.br(id, technical_type_code, feedback, technical_description)
 values('app-title-has-primary-right', 'sql', 'A single primary right (such as ownership) must be identified whenever a new title record is created::::Il titolo originario del nuovo titolo deve avere un diritto primario',
  '#{id}(application.application.id) is requested');
 
+
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('app-title-has-primary-right', now(), 'infinity', 
 'WITH 	newTitleApp	AS	(SELECT (SUM(1) > 0) AS fhCheck FROM application.service se
 				WHERE se.application_id = #{id}
-				AND se.request_type_code IN (''newFreehold'', ''newApartment'', ''newState'', ''newDigitalTitle'')),
+				AND se.request_type_code IN (''newFreehold'', ''newApartment'', ''newState'')),
 	start_titles	AS	(SELECT DISTINCT ON (pt.from_ba_unit_id) pt.from_ba_unit_id, s.application_id FROM administrative.rrr rr 
 				INNER JOIN administrative.required_relationship_baunit pt ON (rr.ba_unit_id = pt.to_ba_unit_id)
 				INNER JOIN transaction.transaction tn ON (rr.transaction_id = tn.id)
@@ -273,6 +274,11 @@ VALUES('app-allowable-primary-right-for-new-title', now(), 'infinity',
 				INNER JOIN application.service s ON (tn.from_service_id = s.id) 
 				INNER JOIN application.application ap ON (s.application_id = ap.id)
 				WHERE ap.id = #{id})
+				UNION
+				(SELECT ba2.id AS titleID, sv2.application_id AS apID FROM application.service sv2 
+				INNER JOIN transaction.transaction tn2 ON (sv2.id = tn2.from_service_id)
+				INNER JOIN administrative.ba_unit ba2 ON (tn2.id = ba2.transaction_id)
+				WHERE sv2.application_id = #{id})
 				UNION
 				(SELECT prp2.ba_unit_id AS titleID, prp2.application_id AS apID FROM application.application_property prp2
 				WHERE prp2.application_id = #{id})),
