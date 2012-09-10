@@ -2329,6 +2329,7 @@ insert into source.spatial_source_type(code, display_value, status) values('rela
 insert into source.spatial_source_type(code, display_value, status) values('topoMap', 'Topographical Map::::Mappa Topografica', 'c');
 insert into source.spatial_source_type(code, display_value, status) values('video', 'Video::::Video', 'c');
 insert into source.spatial_source_type(code, display_value, status, description) values('cadastralSurvey', 'Cadastral Survey::::Perizia Catastale', 'c', 'Extension to LADM');
+insert into source.spatial_source_type(code, display_value, status, description) values('surveyData', 'Survey Data (Coordinates)::::Rilevamento Data', 'c', 'Extension to LADM');
 
 
 
