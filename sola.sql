@@ -866,14 +866,16 @@ BEGIN
   name = '';
    
 	for rec in 
-	   Select pippo.firstpart||'/'||pippo.lastpart || ' ' || pippo.cadtype  as value
+	   Select pippo.firstpart||'/'||pippo.lastpart || ' ' || pippo.cadtype  as value,
+	        pippo.id
 		from application.service s 
 		join application.application_property ap on (s.application_id=ap.application_id)
 		join administrative.ba_unit bu on (ap.name_firstpart||ap.name_lastpart=bu.name_firstpart||bu.name_lastpart)
 		join (select co.name_firstpart firstpart,
 			   co.name_lastpart lastpart,
-			    get_translation(cot.display_value, null) cadtype,
-			   bsu.ba_unit_id unit_id
+			   get_translation(cot.display_value, null) cadtype,
+			   bsu.ba_unit_id unit_id,
+			   co.id id
 			   from administrative.ba_unit_contains_spatial_unit  bsu
 			   join cadastre.cadastre_object co on (bsu.spatial_unit_id = co.id)
 			   join cadastre.cadastre_object_type cot on (co.type_code = cot.code)) pippo
@@ -881,12 +883,12 @@ BEGIN
 	   where s.id = service_id 
 	   and (s.request_type_code = 'cadastreChange' or s.request_type_code = 'redefineCadastre')
 	loop
-	   name = name || ', ' || rec.value;
+	   name = name || ', ' || replace (rec.value,rec.id, '');
 	end loop;
 
         if name = '' then
 	  return (
-	  Select (bu.name_firstpart||bu.name_lastpart) as value
+	  Select (bu.name_firstpart||'/'||bu.name_lastpart) as value
 		from application.service s 
 		join application.application_property ap on (s.application_id=ap.application_id)
 		join administrative.ba_unit bu on (ap.name_firstpart||ap.name_lastpart=bu.name_firstpart||bu.name_lastpart)
