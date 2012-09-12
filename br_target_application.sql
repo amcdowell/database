@@ -491,6 +491,31 @@ SELECT CASE 	WHEN (SELECT (COUNT(*) = 0) FROM cancelPropApp) THEN NULL
 
 INSERT INTO system.br_validation(br_id, target_code, target_application_moment, severity_code, order_of_execution)
 VALUES ('cancel-title-check-rrr-cancelled', 'application', 'validate', 'critical', 150);
+----------------------------------------------------------------------------------------------------
+INSERT INTO system.br(id, technical_type_code, feedback, description) 
+VALUES('app-check-title-ref', 'sql', 'Invalid identifier for title::::ITALIANO',
+ '#{id}(application.application_property.application_id) is requested');
+
+--delete from system.br_definition where br_id = 'app-check-title-ref'
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('app-check-title-ref', NOW(), 'infinity', 
+'WITH 	convertTitleApp	AS	(SELECT se.id FROM application.service se
+				WHERE se.application_id = #{id}
+				AND se.request_type_code = ''newDigitalTitle''),
+	titleRefChk	AS	(SELECT aprp.application_id FROM application.application_property aprp
+				WHERE aprp.application_id= #{id} 
+				AND ((aprp.name_firstpart IS NULL)
+				OR (aprp.name_lastpart IS NULL)
+				OR (SUBSTR(aprp.name_firstpart, 1) != ''N'')
+				OR (NOT(aprp.name_lastpart ~ ''^[0-9]+$''))))--isnumeric test
+	
+SELECT CASE 	WHEN (SELECT (COUNT(*) = 0) FROM convertTitleApp) THEN NULL
+		WHEN (SELECT (COUNT(*) = 0) FROM titleRefChk) THEN TRUE
+		ELSE FALSE
+	END AS vl');
+
+INSERT INTO system.br_validation(br_id, severity_code, target_application_moment, target_code, order_of_execution) 
+VALUES ('app-check-title-ref', 'medium', 'validate', 'application', 750);
 
 ----------------------------------------------------------------------------------------------------------------------
 UPDATE system.br SET display_name = id WHERE display_name !=id;
