@@ -4,38 +4,29 @@ VALUES('newtitle-br22-check-different-owners', 'sql',
 'Owners of new titles should be the same as owners of underlying titles::::Gli aventi diritto delle nuove titoli non sono gli stessi delle proprieta/titoli sottostanti',
 '#{id}(baunit_id) is requested.
 Check that new title owners are the same as underlying titles owners (Give WARNING if > 0)');
-
+--delete from system.br_definition where br_id = 'newtitle-br22-check-different-owners'
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES('newtitle-br22-check-different-owners', now(), 'infinity', 
-'with prior_property_owner as (
-	select po.name
-	from   
-	party.party po,
-	administrative.party_for_rrr pfro,
-	administrative.rrr ro
-	where 
-	po.id = pfro.party_id
-	and
-	pfro.rrr_id = ro.id
-	and
-	ro.ba_unit_id = #{id})
-select  count (pn.name)= 0 as vl
-from   
-	party.party pn,
-	administrative.party_for_rrr pfro,
-	administrative.rrr ro
-	where 
-	pn.id = pfro.party_id
-	and
-	pfro.rrr_id = ro.id
-	and
-	ro.ba_unit_id in
-	(select administrative.required_relationship_baunit.to_ba_unit_id
-	 from   administrative.required_relationship_baunit
-	 where  administrative.required_relationship_baunit.from_ba_unit_id = #{id})
-   and
-        pn.name not in (select name from prior_property_owner)
-    ');
+'WITH new_property_owner AS (
+	SELECT  COALESCE(name, '''') || '' '' || COALESCE(last_name, '''') AS newOwnerStr FROM party.party po
+		INNER JOIN administrative.party_for_rrr pfr1 ON (po.id = pfr1.party_id)
+		INNER JOIN administrative.rrr rr1 ON (pfr1.rrr_id = rr1.id)
+	WHERE rr1.ba_unit_id = #{id}),
+	
+  prior_property_owner AS (
+	SELECT  COALESCE(name, '''') || '' '' || COALESCE(last_name, '''') AS priorOwnerStr FROM party.party pn
+		INNER JOIN administrative.party_for_rrr pfr2 ON (pn.id = pfr2.party_id)
+		INNER JOIN administrative.rrr rr2 ON (pfr2.rrr_id = rr2.id)
+		INNER JOIN administrative.required_relationship_baunit rfb ON (rr2.ba_unit_id = rfb.from_ba_unit_id)
+	WHERE	rfb.to_ba_unit_id = #{id}
+	LIMIT 1	)
+
+SELECT 	CASE 	WHEN (SELECT (COUNT(*) = 0) FROM prior_property_owner) THEN NULL
+		WHEN (SELECT (COUNT(*) != 0) FROM new_property_owner npo WHERE compare_strings((SELECT priorOwnerStr FROM prior_property_owner), npo.newOwnerStr)) THEN TRUE
+		ELSE FALSE
+	END AS vl
+ORDER BY vl
+LIMIT 1');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
 VALUES('newtitle-br22-check-different-owners', 'warning', 'current', 'ba_unit', 680);

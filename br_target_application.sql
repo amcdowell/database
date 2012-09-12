@@ -258,7 +258,7 @@ VALUES ('app-title-has-primary-right', 'application', 'validate', 'critical', 10
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
 VALUES('app-allowable-primary-right-for-new-title', 'sql', 'An allowable primary right (ownership, apartment, State ownership, lease) must be identified for a new title::::Un diritto primario disponibile (proprieta, appartamento o proprieta statale) deve essere identificato per un nuovo titolo',
  '#{id}(application.application.id) is requested');
-
+--delete from system.br_definition where br_id = 'app-allowable-primary-right-for-new-title'
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES('app-allowable-primary-right-for-new-title', now(), 'infinity', 
 'WITH 	newTitleApp	AS	(SELECT (SUM(1) > 0) AS fhCheck FROM application.service se
@@ -267,31 +267,19 @@ VALUES('app-allowable-primary-right-for-new-title', now(), 'infinity',
 	existTitleApp	AS	(SELECT (SUM(1) > 0) AS fhCheck FROM application.application_property prp1
 					INNER JOIN application.service sv ON (prp1.application_id = sv.application_id)
 				WHERE prp1.application_id = #{id}
-				AND sv.request_type_code = ''newDigitalTitle''),
-	start_titles	AS	((SELECT DISTINCT ON (pt.from_ba_unit_id) pt.from_ba_unit_id AS titleID, s.application_id AS apID FROM administrative.rrr rr 
-				INNER JOIN administrative.required_relationship_baunit pt ON (rr.ba_unit_id = pt.to_ba_unit_id)
-				INNER JOIN transaction.transaction tn ON (rr.transaction_id = tn.id)
-				INNER JOIN application.service s ON (tn.from_service_id = s.id) 
-				INNER JOIN application.application ap ON (s.application_id = ap.id)
-				WHERE ap.id = #{id})
-				UNION
-				(SELECT ba2.id AS titleID, sv2.application_id AS apID FROM application.service sv2 
-				INNER JOIN transaction.transaction tn2 ON (sv2.id = tn2.from_service_id)
-				INNER JOIN administrative.ba_unit ba2 ON (tn2.id = ba2.transaction_id)
-				WHERE sv2.application_id = #{id})
-				UNION
-				(SELECT prp2.ba_unit_id AS titleID, prp2.application_id AS apID FROM application.application_property prp2
-				WHERE prp2.application_id = #{id})),
-	start_primary_rrr AS 	(SELECT DISTINCT ON(pp.nr) pp.nr FROM administrative.rrr pp 
-				WHERE pp.status_code != ''cancelled''
-				AND pp.is_primary
-				AND pp.type_code IN (''ownership'', ''apartment'', ''stateOwnership'', ''lease'')
-				AND pp.ba_unit_id IN (SELECT titleID  FROM start_titles))
-
-
-SELECT CASE 	WHEN (((SELECT * FROM newTitleApp) OR (SELECT * FROM existTitleApp)) IS NULL) THEN NULL
-		WHEN ((SELECT COUNT(*) FROM start_primary_rrr) = 1) THEN TRUE
-		ELSE FALSE
+				AND sv.request_type_code = ''newDigitalTitle'')
+				
+ SELECT CASE WHEN (SELECT ((SELECT * FROM newTitleApp) OR (SELECT * FROM existTitleApp)) IS NULL) THEN NULL 
+	WHEN ((SELECT COUNT(*) FROM existTitleApp) = 0) THEN	(SELECT (COUNT(*) = 0) FROM application.application_property prp2
+									INNER JOIN administrative.rrr rr2 
+										ON ((prp2.ba_unit_id = rr2.ba_unit_id) AND NOT(rr2.is_primary OR (rr2.type_code IN (''ownership'', ''apartment'', ''stateOwnership'', ''lease''))))
+								 WHERE prp2.application_id = #{id} )
+	ELSE	(SELECT (COUNT(*) = 0) FROM application.service sv2 
+			 INNER JOIN transaction.transaction tn2 ON (sv2.id = tn2.from_service_id) 
+			 INNER JOIN administrative.ba_unit ba2 ON (tn2.id = ba2.transaction_id) 
+			 INNER JOIN administrative.rrr rr3 
+				ON ((ba2.id = rr3.ba_unit_id) AND NOT(rr3.is_primary OR (rr3.type_code IN (''ownership'', ''apartment'', ''stateOwnership'', ''lease''))))
+			 WHERE sv2.application_id = #{id} )
 	END AS vl');
 
 INSERT INTO system.br_validation(br_id, target_code, target_application_moment, severity_code, order_of_execution)
@@ -506,7 +494,5 @@ VALUES ('cancel-title-check-rrr-cancelled', 'application', 'validate', 'critical
 
 ----------------------------------------------------------------------------------------------------------------------
 UPDATE system.br SET display_name = id WHERE display_name !=id;
-
-----------------------------------------------------------------------------------------------------
 
 ----------------------------------------------------------------------------------------------------
