@@ -504,10 +504,8 @@ VALUES('app-check-title-ref', NOW(), 'infinity',
 				AND se.request_type_code = ''newDigitalTitle''),
 	titleRefChk	AS	(SELECT aprp.application_id FROM application.application_property aprp
 				WHERE aprp.application_id= #{id} 
-				AND ((aprp.name_firstpart IS NULL)
-				OR (aprp.name_lastpart IS NULL)
-				OR (SUBSTR(aprp.name_firstpart, 1) != ''N'')
-				OR (NOT(aprp.name_lastpart ~ ''^[0-9]+$''))))--isnumeric test
+				AND SUBSTR(aprp.name_firstpart, 1) != ''N''
+				AND NOT(aprp.name_lastpart ~ ''^[0-9]+$''))--isnumeric test
 	
 SELECT CASE 	WHEN (SELECT (COUNT(*) = 0) FROM convertTitleApp) THEN NULL
 		WHEN (SELECT (COUNT(*) = 0) FROM titleRefChk) THEN TRUE
