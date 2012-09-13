@@ -159,17 +159,21 @@ insert into system.br(id, technical_type_code, feedback, technical_description)
 values('new-cadastre-objects-do-not-overlap', 'sql', 'The new parcel polygons must not overlap::::I nuovi oggetti catastali non devono sovrapporsi',
  '#{id}(transaction_id) is requested. Check the union of new co has the same area as the sum of all areas of new co-s, which means the new co-s don''t overlap');
 
-insert into system.br_definition(br_id, active_from, active_until, body) 
-values('new-cadastre-objects-do-not-overlap', now(), 'infinity', 
- 'select coalesce(st_area(st_union(co.geom_polygon)) = sum(st_area(co.geom_polygon)), true) as vl
-from cadastre.cadastre_object co where transaction_id = #{id}
- ');
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('new-cadastre-objects-do-not-overlap', now(), 'infinity', 
+ 'WITH tolerance AS (SELECT CAST(ABS(LOG((CAST (vl AS NUMERIC)^2))) AS INT) AS area FROM system.setting where name = ''map-tolerance'' LIMIT 1)
+
+SELECT COALESCE(ROUND(CAST (ST_AREA(ST_UNION(co.geom_polygon))AS NUMERIC), (SELECT area FROM tolerance)) = 
+		ROUND(CAST(SUM(ST_AREA(co.geom_polygon))AS NUMERIC), (SELECT area FROM tolerance)), 
+		TRUE) AS vl
+FROM cadastre.cadastre_object co 
+WHERE transaction_id = #{id} ');
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
 values('new-cadastre-objects-do-not-overlap', 'warning', 'pending', 'cadastre_object', 'cadastreChange', 60);
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, target_request_type_code, order_of_execution) 
-values('new-cadastre-objects-do-not-overlap', 'critical', 'current', 'cadastre_object', 'cadastreChange', 480);
+values('new-cadastre-objects-do-not-overlap', 'medium', 'current', 'cadastre_object', 'cadastreChange', 480);
 
 ----------------------------------------------------------------------------------------------------
 
