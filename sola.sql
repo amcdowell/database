@@ -5727,7 +5727,7 @@ ALTER TABLE administrative.notation ADD CONSTRAINT notation_rrr_id_fk65
 CREATE INDEX notation_rrr_id_fk65_ind ON administrative.notation (rrr_id);
 
 ALTER TABLE administrative.ba_unit_area ADD CONSTRAINT ba_unit_area_ba_unit_id_fk66 
-            FOREIGN KEY (ba_unit_id) REFERENCES administrative.ba_unit(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+            FOREIGN KEY (ba_unit_id) REFERENCES administrative.ba_unit(id) ON UPDATE Cascade ON DELETE Cascade;
 CREATE INDEX ba_unit_area_ba_unit_id_fk66_ind ON administrative.ba_unit_area (ba_unit_id);
 
 ALTER TABLE administrative.ba_unit_area ADD CONSTRAINT ba_unit_area_type_code_fk67 
