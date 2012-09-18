@@ -267,6 +267,48 @@ COMMENT ON FUNCTION public.get_translation(
   , language_code varchar
 ) IS 'This function is used to translate the values that are supposed to be multilingual like the reference data values (display_value)';
     
+-- Function public.clean_db_foreign_constraints --
+CREATE OR REPLACE FUNCTION public.clean_db_foreign_constraints(
+
+) RETURNS void 
+AS $$
+declare
+  rec record;
+begin
+  for rec in select * from information_schema.table_constraints where constraint_type = 'FOREIGN KEY' loop
+    execute 'ALTER TABLE "' || rec.table_schema || '"."' ||  rec.table_name || '" DROP CONSTRAINT "' || rec.constraint_name || '"'; 
+    execute 'DROP INDEX IF EXISTS ' || rec.constraint_name || '_ind';
+  end loop;
+end;
+$$ LANGUAGE plpgsql;
+COMMENT ON FUNCTION public.clean_db_foreign_constraints(
+
+) IS 'This function can be used to drop all foreign key constraints from the database.';
+    
+-- Function public.clean_db_triggers --
+CREATE OR REPLACE FUNCTION public.clean_db_triggers(
+
+) RETURNS void 
+AS $$
+declare
+  rec record;
+begin
+  for rec in SELECT distinct event_object_schema, event_object_table, trigger_name FROM information_schema.triggers 
+    where trigger_name not in ('__track_changes', '__track_history') loop
+    execute 'DROP TRIGGER "' || rec.trigger_name || '" ON "' || rec.event_object_schema || '"."' ||  rec.event_object_table || '" CASCADE;'; 
+  end loop;
+  for rec in select '"' || routine_schema || '"."' || routine_name || '"'  as full_name 
+        from information_schema.routines  where routine_schema='public' 
+            and data_type = 'trigger' and routine_name not in ('postgis_cache_bbox', 'checkauthtrigger', 'f_for_trg_track_history', 'f_for_trg_track_changes' )
+  loop
+      execute 'DROP FUNCTION IF EXISTS '  || rec.full_name || '() CASCADE;';
+  end loop;
+end;
+$$ LANGUAGE plpgsql;
+COMMENT ON FUNCTION public.clean_db_triggers(
+
+) IS 'This function removes all triggers and their related functions in the database. It assumes that the trigger functions are found in the public schema.';
+    
 -- Sequence source.source_la_nr_seq --
 DROP SEQUENCE IF EXISTS source.source_la_nr_seq;
 CREATE SEQUENCE source.source_la_nr_seq
