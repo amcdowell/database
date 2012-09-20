@@ -923,19 +923,16 @@ BEGIN
 			   join cadastre.cadastre_object_type cot on (co.type_code = cot.code)) pippo
 			   on (bu.id = pippo.unit_id)
 	   where s.id = service_id 
-	   and (s.request_type_code = 'cadastreChange' or s.request_type_code = 'redefineCadastre')
+	    and (s.request_type_code = 'cadastreChange' or s.request_type_code = 'redefineCadastre' or s.request_type_code = 'newApartment' 
+	   or s.request_type_code = 'newDigitalProperty' or s.request_type_code = 'newDigitalTitle' or s.request_type_code = 'newFreehold' 
+	   or s.request_type_code = 'newOwnership' or s.request_type_code = 'newState')
+	   and s.status_code != 'lodged'
 	loop
 	   name = name || ', ' || replace (rec.value,rec.id, '');
 	end loop;
 
         if name = '' then
-	  return (
-	  Select (bu.name_firstpart||'/'||bu.name_lastpart) as value
-		from application.service s 
-		join application.application_property ap on (s.application_id=ap.application_id)
-		join administrative.ba_unit bu on (ap.name_firstpart||ap.name_lastpart=bu.name_firstpart||bu.name_lastpart)
-		where s.id = service_id
-	  );
+	  return name;
 	end if;
 
 	if substr(name, 1, 1) = ',' then
