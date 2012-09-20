@@ -908,7 +908,7 @@ BEGIN
   name = '';
    
 	for rec in 
-	   Select pippo.firstpart||'/'||pippo.lastpart || ' ' || pippo.cadtype  as value,
+	   Select bu.name_firstpart||'/'||bu.name_lastpart||' ( '||pippo.firstpart||'/'||pippo.lastpart || ' ' || pippo.cadtype||' )'  as value
 	        pippo.id
 		from application.service s 
 		join application.application_property ap on (s.application_id=ap.application_id)
