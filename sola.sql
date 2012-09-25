@@ -908,7 +908,7 @@ BEGIN
   name = '';
    
 	for rec in 
-	   Select bu.name_firstpart||'/'||bu.name_lastpart||' ( '||pippo.firstpart||'/'||pippo.lastpart || ' ' || pippo.cadtype||' )'  as value
+	   Select bu.name_firstpart||'/'||bu.name_lastpart||' ( '||pippo.firstpart||'/'||pippo.lastpart || ' ' || pippo.cadtype||' )'  as value,
 	        pippo.id
 		from application.service s 
 		join application.application_property ap on (s.application_id=ap.application_id)
@@ -2741,6 +2741,8 @@ CREATE TABLE administrative.ba_unit(
     name varchar(255),
     name_firstpart varchar(20) NOT NULL,
     name_lastpart varchar(50) NOT NULL,
+    creation_date timestamp,
+    expiration_date timestamp,
     status_code varchar(20) NOT NULL DEFAULT ('pending'),
     transaction_id varchar(40),
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
@@ -2782,6 +2784,8 @@ CREATE TABLE administrative.ba_unit_historic
     name varchar(255),
     name_firstpart varchar(20),
     name_lastpart varchar(50),
+    creation_date timestamp,
+    expiration_date timestamp,
     status_code varchar(20),
     transaction_id varchar(40),
     rowidentifier varchar(40),
@@ -3062,8 +3066,8 @@ CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
 --Table administrative.source_describes_ba_unit ----
 DROP TABLE IF EXISTS administrative.source_describes_ba_unit CASCADE;
 CREATE TABLE administrative.source_describes_ba_unit(
-    ba_unit_id varchar(40) NOT NULL,
     source_id varchar(40) NOT NULL,
+    ba_unit_id varchar(40) NOT NULL,
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
     rowversion integer NOT NULL DEFAULT (0),
     change_action char(1) NOT NULL DEFAULT ('i'),
@@ -3072,7 +3076,7 @@ CREATE TABLE administrative.source_describes_ba_unit(
 
     -- Internal constraints
     
-    CONSTRAINT source_describes_ba_unit_pkey PRIMARY KEY (ba_unit_id,source_id)
+    CONSTRAINT source_describes_ba_unit_pkey PRIMARY KEY (source_id,ba_unit_id)
 );
 
 
@@ -3097,8 +3101,8 @@ CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
 DROP TABLE IF EXISTS administrative.source_describes_ba_unit_historic CASCADE;
 CREATE TABLE administrative.source_describes_ba_unit_historic
 (
-    ba_unit_id varchar(40),
     source_id varchar(40),
+    ba_unit_id varchar(40),
     rowidentifier varchar(40),
     rowversion integer,
     change_action char(1),
@@ -3738,6 +3742,7 @@ CREATE TABLE administrative.notation(
     transaction_id varchar(40) NOT NULL,
     reference_nr varchar(15) NOT NULL,
     notation_text varchar(1000),
+    notation_date timestamp,
     status_code varchar(20) NOT NULL DEFAULT ('pending'),
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
     rowversion integer NOT NULL DEFAULT (0),
@@ -3774,6 +3779,7 @@ CREATE TABLE administrative.notation_historic
     transaction_id varchar(40),
     reference_nr varchar(15),
     notation_text varchar(1000),
+    notation_date timestamp,
     status_code varchar(20),
     rowidentifier varchar(40),
     rowversion integer,
