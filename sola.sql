@@ -5359,6 +5359,7 @@ insert into system.approle(code, display_value, status, description) values('var
 insert into system.approle(code, display_value, status, description) values('varyLease', 'Vary Lease', 'c', 'Allows to make changes for registration of a variation to a lease');
 insert into system.approle(code, display_value, status, description) values('varyMortgage', 'Vary Mortgage', 'c', 'Allows to make changes for registration of a variation to a mortgage');
 insert into system.approle(code, display_value, status, description) values('varyRight', 'Vary Right or Restriction', 'c', 'Allows to make changes for registration of a variation to a right or restriction');
+insert into system.approle(code, display_value, status, description) values('BulkApplication', 'Bulk operation application ', 'c', 'Allows usage of Bulk Application');
 
 
 
@@ -5387,6 +5388,7 @@ insert into system.approle_appgroup(approle_code, appgroup_id) values('ApplnAssi
 insert into system.approle_appgroup(approle_code, appgroup_id) values('ApplnUnassignSelf', 'super-group-id');
 insert into system.approle_appgroup(approle_code, appgroup_id) values('ApplnAssignOthers', 'super-group-id');
 insert into system.approle_appgroup(approle_code, appgroup_id) values('ApplnUnassignOthers', 'super-group-id');
+insert into system.approle_appgroup(approle_code, appgroup_id) values('BulkApplication', 'super-group-id');
 
 
 
