@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ProjectTreeState projectID="qAiw9JyGAqHKAQMI" projectPath="E:\SOLAsource\SOLA\database\sola.vpp">
+	<TreeState name="ModelRepository" viewX="0" viewY="0">
+		<ExpandedPath>ModelRepository</ExpandedPath>
+	</TreeState>
+	<TreeState name="DiagramNavigator" viewX="0" viewY="432">
+		<ExpandedPath>DiagramNavigator</ExpandedPath>
+		<ExpandedPath>DiagramNavigator,Database Modeling</ExpandedPath>
+		<ExpandedPath>ERDiagram</ExpandedPath>
+		<ExpandedPath>ERDiagram,5lew9JyGAqHKARVp</ExpandedPath>
+		<SelectedPath>ERDiagram,5lew9JyGAqHKARVp,059X.NyFS_kieBcf</SelectedPath>
+	</TreeState>
+	<TreeState name="ClassBrowser" viewX="0" viewY="0"/>
+	<TreeState name="LogicalView" viewX="0" viewY="0">
+		<ExpandedPath>LogicalView</ExpandedPath>
+	</TreeState>
+</ProjectTreeState>
