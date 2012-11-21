@@ -1930,8 +1930,6 @@ DROP TABLE IF EXISTS administrative.ba_unit_contains_spatial_unit CASCADE;
 CREATE TABLE administrative.ba_unit_contains_spatial_unit(
     ba_unit_id varchar(40) NOT NULL,
     spatial_unit_id varchar(40) NOT NULL,
-    cadastre_objectspatial_unitland_use_code varchar(20),
-    spatial_unitland_use_code varchar(20) NOT NULL,
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
     rowversion integer NOT NULL DEFAULT (0),
     change_action char(1) NOT NULL DEFAULT ('i'),
@@ -1940,7 +1938,7 @@ CREATE TABLE administrative.ba_unit_contains_spatial_unit(
 
     -- Internal constraints
     
-    CONSTRAINT ba_unit_contains_spatial_unit_pkey PRIMARY KEY (ba_unit_id,spatial_unit_id,spatial_unitland_use_code)
+    CONSTRAINT ba_unit_contains_spatial_unit_pkey PRIMARY KEY (ba_unit_id,spatial_unit_id)
 );
 
 
@@ -1968,8 +1966,6 @@ CREATE TABLE administrative.ba_unit_contains_spatial_unit_historic
 (
     ba_unit_id varchar(40),
     spatial_unit_id varchar(40),
-    cadastre_objectspatial_unitland_use_code varchar(20),
-    spatial_unitland_use_code varchar(20),
     rowidentifier varchar(40),
     rowversion integer,
     change_action char(1),
@@ -2279,7 +2275,6 @@ CREATE TABLE cadastre.cadastre_object(
         CONSTRAINT enforce_valid_geom_polygon CHECK (st_isvalid(geom_polygon)),
         CONSTRAINT enforce_geotype_geom_polygon CHECK (geometrytype(geom_polygon) = 'POLYGON'::text OR geom_polygon IS NULL),
     transaction_id varchar(40) NOT NULL,
-    spatial_unitland_use_code varchar(20) NOT NULL,
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
     rowversion integer NOT NULL DEFAULT (0),
     change_action char(1) NOT NULL DEFAULT ('i'),
@@ -2289,7 +2284,7 @@ CREATE TABLE cadastre.cadastre_object(
     -- Internal constraints
     
     CONSTRAINT cadastre_object_name UNIQUE (name_firstpart, name_lastpart),
-    CONSTRAINT cadastre_object_pkey PRIMARY KEY (id,spatial_unitland_use_code)
+    CONSTRAINT cadastre_object_pkey PRIMARY KEY (id)
 );
 
 
@@ -2328,7 +2323,6 @@ CREATE TABLE cadastre.cadastre_object_historic
         CONSTRAINT enforce_valid_geom_polygon CHECK (st_isvalid(geom_polygon)),
         CONSTRAINT enforce_geotype_geom_polygon CHECK (geometrytype(geom_polygon) = 'POLYGON'::text OR geom_polygon IS NULL),
     transaction_id varchar(40),
-    spatial_unitland_use_code varchar(20),
     rowidentifier varchar(40),
     rowversion integer,
     change_action char(1),
@@ -2430,7 +2424,6 @@ CREATE TABLE cadastre.cadastre_object_target(
         CONSTRAINT enforce_srid_geom_polygon CHECK (st_srid(geom_polygon) = 2193),
         CONSTRAINT enforce_valid_geom_polygon CHECK (st_isvalid(geom_polygon)),
         CONSTRAINT enforce_geotype_geom_polygon CHECK (geometrytype(geom_polygon) = 'POLYGON'::text OR geom_polygon IS NULL),
-    cadastre_objectspatial_unitland_use_code varchar(20) NOT NULL,
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
     rowversion integer NOT NULL DEFAULT (0),
     change_action char(1) NOT NULL DEFAULT ('i'),
@@ -2439,7 +2432,7 @@ CREATE TABLE cadastre.cadastre_object_target(
 
     -- Internal constraints
     
-    CONSTRAINT cadastre_object_target_pkey PRIMARY KEY (transaction_id,cadastre_object_id,cadastre_objectspatial_unitland_use_code)
+    CONSTRAINT cadastre_object_target_pkey PRIMARY KEY (transaction_id,cadastre_object_id)
 );
 
 
@@ -2470,7 +2463,6 @@ CREATE TABLE cadastre.cadastre_object_target_historic
         CONSTRAINT enforce_srid_geom_polygon CHECK (st_srid(geom_polygon) = 2193),
         CONSTRAINT enforce_valid_geom_polygon CHECK (st_isvalid(geom_polygon)),
         CONSTRAINT enforce_geotype_geom_polygon CHECK (geometrytype(geom_polygon) = 'POLYGON'::text OR geom_polygon IS NULL),
-    cadastre_objectspatial_unitland_use_code varchar(20),
     rowidentifier varchar(40),
     rowversion integer,
     change_action char(1),
@@ -2920,7 +2912,6 @@ CREATE TABLE cadastre.legal_space_utility_network(
         CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
         CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
         CONSTRAINT enforce_valid_geom CHECK (st_isvalid(geom)),
-    cadastre_objectspatial_unitland_use_code varchar(20) NOT NULL,
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
     rowversion integer NOT NULL DEFAULT (0),
     change_action char(1) NOT NULL DEFAULT ('i'),
@@ -2929,7 +2920,7 @@ CREATE TABLE cadastre.legal_space_utility_network(
 
     -- Internal constraints
     
-    CONSTRAINT legal_space_utility_network_pkey PRIMARY KEY (id,cadastre_objectspatial_unitland_use_code)
+    CONSTRAINT legal_space_utility_network_pkey PRIMARY KEY (id)
 );
 
 
@@ -2965,7 +2956,6 @@ CREATE TABLE cadastre.legal_space_utility_network_historic
         CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
         CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
         CONSTRAINT enforce_valid_geom CHECK (st_isvalid(geom)),
-    cadastre_objectspatial_unitland_use_code varchar(20),
     rowidentifier varchar(40),
     rowversion integer,
     change_action char(1),
@@ -4822,6 +4812,7 @@ CREATE TABLE cadastre.spatial_unit(
     label varchar(255),
     surface_relation_code varchar(20) NOT NULL DEFAULT ('onSurface'),
     level_id varchar(40),
+    land_use_code varchar(20) DEFAULT (residential),
     reference_point GEOMETRY
         CONSTRAINT enforce_dims_reference_point CHECK (st_ndims(reference_point) = 2),
         CONSTRAINT enforce_srid_reference_point CHECK (st_srid(reference_point) = 2193),
@@ -4831,7 +4822,6 @@ CREATE TABLE cadastre.spatial_unit(
         CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
         CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
         CONSTRAINT enforce_valid_geom CHECK (st_isvalid(geom)),
-    land_use_code varchar(20) DEFAULT (residential),
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
     rowversion integer NOT NULL DEFAULT (0),
     change_action char(1) NOT NULL DEFAULT ('i'),
@@ -4876,6 +4866,7 @@ CREATE TABLE cadastre.spatial_unit_historic
     label varchar(255),
     surface_relation_code varchar(20),
     level_id varchar(40),
+    land_use_code varchar(20),
     reference_point GEOMETRY
         CONSTRAINT enforce_dims_reference_point CHECK (st_ndims(reference_point) = 2),
         CONSTRAINT enforce_srid_reference_point CHECK (st_srid(reference_point) = 2193),
@@ -4885,7 +4876,6 @@ CREATE TABLE cadastre.spatial_unit_historic
         CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
         CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
         CONSTRAINT enforce_valid_geom CHECK (st_isvalid(geom)),
-    land_use_code varchar(20),
     rowidentifier varchar(40),
     rowversion integer,
     change_action char(1),
@@ -4915,7 +4905,6 @@ DROP TABLE IF EXISTS cadastre.spatial_unit_address CASCADE;
 CREATE TABLE cadastre.spatial_unit_address(
     spatial_unit_id varchar(40) NOT NULL,
     address_id varchar(40) NOT NULL,
-    spatial_unitland_use_code varchar(20) NOT NULL,
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
     rowversion integer NOT NULL DEFAULT (0),
     change_action char(1) NOT NULL DEFAULT ('i'),
@@ -4924,7 +4913,7 @@ CREATE TABLE cadastre.spatial_unit_address(
 
     -- Internal constraints
     
-    CONSTRAINT spatial_unit_address_pkey PRIMARY KEY (spatial_unit_id,address_id,spatial_unitland_use_code)
+    CONSTRAINT spatial_unit_address_pkey PRIMARY KEY (spatial_unit_id,address_id)
 );
 
 
@@ -4951,7 +4940,6 @@ CREATE TABLE cadastre.spatial_unit_address_historic
 (
     spatial_unit_id varchar(40),
     address_id varchar(40),
-    spatial_unitland_use_code varchar(20),
     rowidentifier varchar(40),
     rowversion integer,
     change_action char(1),
@@ -5071,7 +5059,6 @@ DROP TABLE IF EXISTS cadastre.spatial_unit_in_group CASCADE;
 CREATE TABLE cadastre.spatial_unit_in_group(
     spatial_unit_group_id varchar(40) NOT NULL,
     spatial_unit_id varchar(40) NOT NULL,
-    spatial_unitland_use_code varchar(20) NOT NULL,
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
     rowversion integer NOT NULL DEFAULT (0),
     change_action char(1) NOT NULL DEFAULT ('i'),
@@ -5080,7 +5067,7 @@ CREATE TABLE cadastre.spatial_unit_in_group(
 
     -- Internal constraints
     
-    CONSTRAINT spatial_unit_in_group_pkey PRIMARY KEY (spatial_unit_group_id,spatial_unit_id,spatial_unitland_use_code)
+    CONSTRAINT spatial_unit_in_group_pkey PRIMARY KEY (spatial_unit_group_id,spatial_unit_id)
 );
 
 
@@ -5107,7 +5094,6 @@ CREATE TABLE cadastre.spatial_unit_in_group_historic
 (
     spatial_unit_group_id varchar(40),
     spatial_unit_id varchar(40),
-    spatial_unitland_use_code varchar(20),
     rowidentifier varchar(40),
     rowversion integer,
     change_action char(1),
@@ -5132,7 +5118,6 @@ CREATE TABLE cadastre.spatial_value_area(
     spatial_unit_id varchar(40) NOT NULL,
     type_code varchar(20) NOT NULL,
     size numeric(29, 2) NOT NULL,
-    spatial_unitland_use_code varchar(20) NOT NULL,
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
     rowversion integer NOT NULL DEFAULT (0),
     change_action char(1) NOT NULL DEFAULT ('i'),
@@ -5141,7 +5126,7 @@ CREATE TABLE cadastre.spatial_value_area(
 
     -- Internal constraints
     
-    CONSTRAINT spatial_value_area_pkey PRIMARY KEY (spatial_unit_id,type_code,spatial_unitland_use_code)
+    CONSTRAINT spatial_value_area_pkey PRIMARY KEY (spatial_unit_id,type_code)
 );
 
 
@@ -5169,7 +5154,6 @@ CREATE TABLE cadastre.spatial_value_area_historic
     spatial_unit_id varchar(40),
     type_code varchar(20),
     size numeric(29, 2),
-    spatial_unitland_use_code varchar(20),
     rowidentifier varchar(40),
     rowversion integer,
     change_action char(1),
@@ -5839,8 +5823,8 @@ ALTER TABLE administrative.ba_unit_contains_spatial_unit ADD CONSTRAINT ba_unit_
 CREATE INDEX ba_unit_contains_spatial_unit_spatial_unit_id_fk68_ind ON administrative.ba_unit_contains_spatial_unit (spatial_unit_id);
 
 ALTER TABLE administrative.ba_unit_contains_spatial_unit ADD CONSTRAINT ba_unit_contains_spatial_unit_spatial_unit_id_fk69 
-            FOREIGN KEY (spatial_unit_id,cadastre_objectspatial_unitland_use_code) REFERENCES cadastre.cadastre_object(id,spatial_unitland_use_code) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX ba_unit_contains_spatial_unit_spatial_unit_id_fk69_ind ON administrative.ba_unit_contains_spatial_unit (spatial_unit_id,cadastre_objectspatial_unitland_use_code);
+            FOREIGN KEY (spatial_unit_id) REFERENCES cadastre.cadastre_object(id) ON UPDATE CASCADE ON DELETE CASCADE;
+CREATE INDEX ba_unit_contains_spatial_unit_spatial_unit_id_fk69_ind ON administrative.ba_unit_contains_spatial_unit (spatial_unit_id);
 
 ALTER TABLE administrative.ba_unit_as_party ADD CONSTRAINT ba_unit_as_party_ba_unit_id_fk70 
             FOREIGN KEY (ba_unit_id) REFERENCES administrative.ba_unit(id) ON UPDATE CASCADE ON DELETE CASCADE;
@@ -5927,8 +5911,8 @@ ALTER TABLE cadastre.spatial_unit_in_group ADD CONSTRAINT spatial_unit_in_group_
 CREATE INDEX spatial_unit_in_group_spatial_unit_id_fk90_ind ON cadastre.spatial_unit_in_group (spatial_unit_id);
 
 ALTER TABLE cadastre.legal_space_utility_network ADD CONSTRAINT legal_space_utility_network_id_fk91 
-            FOREIGN KEY (id,cadastre_objectspatial_unitland_use_code) REFERENCES cadastre.cadastre_object(id,spatial_unitland_use_code) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX legal_space_utility_network_id_fk91_ind ON cadastre.legal_space_utility_network (id,cadastre_objectspatial_unitland_use_code);
+            FOREIGN KEY (id) REFERENCES cadastre.cadastre_object(id) ON UPDATE CASCADE ON DELETE CASCADE;
+CREATE INDEX legal_space_utility_network_id_fk91_ind ON cadastre.legal_space_utility_network (id);
 
 ALTER TABLE cadastre.legal_space_utility_network ADD CONSTRAINT legal_space_utility_network_status_code_fk92 
             FOREIGN KEY (status_code) REFERENCES cadastre.utility_network_status_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
@@ -5939,8 +5923,8 @@ ALTER TABLE cadastre.legal_space_utility_network ADD CONSTRAINT legal_space_util
 CREATE INDEX legal_space_utility_network_type_code_fk93_ind ON cadastre.legal_space_utility_network (type_code);
 
 ALTER TABLE cadastre.cadastre_object_target ADD CONSTRAINT cadastre_object_target_cadastre_object_id_fk94 
-            FOREIGN KEY (cadastre_object_id,cadastre_objectspatial_unitland_use_code) REFERENCES cadastre.cadastre_object(id,spatial_unitland_use_code) ON UPDATE CASCADE ON DELETE CASCADE;
-CREATE INDEX cadastre_object_target_cadastre_object_id_fk94_ind ON cadastre.cadastre_object_target (cadastre_object_id,cadastre_objectspatial_unitland_use_code);
+            FOREIGN KEY (cadastre_object_id) REFERENCES cadastre.cadastre_object(id) ON UPDATE CASCADE ON DELETE CASCADE;
+CREATE INDEX cadastre_object_target_cadastre_object_id_fk94_ind ON cadastre.cadastre_object_target (cadastre_object_id);
 
 ALTER TABLE cadastre.cadastre_object_target ADD CONSTRAINT cadastre_object_target_transaction_id_fk95 
             FOREIGN KEY (transaction_id) REFERENCES transaction.transaction(id) ON UPDATE CASCADE ON DELETE CASCADE;
