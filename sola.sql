@@ -4812,7 +4812,7 @@ CREATE TABLE cadastre.spatial_unit(
     label varchar(255),
     surface_relation_code varchar(20) NOT NULL DEFAULT ('onSurface'),
     level_id varchar(40),
-    land_use_code varchar(20) DEFAULT (residential),
+    land_use_code varchar(20),
     reference_point GEOMETRY
         CONSTRAINT enforce_dims_reference_point CHECK (st_ndims(reference_point) = 2),
         CONSTRAINT enforce_srid_reference_point CHECK (st_srid(reference_point) = 2193),
