@@ -989,7 +989,34 @@ CREATE OR REPLACE FUNCTION bulk_operation.move_spatial_units(
  transaction_id varchar
 ) RETURNS void 
 AS $$
+declare
+  spatial_unit_type varchar;
+  generate_name_first_part boolean;
+  other_object_type varchar;
+  rec record;
 begin
+  spatial_unit_type = (select type_code 
+    from bulk_operation.spatial_unit_temporary 
+    where transaction_id = transaction_id_v limit 1);
+  if spatial_unit_type = 'cadastre_object' then
+    generate_name_first_part = (select name_firstpart is null 
+      from bulk_operation.spatial_unit_temporary 
+      where transaction_id = transaction_id_v limit 1);
+    for rec in select id, transaction_id, cadastre_object_type_code, name_firstpart, name_lastpart, geom, official_area
+      from bulk_operation.spatial_unit_temporary where transaction_id = transaction_id_v loop
+    end loop;
+  else
+    other_object_type = (select type_code 
+      from bulk_operation.spatial_unit_temporary 
+      where transaction_id = transaction_id_v limit 1);
+    if (select count(*) from cadastre.level where name = other_object_type)=0 then
+      insert into cadastre.level(id, name) values(other_object_type, other_object_type);
+    end if;
+    insert into cadastre.spatial_unit(id, label, level_id, geom)
+    select id, label, type_code, geom
+    from bulk_operation.spatial_unit_temporary where transaction_id = transaction_id_v;
+  end if;
+  delete from bulk_operation.spatial_unit_temporary where transaction_id = transaction_id_v;
 end;
 $$ LANGUAGE plpgsql;
 COMMENT ON FUNCTION bulk_operation.move_spatial_units(
@@ -3384,7 +3411,7 @@ DROP TABLE IF EXISTS cadastre.level CASCADE;
 CREATE TABLE cadastre.level(
     id varchar(40) NOT NULL,
     name varchar(50),
-    register_type_code varchar(20) NOT NULL,
+    register_type_code varchar(20) NOT NULL DEFAULT ('all'),
     structure_code varchar(20),
     type_code varchar(20),
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
@@ -5568,7 +5595,7 @@ CREATE TABLE bulk_operation.spatial_unit_temporary(
     id varchar(40) NOT NULL,
     transaction_id varchar(40) NOT NULL,
     type_code varchar(20) NOT NULL,
-    cadastre_object_type_code varchar(20) NOT NULL,
+    cadastre_object_type_code varchar(20),
     name_firstpart varchar(20),
     name_lastpart varchar(50),
     geom GEOMETRY NOT NULL
@@ -5605,30 +5632,6 @@ CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
    ON bulk_operation.spatial_unit_temporary FOR EACH ROW
    EXECUTE PROCEDURE f_for_trg_track_changes();
     
---Table bulk_operation.spatial_unit_temporary_type ----
-DROP TABLE IF EXISTS bulk_operation.spatial_unit_temporary_type CASCADE;
-CREATE TABLE bulk_operation.spatial_unit_temporary_type(
-    code varchar(20) NOT NULL,
-    display_value varchar(250) NOT NULL,
-    description varchar(555),
-    status char(1) NOT NULL,
-
-    -- Internal constraints
-    
-    CONSTRAINT spatial_unit_temporary_type_display_value_unique UNIQUE (display_value),
-    CONSTRAINT spatial_unit_temporary_type_pkey PRIMARY KEY (code)
-);
-
-
-comment on table bulk_operation.spatial_unit_temporary_type is 'The type of spatial object that can be uploaded during the bulk operations.';
-    
- -- Data for the table bulk_operation.spatial_unit_temporary_type -- 
-insert into bulk_operation.spatial_unit_temporary_type(code, display_value, description, status) values('cadastre_object', 'Cadastre object', 'the object will be inserted into the cadastre_object table', 'c');
-insert into bulk_operation.spatial_unit_temporary_type(code, display_value, status) values('1', 'Roads', 'c');
-insert into bulk_operation.spatial_unit_temporary_type(code, display_value, status) values('2', 'Villages', 'c');
-
-
-
 
 ALTER TABLE source.source ADD CONSTRAINT source_archive_id_fk0 
             FOREIGN KEY (archive_id) REFERENCES source.archive(id) ON UPDATE CASCADE ON DELETE RESTRICT;
@@ -6145,10 +6148,6 @@ CREATE INDEX spatial_unit_temporary_transaction_id_fk127_ind ON bulk_operation.s
 ALTER TABLE bulk_operation.spatial_unit_temporary ADD CONSTRAINT spatial_unit_temporary_cadastre_object_type_code_fk128 
             FOREIGN KEY (cadastre_object_type_code) REFERENCES cadastre.cadastre_object_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
 CREATE INDEX spatial_unit_temporary_cadastre_object_type_code_fk128_ind ON bulk_operation.spatial_unit_temporary (cadastre_object_type_code);
-
-ALTER TABLE bulk_operation.spatial_unit_temporary ADD CONSTRAINT spatial_unit_temporary_type_code_fk129 
-            FOREIGN KEY (type_code) REFERENCES bulk_operation.spatial_unit_temporary_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX spatial_unit_temporary_type_code_fk129_ind ON bulk_operation.spatial_unit_temporary (type_code);
 --Generate triggers for tables --
 -- triggers for table source.source -- 
 
