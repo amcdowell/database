@@ -1,4 +1,4 @@
-﻿
+
 -- Starting up the database script generation
 ALTER DATABASE sola SET bytea_output TO 'escape';
     
@@ -1037,6 +1037,7 @@ declare
   generate_name_first_part boolean;
   other_object_type varchar;
   rec record;
+  first_part_counter integer;
 begin
   spatial_unit_type = (select type_code 
     from bulk_operation.spatial_unit_temporary 
@@ -1045,8 +1046,16 @@ begin
     generate_name_first_part = (select name_firstpart is null 
       from bulk_operation.spatial_unit_temporary 
       where transaction_id = transaction_id_v limit 1);
+    first_part_counter = 1;
     for rec in select id, transaction_id, cadastre_object_type_code, name_firstpart, name_lastpart, geom, official_area
       from bulk_operation.spatial_unit_temporary where transaction_id = transaction_id_v loop
+        insert into cadastre.cadastre_object(id, type_code, status_code, transaction_id, name_firstpart, name_lastpart, geom_polygon)
+        values(rec.id, rec.cadastre_object_type_code, 'current', transaction_id_v, 
+          case when generate_name_first_part then first_part_counter::varchar else rec.name_firstpart end, 
+          rec.name_lastpart, 
+          st_geometryn(rec.geom,1)
+          );
+        first_part_counter = first_part_counter + 1;
     end loop;
   else
     other_object_type = (select type_code 
@@ -6378,19 +6387,19 @@ order by b.id;
 DROP VIEW IF EXISTS cadastre.road CASCADE;
 CREATE VIEW cadastre.road AS SELECT su.id, su.label, su.geom
 FROM cadastre.level l, cadastre.spatial_unit su 
-WHERE l.id= su.level_id AND l.name = 'Roads';
+WHERE l.id= su.level_id AND l.name = 'Roads';;
 
 -------View cadastre.survey_control ---------
 DROP VIEW IF EXISTS cadastre.survey_control CASCADE;
 CREATE VIEW cadastre.survey_control AS SELECT su.id, su.label, su.geom
 FROM cadastre.level l, cadastre.spatial_unit su 
-WHERE l.id = su.level_id AND l.name = 'Survey Control';
+WHERE l.id = su.level_id AND l.name = 'Survey Control';;
 
 -------View cadastre.place_name ---------
 DROP VIEW IF EXISTS cadastre.place_name CASCADE;
 CREATE VIEW cadastre.place_name AS SELECT su.id, su.label, su.geom
 FROM cadastre.level l, cadastre.spatial_unit su 
-WHERE l.id = su.level_id AND l.name = 'Place Names';
+WHERE l.id = su.level_id AND l.name = 'Place Names';;
 
 -------View administrative.sys_reg_state_land ---------
 DROP VIEW IF EXISTS administrative.sys_reg_state_land CASCADE;
@@ -6442,7 +6451,7 @@ DROP VIEW IF EXISTS administrative.systematic_registration_listing CASCADE;
 CREATE VIEW administrative.systematic_registration_listing AS SELECT co.id, co.name_firstpart, co.name_lastpart, sa.size, COALESCE(ap.land_use_code, 'residential'::character varying) AS land_use_code, su.ba_unit_id
    FROM cadastre.cadastre_object co, cadastre.spatial_value_area sa, administrative.ba_unit_contains_spatial_unit su, application.application_property ap, application.application aa, application.service s
   WHERE sa.spatial_unit_id::text = co.id::text AND sa.type_code::text = 'officialArea'::text AND su.spatial_unit_id::text = sa.spatial_unit_id::text AND ap.ba_unit_id::text = su.ba_unit_id::text AND aa.id::text = ap.application_id::text AND s.application_id::text = aa.id::text AND s.request_type_code::text = 'systematicRegn'::text AND s.status_code::text = 'completed'::text;
-
+;
 
 -------View administrative.sys_reg_owner_name ---------
 DROP VIEW IF EXISTS administrative.sys_reg_owner_name CASCADE;
