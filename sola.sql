@@ -1029,42 +1029,145 @@ COMMENT ON FUNCTION system.get_setting(
     
 -- Function bulk_operation.move_spatial_units --
 CREATE OR REPLACE FUNCTION bulk_operation.move_spatial_units(
- transaction_id varchar
+ transaction_id_v varchar
 ) RETURNS void 
 AS $$
 declare
   spatial_unit_type varchar;
-  generate_name_first_part boolean;
-  other_object_type varchar;
-  rec record;
 begin
   spatial_unit_type = (select type_code 
     from bulk_operation.spatial_unit_temporary 
     where transaction_id = transaction_id_v limit 1);
-  if spatial_unit_type = 'cadastre_object' then
-    generate_name_first_part = (select name_firstpart is null 
-      from bulk_operation.spatial_unit_temporary 
-      where transaction_id = transaction_id_v limit 1);
-    for rec in select id, transaction_id, cadastre_object_type_code, name_firstpart, name_lastpart, geom, official_area
-      from bulk_operation.spatial_unit_temporary where transaction_id = transaction_id_v loop
-    end loop;
-  else
-    other_object_type = (select type_code 
-      from bulk_operation.spatial_unit_temporary 
-      where transaction_id = transaction_id_v limit 1);
-    if (select count(*) from cadastre.level where name = other_object_type)=0 then
-      insert into cadastre.level(id, name) values(other_object_type, other_object_type);
-    end if;
-    insert into cadastre.spatial_unit(id, label, level_id, geom)
-    select id, label, type_code, geom
-    from bulk_operation.spatial_unit_temporary where transaction_id = transaction_id_v;
+  if spatial_unit_type is null then
+    return;
   end if;
-  delete from bulk_operation.spatial_unit_temporary where transaction_id = transaction_id_v;
+  if spatial_unit_type = 'cadastre_object' then
+    execute bulk_operation.move_cadastre_objects(transaction_id_v);
+  else
+    execute bulk_operation.move_other_objects(transaction_id_v);
+  end if;
 end;
 $$ LANGUAGE plpgsql;
 COMMENT ON FUNCTION bulk_operation.move_spatial_units(
- transaction_id varchar
+ transaction_id_v varchar
 ) IS 'This function moves the temporary spatial units to the destination tables. This function is called after the bulk opearation transaction is created from the bulk opeation apllication.';
+    
+-- Function bulk_operation.move_cadastre_objects --
+CREATE OR REPLACE FUNCTION bulk_operation.move_cadastre_objects(
+ transaction_id_v varchar
+) RETURNS void 
+AS $$
+declare
+  generate_name_first_part boolean;
+  rec record;
+  rec2 record;
+  last_part varchar;
+  first_part_counter integer;
+  first_part  varchar;
+  tmp_value integer;
+  duplicate_seperator varchar;
+  status varchar;
+  geom_v geometry;
+  tolerance double precision;
+  add_survey_points boolean;
+  survey_point_counter integer;
+begin
+  duplicate_seperator = ' / ';
+  tolerance = system.get_setting('map-tolerance')::double precision;
+  generate_name_first_part = (select bulk_generate_first_part 
+    from transaction.transaction 
+    where id = transaction_id_v);
+  first_part_counter = 1;
+  for rec in select id, transaction_id, cadastre_object_type_code, name_firstpart, name_lastpart, geom, official_area
+    from bulk_operation.spatial_unit_temporary where transaction_id = transaction_id_v loop
+      if last_part is null then
+        last_part = rec.name_lastpart;
+        if generate_name_first_part then
+          first_part_counter = (select coalesce(max(name_firstpart::integer), 0) 
+            from cadastre.cadastre_object 
+            where name_firstpart ~ '^[0-9]+$' and name_lastpart = last_part);
+          first_part_counter = first_part_counter + 1;
+        end if;
+      end if;
+      if not generate_name_first_part then
+        first_part = rec.name_firstpart;
+        -- It means the unicity of the cadastre object name is not garanteed so it has to be checked.
+        -- Check first if the combination first_part, last_part is unique within the loaded file
+        tmp_value = (select count(1) 
+          from bulk_operation.spatial_unit_temporary 
+          where transaction_id = transaction_id_v and id != rec.id 
+            and name_lastpart = last_part and name_firstpart = first_part);
+        if tmp_value = 0 then
+          -- It means within the loading cadastre objects, the combination is unique. 
+          -- Now it must be checked against the cadastre_object records
+          tmp_value = (select count(1) 
+            from cadastre.cadastre_object 
+            where name_lastpart = last_part 
+              and (name_firstpart = first_part
+                or name_firstpart like first_part || duplicate_seperator || '%'));
+        end if;
+      else
+        first_part = first_part_counter::varchar;
+        first_part_counter = first_part_counter + 1;
+      end if;
+      geom_v = st_geometryn(rec.geom,1);
+      add_survey_points = true;
+      if st_isvalid(geom_v) and st_geometrytype(geom_v) = 'ST_Polygon' then
+        if (select count(1) 
+          from cadastre.cadastre_object 
+          where geom_polygon && geom_v 
+            and st_intersects(geom_polygon, st_buffer(geom_v, - tolerance))) > 0 then
+          status = 'pending';
+        else
+          status = 'current';
+          add_survey_points = false;
+        end if;
+        insert into cadastre.cadastre_object(id, type_code, status_code, transaction_id, name_firstpart, name_lastpart, geom_polygon)
+        values(rec.id, rec.cadastre_object_type_code, status, transaction_id_v, first_part, last_part, geom_v);
+        insert into cadastre.spatial_value_area(spatial_unit_id, type_code, size)
+        values(rec.id, 'officialArea', rec.official_area);
+        insert into cadastre.spatial_value_area(spatial_unit_id, type_code, size)
+        values(rec.id, 'calculatedArea', st_area(geom_v));
+      end if;
+      if add_survey_points then
+        survey_point_counter = (select count(1) + 1 from cadastre.survey_point where transaction_id = transaction_id_v);
+        for rec2 in select distinct geom from st_dumppoints(geom_v) loop
+          insert into cadastre.survey_point(transaction_id, id, geom, original_geom)
+          values(transaction_id_v, survey_point_counter::varchar, rec2.geom, rec2.geom);
+          survey_point_counter = survey_point_counter + 1;
+        end loop;
+      end if;
+    end loop;
+    delete from bulk_operation.spatial_unit_temporary where transaction_id = transaction_id_v;
+end;
+$$ LANGUAGE plpgsql;
+COMMENT ON FUNCTION bulk_operation.move_cadastre_objects(
+ transaction_id_v varchar
+) IS 'This function will move the cadastre objects from the bulk operation schema to the cadastre schema.';
+    
+-- Function bulk_operation.move_other_objects --
+CREATE OR REPLACE FUNCTION bulk_operation.move_other_objects(
+ transaction_id_v varchar
+) RETURNS void 
+AS $$
+declare
+  other_object_type varchar;
+begin
+  other_object_type = (select type_code 
+    from bulk_operation.spatial_unit_temporary 
+    where transaction_id = transaction_id_v limit 1);
+  if (select count(*) from cadastre.level where name = other_object_type)=0 then
+    insert into cadastre.level(id, name) values(other_object_type, other_object_type);
+  end if;
+  insert into cadastre.spatial_unit(id, label, level_id, geom, transaction_id)
+  select id, label, type_code, geom, transaction_id
+  from bulk_operation.spatial_unit_temporary where transaction_id = transaction_id_v;
+  delete from bulk_operation.spatial_unit_temporary where transaction_id = transaction_id_v;
+end;
+$$ LANGUAGE plpgsql;
+COMMENT ON FUNCTION bulk_operation.move_other_objects(
+ transaction_id_v varchar
+) IS 'This function is used to move other kinds of spatial objects except the cadastre objects.';
     
     
 select clean_db('public');
@@ -1431,6 +1534,7 @@ CREATE TABLE transaction.transaction(
     from_service_id varchar(40),
     status_code varchar(20) NOT NULL DEFAULT ('pending'),
     approval_datetime timestamp,
+    bulk_generate_first_part bool NOT NULL DEFAULT (false),
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
     rowversion integer NOT NULL DEFAULT (0),
     change_action char(1) NOT NULL DEFAULT ('i'),
@@ -1465,6 +1569,7 @@ CREATE TABLE transaction.transaction_historic
     from_service_id varchar(40),
     status_code varchar(20),
     approval_datetime timestamp,
+    bulk_generate_first_part bool,
     rowidentifier varchar(40),
     rowversion integer,
     change_action char(1),
@@ -3312,6 +3417,7 @@ CREATE TABLE cadastre.spatial_unit(
         CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
         CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
         CONSTRAINT enforce_valid_geom CHECK (st_isvalid(geom)),
+    transaction_id varchar(40),
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
     rowversion integer NOT NULL DEFAULT (0),
     change_action char(1) NOT NULL DEFAULT ('i'),
@@ -3366,6 +3472,7 @@ CREATE TABLE cadastre.spatial_unit_historic
         CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
         CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
         CONSTRAINT enforce_valid_geom CHECK (st_isvalid(geom)),
+    transaction_id varchar(40),
     rowidentifier varchar(40),
     rowversion integer,
     change_action char(1),
@@ -5060,6 +5167,7 @@ insert into system.setting(name, vl, active, description) values('map-north', '5
 insert into system.setting(name, vl, active, description) values('map-tolerance', '0.01', true, 'The tolerance that is used while snapping geometries to each other. If two points are within this distance are considered being in the same location.');
 insert into system.setting(name, vl, active, description) values('map-shift-tolerance-rural', '20', true, 'The shift tolerance of boundary points used in cadastre change in rural areas.');
 insert into system.setting(name, vl, active, description) values('map-shift-tolerance-urban', '5', true, 'The shift tolerance of boundary points used in cadastre change in urban areas.');
+insert into system.setting(name, vl, active, description) values('public-notification-duration', '30', true, 'The notification duration for the public display.');
 
 
 
@@ -6187,12 +6295,16 @@ ALTER TABLE application.application_property ADD CONSTRAINT application_property
 CREATE INDEX application_property_land_use_code_fk126_ind ON application.application_property (land_use_code);
 
 ALTER TABLE bulk_operation.spatial_unit_temporary ADD CONSTRAINT spatial_unit_temporary_transaction_id_fk127 
-            FOREIGN KEY (transaction_id) REFERENCES transaction.transaction(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+            FOREIGN KEY (transaction_id) REFERENCES transaction.transaction(id) ON UPDATE CASCADE ON DELETE Cascade;
 CREATE INDEX spatial_unit_temporary_transaction_id_fk127_ind ON bulk_operation.spatial_unit_temporary (transaction_id);
 
 ALTER TABLE bulk_operation.spatial_unit_temporary ADD CONSTRAINT spatial_unit_temporary_cadastre_object_type_code_fk128 
             FOREIGN KEY (cadastre_object_type_code) REFERENCES cadastre.cadastre_object_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
 CREATE INDEX spatial_unit_temporary_cadastre_object_type_code_fk128_ind ON bulk_operation.spatial_unit_temporary (cadastre_object_type_code);
+
+ALTER TABLE cadastre.spatial_unit ADD CONSTRAINT spatial_unit_transaction_id_fk129 
+            FOREIGN KEY (transaction_id) REFERENCES transaction.transaction(id) ON UPDATE CASCADE ON DELETE Cascade;
+CREATE INDEX spatial_unit_transaction_id_fk129_ind ON cadastre.spatial_unit (transaction_id);
 --Generate triggers for tables --
 -- triggers for table source.source -- 
 
