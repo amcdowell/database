@@ -1069,9 +1069,10 @@ declare
   status varchar;
   geom_v geometry;
   tolerance double precision;
-  add_survey_points boolean;
   survey_point_counter integer;
+  transaction_has_pending boolean;
 begin
+  transaction_has_pending = false;
   duplicate_seperator = ' / ';
   tolerance = system.get_setting('map-tolerance')::double precision;
   generate_name_first_part = (select bulk_generate_first_part 
@@ -1080,6 +1081,7 @@ begin
   first_part_counter = 1;
   for rec in select id, transaction_id, cadastre_object_type_code, name_firstpart, name_lastpart, geom, official_area
     from bulk_operation.spatial_unit_temporary where transaction_id = transaction_id_v loop
+      status = 'current';
       if last_part is null then
         last_part = rec.name_lastpart;
         if generate_name_first_part then
@@ -1092,35 +1094,28 @@ begin
       if not generate_name_first_part then
         first_part = rec.name_firstpart;
         -- It means the unicity of the cadastre object name is not garanteed so it has to be checked.
-        -- Check first if the combination first_part, last_part is unique within the loaded file
-        tmp_value = (select count(1) 
-          from bulk_operation.spatial_unit_temporary 
-          where transaction_id = transaction_id_v and id != rec.id 
-            and name_lastpart = last_part and name_firstpart = first_part);
-        if tmp_value = 0 then
-          -- It means within the loading cadastre objects, the combination is unique. 
-          -- Now it must be checked against the cadastre_object records
-          tmp_value = (select count(1) 
-            from cadastre.cadastre_object 
-            where name_lastpart = last_part 
-              and (name_firstpart = first_part
-                or name_firstpart like first_part || duplicate_seperator || '%'));
+        -- Check first if the combination first_part, last_part is found in the cadastre_object table
+        tmp_value = (select count(1)
+          from cadastre.cadastre_object 
+          where name_lastpart = last_part 
+            and (name_firstpart = first_part
+              or name_firstpart like first_part || duplicate_seperator || '%'));
+        if tmp_value > 0 then
+          tmp_value = tmp_value + 1;
+          first_part = first_part || duplicate_seperator || tmp_value::varchar;
+          status = 'pending';
         end if;
       else
         first_part = first_part_counter::varchar;
         first_part_counter = first_part_counter + 1;
       end if;
       geom_v = st_geometryn(rec.geom,1);
-      add_survey_points = true;
       if st_isvalid(geom_v) and st_geometrytype(geom_v) = 'ST_Polygon' then
         if (select count(1) 
           from cadastre.cadastre_object 
           where geom_polygon && geom_v 
             and st_intersects(geom_polygon, st_buffer(geom_v, - tolerance))) > 0 then
           status = 'pending';
-        else
-          status = 'current';
-          add_survey_points = false;
         end if;
         insert into cadastre.cadastre_object(id, type_code, status_code, transaction_id, name_firstpart, name_lastpart, geom_polygon)
         values(rec.id, rec.cadastre_object_type_code, status, transaction_id_v, first_part, last_part, geom_v);
@@ -1129,7 +1124,8 @@ begin
         insert into cadastre.spatial_value_area(spatial_unit_id, type_code, size)
         values(rec.id, 'calculatedArea', st_area(geom_v));
       end if;
-      if add_survey_points then
+      if status = 'pending' then
+        transaction_has_pending = true;
         survey_point_counter = (select count(1) + 1 from cadastre.survey_point where transaction_id = transaction_id_v);
         for rec2 in select distinct geom from st_dumppoints(geom_v) loop
           insert into cadastre.survey_point(transaction_id, id, geom, original_geom)
@@ -1138,6 +1134,9 @@ begin
         end loop;
       end if;
     end loop;
+    if not transaction_has_pending then
+      update transaction.transaction set status_code = 'approved' where id = transaction_id_v;
+    end if;
     delete from bulk_operation.spatial_unit_temporary where transaction_id = transaction_id_v;
 end;
 $$ LANGUAGE plpgsql;
@@ -1162,6 +1161,7 @@ begin
   insert into cadastre.spatial_unit(id, label, level_id, geom, transaction_id)
   select id, label, type_code, geom, transaction_id
   from bulk_operation.spatial_unit_temporary where transaction_id = transaction_id_v;
+  update transaction.transaction set status_code = 'approved' where id = transaction_id_v;
   delete from bulk_operation.spatial_unit_temporary where transaction_id = transaction_id_v;
 end;
 $$ LANGUAGE plpgsql;
@@ -5450,6 +5450,7 @@ insert into system.br_validation_target_type(code, display_value, status, descri
 insert into system.br_validation_target_type(code, display_value, status, description) values('ba_unit', 'Administrative Unit::::Unita Amministrativa', 'c', 'The target of the validation is the ba_unit. It accepts one parameter {id} which is the ba_unit id.');
 insert into system.br_validation_target_type(code, display_value, status, description) values('source', 'Source::::Sorgente', 'c', 'The target of the validation is the source. It accepts one parameter {id} which is the source id.');
 insert into system.br_validation_target_type(code, display_value, status, description) values('cadastre_object', 'Cadastre Object::::Oggetto Catastale', 'c', 'The target of the validation is the transaction related with the cadastre change. It accepts one parameter {id} which is the transaction id.');
+insert into system.br_validation_target_type(code, display_value, status, description) values('bulkOperationSpatial', 'BUlk operation', 'c', 'The target of the validation is the transaction related with the bulk operations.');
 
 
 
