@@ -263,15 +263,16 @@ VALUES('service-has-person-verification', 'sql', 'Within the application persona
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES('service-has-person-verification', now(), 'infinity', 
-'SELECT (COUNT(*) > 0) AS vl FROM source.source sc
-	INNER JOIN application.application_uses_source aus ON ((sc.id = aus.source_id) AND (sc.type_code = ''idVerification''))
-	INNER JOIN application.service sv ON (aus.application_id = sv.application_id)
+'SELECT (case when sv.application_id is null then null else sc.id is not null end) as vl
+FROM application.service sv
+  LEFT JOIN application.application_uses_source aus ON (aus.application_id = sv.application_id)
+  LEFT JOIN source.source sc ON ((sc.id = aus.source_id) AND (sc.type_code = ''idVerification''))
 WHERE sv.id= #{id}
-ORDER BY vl
+ORDER BY sv.id
 LIMIT 1');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_service_moment, target_code, order_of_execution) 
-VALUES('service-has-person-verification', 'critical', 'complete', 'service', 350);
+VALUES('service-has-person-verification', 'complete', 'complete', 'service', 350);
 
 ------------------------------------------------------------------------------------------------
 
