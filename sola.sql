@@ -5451,6 +5451,7 @@ insert into system.br_validation_target_type(code, display_value, status, descri
 insert into system.br_validation_target_type(code, display_value, status, description) values('source', 'Source::::Sorgente', 'c', 'The target of the validation is the source. It accepts one parameter {id} which is the source id.');
 insert into system.br_validation_target_type(code, display_value, status, description) values('cadastre_object', 'Cadastre Object::::Oggetto Catastale', 'c', 'The target of the validation is the transaction related with the cadastre change. It accepts one parameter {id} which is the transaction id.');
 insert into system.br_validation_target_type(code, display_value, status, description) values('bulkOperationSpatial', 'BUlk operation', 'c', 'The target of the validation is the transaction related with the bulk operations.');
+insert into system.br_validation_target_type(code, display_value, status, description) values('public_display', 'Public display', 'c', 'The target of the validation is the set of cadastre objects/ba units that belong to a certain last part. It accepts one parameter {lastPart} which is the last part.');
 
 
 

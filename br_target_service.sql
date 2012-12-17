@@ -272,7 +272,7 @@ ORDER BY sv.id
 LIMIT 1');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_service_moment, target_code, order_of_execution) 
-VALUES('service-has-person-verification', 'complete', 'complete', 'service', 350);
+VALUES('service-has-person-verification', 'critical', 'complete', 'service', 350);
 
 ------------------------------------------------------------------------------------------------
 
