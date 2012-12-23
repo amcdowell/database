@@ -37,7 +37,7 @@ from cadastre.cadastre_object co
 ');
 
 insert into system.br_validation(br_id, severity_code, target_code, order_of_execution) 
-values('public-display-check-complete-status', 'critical', 'public_display', 1);
+values('public-display-check-complete-status', 'warning', 'public_display', 1);
 
 ----------------------------------------------------------------------------------------------------
 insert into system.br(id, technical_type_code, feedback, technical_description) 
@@ -77,7 +77,7 @@ values('public-display-check-baunit-has-co', now(), 'infinity',
    )');
 
 insert into system.br_validation(br_id, severity_code, target_code, order_of_execution) 
-values('public-display-check-baunit-has-co', 'critical', 'public_display', 2);
+values('public-display-check-baunit-has-co', 'warning', 'public_display', 2);
 
 ----------------------------------------------------------------------------------------------------
 update system.br set display_name = id where display_name !=id;
