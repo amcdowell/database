@@ -1109,7 +1109,11 @@ begin
         first_part = first_part_counter::varchar;
         first_part_counter = first_part_counter + 1;
       end if;
-      geom_v = st_geometryn(rec.geom,1);
+      geom_v = rec.geom;
+      --if st_geometrytype(geom_v) = 'ST_MultiPolygon' then
+        -- If the geom is of type multipolygon consider only the first polygon
+      --  geom_v = st_geometryn(geom_v, 1);
+      --end if;
       if st_isvalid(geom_v) and st_geometrytype(geom_v) = 'ST_Polygon' then
         if (select count(1) 
           from cadastre.cadastre_object 

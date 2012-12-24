@@ -54,8 +54,8 @@ values('bulk-spatial-geom-not-valid', now(), 'infinity',
  'select (select count(1)=0
   from bulk_operation.spatial_unit_temporary tmp
   where tmp.transaction_id = t.id 
-    and not (st_isvalid(st_geometryn(tmp.geom,1)) 
-    and st_geometrytype(st_geometryn(tmp.geom,1)) = ''ST_Polygon'')) as vl
+    and not (st_isvalid(tmp.geom) 
+    and st_geometrytype(tmp.geom) = ''ST_Polygon'')) as vl
 from transaction.transaction t
 where id = #{id}
   and id in (select transaction_id 
