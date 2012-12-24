@@ -1120,7 +1120,7 @@ begin
         insert into cadastre.cadastre_object(id, type_code, status_code, transaction_id, name_firstpart, name_lastpart, geom_polygon)
         values(rec.id, rec.cadastre_object_type_code, status, transaction_id_v, first_part, last_part, geom_v);
         insert into cadastre.spatial_value_area(spatial_unit_id, type_code, size)
-        values(rec.id, 'officialArea', rec.official_area);
+        values(rec.id, 'officialArea', coalesce(rec.official_area, st_area(geom_v)));
         insert into cadastre.spatial_value_area(spatial_unit_id, type_code, size)
         values(rec.id, 'calculatedArea', st_area(geom_v));
       end if;
