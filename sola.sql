@@ -1155,12 +1155,22 @@ CREATE OR REPLACE FUNCTION bulk_operation.move_other_objects(
 AS $$
 declare
   other_object_type varchar;
+  geometry_type varchar;
 begin
   other_object_type = (select type_code 
     from bulk_operation.spatial_unit_temporary 
     where transaction_id = transaction_id_v limit 1);
+  geometry_type = (select st_geometrytype(geom) 
+    from bulk_operation.spatial_unit_temporary 
+    where transaction_id = transaction_id_v limit 1);
+  geometry_type = lower(substring(geometry_type from 4));
+  if (select count(*) from cadastre.structure_type where code = geometry_type) = 0 then
+    insert into cadastre.structure_type(code, display_value, status)
+    values(geometry_type, geometry_type, 'c');
+  end if;
   if (select count(*) from cadastre.level where name = other_object_type)=0 then
-    insert into cadastre.level(id, name) values(other_object_type, other_object_type);
+    insert into cadastre.level(id, type_code, name, structure_code) 
+    values(other_object_type, 'geographicLocator', other_object_type, geometry_type);
   end if;
   insert into cadastre.spatial_unit(id, label, level_id, geom, transaction_id)
   select id, label, type_code, geom, transaction_id
@@ -1171,7 +1181,8 @@ end;
 $$ LANGUAGE plpgsql;
 COMMENT ON FUNCTION bulk_operation.move_other_objects(
  transaction_id_v varchar
-) IS 'This function is used to move other kinds of spatial objects except the cadastre objects.';
+) IS 'This function is used to move other kinds of spatial objects except the cadastre objects. <br/>
+The function will add a new level if need together with a new structure type if it is not found.';
     
     
 select clean_db('public');
@@ -3626,6 +3637,11 @@ CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
    ON cadastre.level FOR EACH ROW
    EXECUTE PROCEDURE f_for_trg_track_history();
     
+ -- Data for the table cadastre.level -- 
+insert into cadastre.level(id, name, register_type_code, structure_code, type_code) values('cadastreObject', 'Cadastre object', 'all', 'polygon', 'primaryRight');
+
+
+
 --Table cadastre.register_type ----
 DROP TABLE IF EXISTS cadastre.register_type CASCADE;
 CREATE TABLE cadastre.register_type(
@@ -6375,8 +6391,8 @@ CREATE OR REPLACE FUNCTION cadastre.f_for_tbl_cadastre_object_trg_new() RETURNS 
 AS $$
 BEGIN
   if (select count(*)=0 from cadastre.spatial_unit where id=new.id) then
-    insert into cadastre.spatial_unit(id, rowidentifier, change_user) 
-    values(new.id, new.rowidentifier,new.change_user);
+    insert into cadastre.spatial_unit(id, rowidentifier, level_id, change_user) 
+    values(new.id, new.rowidentifier, 'cadastreObject', new.change_user);
   end if;
   return new;
 END;
