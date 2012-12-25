@@ -3756,6 +3756,7 @@ CREATE TABLE cadastre.cadastre_object(
         CONSTRAINT enforce_valid_geom_polygon CHECK (st_isvalid(geom_polygon)),
         CONSTRAINT enforce_geotype_geom_polygon CHECK (geometrytype(geom_polygon) = 'POLYGON'::text OR geom_polygon IS NULL),
     transaction_id varchar(40) NOT NULL,
+    land_use_code varchar(255) DEFAULT ('residential'),
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
     rowversion integer NOT NULL DEFAULT (0),
     change_action char(1) NOT NULL DEFAULT ('i'),
@@ -3804,6 +3805,7 @@ CREATE TABLE cadastre.cadastre_object_historic
         CONSTRAINT enforce_valid_geom_polygon CHECK (st_isvalid(geom_polygon)),
         CONSTRAINT enforce_geotype_geom_polygon CHECK (geometrytype(geom_polygon) = 'POLYGON'::text OR geom_polygon IS NULL),
     transaction_id varchar(40),
+    land_use_code varchar(255),
     rowidentifier varchar(40),
     rowversion integer,
     change_action char(1),
@@ -6530,41 +6532,41 @@ WHERE l.id = su.level_id AND l.name = 'Place Names';;
 
 -------View administrative.sys_reg_state_land ---------
 DROP VIEW IF EXISTS administrative.sys_reg_state_land CASCADE;
-CREATE VIEW administrative.sys_reg_state_land AS SELECT (pp.name::text || ' '::text) || COALESCE(pp.last_name, ' '::character varying)::text AS value, co.id, co.name_firstpart, co.name_lastpart, COALESCE(ap.land_use_code, 'residential'::character varying) AS land_use_code, su.ba_unit_id, 
+CREATE VIEW administrative.sys_reg_state_land AS SELECT (pp.name::text || ' '::text) || COALESCE(pp.last_name, ' '::character varying)::text AS value, co.id, co.name_firstpart, co.name_lastpart, COALESCE(co.land_use_code, 'residential'::character varying) AS land_use_code, su.ba_unit_id, 
                 CASE
-                    WHEN COALESCE(ap.land_use_code, 'residential'::character varying)::text = 'residential'::text THEN sa.size
+                    WHEN COALESCE(co.land_use_code, 'residential'::character varying)::text = 'residential'::text THEN sa.size
                     ELSE 0::numeric
                 END AS residential, 
                 CASE
-                    WHEN COALESCE(ap.land_use_code, 'residential'::character varying)::text = 'agricultural'::text THEN sa.size
+                    WHEN COALESCE(co.land_use_code, 'residential'::character varying)::text = 'agricultural'::text THEN sa.size
                     ELSE 0::numeric
                 END AS agricultural, 
                 CASE
-                    WHEN COALESCE(ap.land_use_code, 'residential'::character varying)::text = 'commercial'::text THEN sa.size
+                    WHEN COALESCE(co.land_use_code, 'residential'::character varying)::text = 'commercial'::text THEN sa.size
                     ELSE 0::numeric
                 END AS commercial, 
                 CASE
-                    WHEN COALESCE(ap.land_use_code, 'residential'::character varying)::text = 'industrial'::text THEN sa.size
+                    WHEN COALESCE(co.land_use_code, 'residential'::character varying)::text = 'industrial'::text THEN sa.size
                     ELSE 0::numeric
                 END AS industrial
            FROM cadastre.cadastre_object co, cadastre.spatial_value_area sa, administrative.ba_unit_contains_spatial_unit su, application.application_property ap, application.application aa, application.service s, party.party pp, administrative.party_for_rrr pr, administrative.rrr rrr
           WHERE sa.spatial_unit_id::text = co.id::text AND sa.type_code::text = 'officialArea'::text AND su.spatial_unit_id::text = sa.spatial_unit_id::text AND ap.ba_unit_id::text = su.ba_unit_id::text AND aa.id::text = ap.application_id::text AND s.application_id::text = aa.id::text AND s.request_type_code::text = 'systematicRegn'::text AND s.status_code::text = 'completed'::text AND pp.id::text = pr.party_id::text AND pr.rrr_id::text = rrr.id::text AND rrr.ba_unit_id::text = su.ba_unit_id::text AND rrr.type_code::text = 'stateOwnership'::text
 UNION 
-         SELECT DISTINCT 'No Claimant '::text AS value, co.id, co.name_firstpart, co.name_lastpart, COALESCE(ap.land_use_code, 'residential'::character varying) AS land_use_code, su.ba_unit_id, 
+         SELECT DISTINCT 'No Claimant '::text AS value, co.id, co.name_firstpart, co.name_lastpart, COALESCE(co.land_use_code, 'residential'::character varying) AS land_use_code, su.ba_unit_id, 
                 CASE
-                    WHEN COALESCE(ap.land_use_code, 'residential'::character varying)::text = 'residential'::text THEN sa.size
+                    WHEN COALESCE(co.land_use_code, 'residential'::character varying)::text = 'residential'::text THEN sa.size
                     ELSE 0::numeric
                 END AS residential, 
                 CASE
-                    WHEN COALESCE(ap.land_use_code, 'residential'::character varying)::text = 'agricultural'::text THEN sa.size
+                    WHEN COALESCE(co.land_use_code, 'residential'::character varying)::text = 'agricultural'::text THEN sa.size
                     ELSE 0::numeric
                 END AS agricultural, 
                 CASE
-                    WHEN COALESCE(ap.land_use_code, 'residential'::character varying)::text = 'commercial'::text THEN sa.size
+                    WHEN COALESCE(co.land_use_code, 'residential'::character varying)::text = 'commercial'::text THEN sa.size
                     ELSE 0::numeric
                 END AS commercial, 
                 CASE
-                    WHEN COALESCE(ap.land_use_code, 'residential'::character varying)::text = 'industrial'::text THEN sa.size
+                    WHEN COALESCE(co.land_use_code, 'residential'::character varying)::text = 'industrial'::text THEN sa.size
                     ELSE 0::numeric
                 END AS industrial
            FROM cadastre.cadastre_object co, cadastre.spatial_value_area sa, administrative.ba_unit_contains_spatial_unit su, application.application_property ap, application.application aa, party.party pp, administrative.party_for_rrr pr, administrative.rrr rrr, application.service s
@@ -6581,45 +6583,45 @@ su.ba_unit_id
    FROM cadastre.land_use_type lu,cadastre.cadastre_object co, cadastre.spatial_value_area sa, administrative.ba_unit_contains_spatial_unit su, 
    application.application_property ap, application.application aa, application.service s
   WHERE sa.spatial_unit_id::text = co.id::text AND sa.type_code::text = 'officialArea'::text AND su.spatial_unit_id::text = sa.spatial_unit_id::text AND ap.ba_unit_id::text = su.ba_unit_id::text AND aa.id::text = ap.application_id::text AND s.application_id::text = aa.id::text AND s.request_type_code::text = 'systematicRegn'::text AND s.status_code::text = 'completed'::text
-  AND COALESCE(ap.land_use_code, 'residential'::character varying)=lu.code;
+  AND COALESCE(co.land_use_code, 'residential'::character varying)=lu.code;
 
 -------View administrative.sys_reg_owner_name ---------
 DROP VIEW IF EXISTS administrative.sys_reg_owner_name CASCADE;
-CREATE VIEW administrative.sys_reg_owner_name AS  SELECT (pp.name::text || ' '::text) || COALESCE(pp.last_name, ''::character varying)::text AS value, co.id, co.name_firstpart, co.name_lastpart, COALESCE(ap.land_use_code, 'residential'::character varying) AS land_use_code, su.ba_unit_id, 
+CREATE VIEW administrative.sys_reg_owner_name AS  SELECT (pp.name::text || ' '::text) || COALESCE(pp.last_name, ''::character varying)::text AS value, co.id, co.name_firstpart, co.name_lastpart, COALESCE(co.land_use_code, 'residential'::character varying) AS land_use_code, su.ba_unit_id, 
                 CASE
-                    WHEN COALESCE(ap.land_use_code, 'residential'::character varying)::text = 'residential'::text THEN sa.size
+                    WHEN COALESCE(co.land_use_code, 'residential'::character varying)::text = 'residential'::text THEN sa.size
                     ELSE 0::numeric
                 END AS residential, 
                 CASE
-                    WHEN COALESCE(ap.land_use_code, 'residential'::character varying)::text = 'agricultural'::text THEN sa.size
+                    WHEN COALESCE(co.land_use_code, 'residential'::character varying)::text = 'agricultural'::text THEN sa.size
                     ELSE 0::numeric
                 END AS agricultural, 
                 CASE
-                    WHEN COALESCE(ap.land_use_code, 'residential'::character varying)::text = 'commercial'::text THEN sa.size
+                    WHEN COALESCE(co.land_use_code, 'residential'::character varying)::text = 'commercial'::text THEN sa.size
                     ELSE 0::numeric
                 END AS commercial, 
                 CASE
-                    WHEN COALESCE(ap.land_use_code, 'residential'::character varying)::text = 'industrial'::text THEN sa.size
+                    WHEN COALESCE(co.land_use_code, 'residential'::character varying)::text = 'industrial'::text THEN sa.size
                     ELSE 0::numeric
                 END AS industrial
            FROM cadastre.cadastre_object co, cadastre.spatial_value_area sa, administrative.ba_unit_contains_spatial_unit su, application.application_property ap, application.application aa, application.service s, party.party pp, administrative.party_for_rrr pr, administrative.rrr rrr
           WHERE sa.spatial_unit_id::text = co.id::text AND sa.type_code::text = 'officialArea'::text AND su.spatial_unit_id::text = sa.spatial_unit_id::text AND ap.ba_unit_id::text = su.ba_unit_id::text AND aa.id::text = ap.application_id::text AND s.application_id::text = aa.id::text AND s.request_type_code::text = 'systematicRegn'::text AND s.status_code::text = 'completed'::text AND pp.id::text = pr.party_id::text AND pr.rrr_id::text = rrr.id::text AND rrr.ba_unit_id::text = su.ba_unit_id::text AND (rrr.type_code::text = 'ownership'::text OR rrr.type_code::text = 'apartment'::text OR rrr.type_code::text = 'commonOwnership'::text)
 UNION 
-         SELECT DISTINCT 'No Claimant '::text AS value, co.id, co.name_firstpart, co.name_lastpart, COALESCE(ap.land_use_code, 'residential'::character varying) AS land_use_code, su.ba_unit_id, 
+         SELECT DISTINCT 'No Claimant '::text AS value, co.id, co.name_firstpart, co.name_lastpart, COALESCE(co.land_use_code, 'residential'::character varying) AS land_use_code, su.ba_unit_id, 
                 CASE
-                    WHEN COALESCE(ap.land_use_code, 'residential'::character varying)::text = 'residential'::text THEN sa.size
+                    WHEN COALESCE(co.land_use_code, 'residential'::character varying)::text = 'residential'::text THEN sa.size
                     ELSE 0::numeric
                 END AS residential, 
                 CASE
-                    WHEN COALESCE(ap.land_use_code, 'residential'::character varying)::text = 'agricultural'::text THEN sa.size
+                    WHEN COALESCE(co.land_use_code, 'residential'::character varying)::text = 'agricultural'::text THEN sa.size
                     ELSE 0::numeric
                 END AS agricultural, 
                 CASE
-                    WHEN COALESCE(ap.land_use_code, 'residential'::character varying)::text = 'commercial'::text THEN sa.size
+                    WHEN COALESCE(co.land_use_code, 'residential'::character varying)::text = 'commercial'::text THEN sa.size
                     ELSE 0::numeric
                 END AS commercial, 
                 CASE
-                    WHEN COALESCE(ap.land_use_code, 'residential'::character varying)::text = 'industrial'::text THEN sa.size
+                    WHEN COALESCE(co.land_use_code, 'residential'::character varying)::text = 'industrial'::text THEN sa.size
                     ELSE 0::numeric
                 END AS industrial
            FROM cadastre.cadastre_object co, cadastre.spatial_value_area sa, administrative.ba_unit_contains_spatial_unit su, application.application_property ap, application.application aa, party.party pp, administrative.party_for_rrr pr, administrative.rrr rrr, application.service s
