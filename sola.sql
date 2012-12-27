@@ -1127,6 +1127,8 @@ begin
         values(rec.id, 'officialArea', coalesce(rec.official_area, st_area(geom_v)));
         insert into cadastre.spatial_value_area(spatial_unit_id, type_code, size)
         values(rec.id, 'calculatedArea', st_area(geom_v));
+      else
+        status = 'pending'; 
       end if;
       if status = 'pending' then
         transaction_has_pending = true;
