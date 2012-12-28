@@ -1030,6 +1030,7 @@ COMMENT ON FUNCTION system.get_setting(
 -- Function bulk_operation.move_spatial_units --
 CREATE OR REPLACE FUNCTION bulk_operation.move_spatial_units(
  transaction_id_v varchar
+  , change_user_v varchar
 ) RETURNS void 
 AS $$
 declare
@@ -1042,19 +1043,21 @@ begin
     return;
   end if;
   if spatial_unit_type = 'cadastre_object' then
-    execute bulk_operation.move_cadastre_objects(transaction_id_v);
+    execute bulk_operation.move_cadastre_objects(transaction_id_v, change_user_v);
   else
-    execute bulk_operation.move_other_objects(transaction_id_v);
+    execute bulk_operation.move_other_objects(transaction_id_v, change_user_v);
   end if;
 end;
 $$ LANGUAGE plpgsql;
 COMMENT ON FUNCTION bulk_operation.move_spatial_units(
  transaction_id_v varchar
+  , change_user_v varchar
 ) IS 'This function moves the temporary spatial units to the destination tables. This function is called after the bulk opearation transaction is created from the bulk opeation apllication.';
     
 -- Function bulk_operation.move_cadastre_objects --
 CREATE OR REPLACE FUNCTION bulk_operation.move_cadastre_objects(
  transaction_id_v varchar
+  , change_user_v varchar
 ) RETURNS void 
 AS $$
 declare
@@ -1121,12 +1124,12 @@ begin
             and st_intersects(geom_polygon, st_buffer(geom_v, - tolerance))) > 0 then
           status = 'pending';
         end if;
-        insert into cadastre.cadastre_object(id, type_code, status_code, transaction_id, name_firstpart, name_lastpart, geom_polygon)
-        values(rec.id, rec.cadastre_object_type_code, status, transaction_id_v, first_part, last_part, geom_v);
-        insert into cadastre.spatial_value_area(spatial_unit_id, type_code, size)
-        values(rec.id, 'officialArea', coalesce(rec.official_area, st_area(geom_v)));
-        insert into cadastre.spatial_value_area(spatial_unit_id, type_code, size)
-        values(rec.id, 'calculatedArea', st_area(geom_v));
+        insert into cadastre.cadastre_object(id, type_code, status_code, transaction_id, name_firstpart, name_lastpart, geom_polygon, change_user)
+        values(rec.id, rec.cadastre_object_type_code, status, transaction_id_v, first_part, last_part, geom_v, change_user_v);
+        insert into cadastre.spatial_value_area(spatial_unit_id, type_code, size, change_user)
+        values(rec.id, 'officialArea', coalesce(rec.official_area, st_area(geom_v)), change_user_v);
+        insert into cadastre.spatial_value_area(spatial_unit_id, type_code, size, change_user)
+        values(rec.id, 'calculatedArea', st_area(geom_v), change_user_v);
       else
         status = 'pending'; 
       end if;
@@ -1134,31 +1137,38 @@ begin
         transaction_has_pending = true;
         survey_point_counter = (select count(1) + 1 from cadastre.survey_point where transaction_id = transaction_id_v);
         for rec2 in select distinct geom from st_dumppoints(geom_v) loop
-          insert into cadastre.survey_point(transaction_id, id, geom, original_geom)
-          values(transaction_id_v, survey_point_counter::varchar, rec2.geom, rec2.geom);
+          insert into cadastre.survey_point(transaction_id, id, geom, original_geom, change_user)
+          values(transaction_id_v, survey_point_counter::varchar, rec2.geom, rec2.geom, change_user_v);
           survey_point_counter = survey_point_counter + 1;
         end loop;
       end if;
     end loop;
     if not transaction_has_pending then
-      update transaction.transaction set status_code = 'approved' where id = transaction_id_v;
+      update transaction.transaction set status_code = 'approved', change_user = change_user_v where id = transaction_id_v;
     end if;
     delete from bulk_operation.spatial_unit_temporary where transaction_id = transaction_id_v;
 end;
 $$ LANGUAGE plpgsql;
 COMMENT ON FUNCTION bulk_operation.move_cadastre_objects(
  transaction_id_v varchar
+  , change_user_v varchar
 ) IS 'This function will move the cadastre objects from the bulk operation schema to the cadastre schema.';
     
 -- Function bulk_operation.move_other_objects --
 CREATE OR REPLACE FUNCTION bulk_operation.move_other_objects(
  transaction_id_v varchar
+  , change_user_v varchar
 ) RETURNS void 
 AS $$
 declare
   other_object_type varchar;
+  level_id_v varchar;
   geometry_type varchar;
+  query_name_v varchar;
+  query_sql_template varchar;
 begin
+  query_sql_template = 'select id, label, st_asewkb(geom) as the_geom from cadastre.spatial_unit 
+where level_id = ''level_id_v'' and ST_Intersects(geom, ST_SetSRID(ST_MakeBox3D(ST_Point(#{minx}, #{miny}),ST_Point(#{maxx}, #{maxy})), #{srid}))';
   other_object_type = (select type_code 
     from bulk_operation.spatial_unit_temporary 
     where transaction_id = transaction_id_v limit 1);
@@ -1170,21 +1180,53 @@ begin
     insert into cadastre.structure_type(code, display_value, status)
     values(geometry_type, geometry_type, 'c');
   end if;
-  if (select count(*) from cadastre.level where name = other_object_type)=0 then
+  level_id_v = (select id from cadastre.level where name = other_object_type or id = lower(other_object_type));
+  if level_id_v is null then
+    level_id_v = lower(other_object_type);
     insert into cadastre.level(id, type_code, name, structure_code) 
-    values(other_object_type, 'geographicLocator', other_object_type, geometry_type);
+    values(level_id_v, 'geographicLocator', other_object_type, geometry_type);
+    if (select count(*) from system.config_map_layer where name = level_id_v) = 0 then
+      -- A map layer is added here. For the symbology an sld file already predefined in gis component must be used.
+      -- The sld file must be named after the geometry type + the word generic. 
+      query_name_v = 'SpatialResult.get' || level_id_v;
+      if (select count(*) from system.query where name = query_name_v) = 0 then
+        -- A query is added here
+        insert into system.query(name, sql) values(query_name_v, replace(query_sql_template, 'level_id_v', level_id_v));
+      end if;
+      insert into system.config_map_layer(name, title, type_code, active, visible_in_start, item_order, style, pojo_structure, pojo_query_name, added_from_bulk_operation) 
+      values(level_id_v, other_object_type, 'pojo', true, true, 1, 'generic-' || geometry_type || '.xml', 'theGeom:Polygon,label:""', query_name_v, true);
+    end if;
   end if;
-  insert into cadastre.spatial_unit(id, label, level_id, geom, transaction_id)
-  select id, label, type_code, geom, transaction_id
+  insert into cadastre.spatial_unit(id, label, level_id, geom, transaction_id, change_user)
+  select id, label, level_id_v, geom, transaction_id, change_user_v
   from bulk_operation.spatial_unit_temporary where transaction_id = transaction_id_v;
-  update transaction.transaction set status_code = 'approved' where id = transaction_id_v;
+  update transaction.transaction set status_code = 'approved', change_user = change_user_v where id = transaction_id_v;
   delete from bulk_operation.spatial_unit_temporary where transaction_id = transaction_id_v;
 end;
 $$ LANGUAGE plpgsql;
 COMMENT ON FUNCTION bulk_operation.move_other_objects(
  transaction_id_v varchar
+  , change_user_v varchar
 ) IS 'This function is used to move other kinds of spatial objects except the cadastre objects. <br/>
 The function will add a new level if need together with a new structure type if it is not found.';
+    
+-- Function bulk_operation.clean_after_rollback --
+CREATE OR REPLACE FUNCTION bulk_operation.clean_after_rollback(
+
+) RETURNS void 
+AS $$
+declare
+  rec record;
+begin
+  for rec in select id from cadastre.level where id not in (select level_id from cadastre.spatial_unit) loop
+    delete from cadastre.level where id = rec.id;
+    delete from system.config_map_layer where added_from_bulk_operation and name = rec.id;
+  end loop;
+end;
+$$ LANGUAGE plpgsql;
+COMMENT ON FUNCTION bulk_operation.clean_after_rollback(
+
+) IS 'This function is executed to run clean up tasks after the transaction of bulk operation is rolledback.';
     
     
 select clean_db('public');
@@ -5265,6 +5307,7 @@ CREATE TABLE system.config_map_layer(
     shape_location varchar(500),
     security_user varchar(30),
     security_password varchar(30),
+    added_from_bulk_operation bool NOT NULL DEFAULT (false),
 
     -- Internal constraints
     
