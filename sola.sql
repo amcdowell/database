@@ -526,6 +526,345 @@ COMMENT ON FUNCTION administrative.get_parcel_ownernames(
  baunit_id  varchar
 ) IS '';
     
+-- Function administrative.getsysregmanagement --
+CREATE OR REPLACE FUNCTION administrative.getsysregmanagement(
+ fromdate varchar
+  , todate varchar
+  , namelastpart varchar
+) RETURNS SETOF record 
+AS $$
+DECLARE 
+
+       counter  integer:=0 ;
+       descr    varchar; 
+       
+       rec     record;
+       sqlSt varchar;
+       managementFound boolean;
+       recToReturn record;
+    
+BEGIN  
+    
+    sqlSt:= '';
+    
+    sqlSt:= 'SELECT  
+		    count (distinct(aa.id)) counter,
+		    get_translation(''Applications::::Pratiche'', NULL::character varying) descr,
+		    1 as order
+		    FROM  application.application aa,
+			  application.service s
+		    WHERE s.application_id = aa.id
+		    AND   s.request_type_code::text = ''systematicRegn''::text
+		    AND  (
+		          (aa.lodging_datetime  between to_date('''|| fromDate || ''',''yyyy-mm-dd'')  and to_date('''|| toDate || ''',''yyyy-mm-dd''))
+		           or
+		          (aa.change_time  between to_date('''|| fromDate || ''',''yyyy-mm-dd'')  and to_date('''|| toDate || ''',''yyyy-mm-dd''))
+		          )
+             UNION
+		     select count (distinct(aa.id)) counter,
+		     get_translation(''Applications with spatial object::::Pratiche con particelle'', NULL::character varying) descr,
+		     2 as order
+		from application.application aa, 
+		     administrative.ba_unit_contains_spatial_unit su, 
+		     application.application_property ap,
+		     application.service s
+		 WHERE ap.ba_unit_id::text = su.ba_unit_id::text 
+		 AND   aa.id::text = ap.application_id::text
+		 AND   s.request_type_code::text = ''systematicRegn''::text
+		 AND s.application_id = aa.id
+		 AND   aa.change_time  between to_date('''|| fromDate || ''',''yyyy-mm-dd'')  and to_date('''|| toDate || ''',''yyyy-mm-dd'')
+	     UNION
+		select count (distinct(aa.id)) counter,
+		 get_translation(''Applications completed::::Pratiche completate'', NULL::character varying) descr,
+		 3 as order
+		 from application.application aa, application.service s where s.request_type_code::text = ''systematicRegn''::text
+		 AND aa.status_code=''completed''
+		 AND s.application_id = aa.id
+		 AND   aa.change_time  between to_date('''|| fromDate || ''',''yyyy-mm-dd'')  and to_date('''|| toDate || ''',''yyyy-mm-dd'')
+             UNION
+		select count(aa.id) counter,
+		get_translation(''Applications approved::::Pratiche approvate'', NULL::character varying) descr,
+		4 as order
+		 from application.application  aa, application.service s where s.request_type_code::text = ''systematicRegn''::text
+		 AND aa.status_code=''approved'' 
+		 AND s.application_id = aa.id
+		 AND   aa.change_time  between to_date('''|| fromDate || ''',''yyyy-mm-dd'')  and to_date('''|| toDate || ''',''yyyy-mm-dd'')
+	     UNION
+		select count(aa.id) counter,
+		 get_translation(''Application archived::::Pratiche archiviate'', NULL::character varying) descr,
+		 5 as order
+		 from application.application  aa, application.service s where s.request_type_code::text = ''systematicRegn''::text
+		 AND   aa.change_time  between to_date('''|| fromDate || ''',''yyyy-mm-dd'')  and to_date('''|| toDate || ''',''yyyy-mm-dd'')
+		 AND aa.status_code=''archived'' 
+		 AND s.application_id = aa.id 
+            UNION
+		 select count(co.id) counter,
+		 get_translation(''Parcels in public notification::::Particelle in pubblica notifica'', NULL::character varying) descr,
+		 6 as order
+		 from cadastre.cadastre_object co, application.service s where s.request_type_code::text = ''systematicRegn''::text
+                 AND co.name_lastpart in (select ss.reference_nr 
+                                                        from   source.source ss 
+                                                        where  ss.recordation  between to_date('''|| fromDate || ''',''yyyy-mm-dd'')  and to_date('''|| toDate || ''',''yyyy-mm-dd'')
+                                                        AND ss.expiration_date > now())
+                                                        AND   co.name_lastpart='''||namelastpart||''' 
+            UNION
+		select count(co.id) counter,
+		get_translation(''Parcels with public notification completed::::Particelle con pubblica notifica completata'', NULL::character varying) descr,
+		7 as order
+		 from cadastre.cadastre_object co, application.service s, application.application aa where s.request_type_code::text = ''systematicRegn''::text
+					      AND s.application_id = aa.id
+					      AND  co.name_lastpart in (select ss.reference_nr 
+									from   source.source ss 
+									where  ss.recordation  between to_date('''|| fromDate || ''',''yyyy-mm-dd'')  and to_date('''|| toDate || ''',''yyyy-mm-dd'')
+                                                                        AND ss.expiration_date <= now())
+                                              AND   co.name_lastpart='''||namelastpart||'''
+
+	     UNION								
+               select count(distinct(co.id)) counter,
+               get_translation(''Parcels in approved applications::::Particelle in pratiche approvate'', NULL::character varying) descr,
+	       8 as order
+		from  cadastre.cadastre_object co,
+                                   application.application  aa, 
+                                   administrative.ba_unit_contains_spatial_unit su, 
+                                   application.application_property ap, application.service s 
+              where s.request_type_code::text = ''systematicRegn''::text
+                                   AND s.application_id = aa.id
+		 AND   aa.change_time  between to_date('''|| fromDate || ''',''yyyy-mm-dd'')  and to_date('''|| toDate || ''',''yyyy-mm-dd'')
+		 AND ap.ba_unit_id::text = su.ba_unit_id::text 
+				     AND   aa.id::text = ap.application_id::text
+                             AND   co.id = su.spatial_unit_id
+                             AND   aa.status_code::text = ''approved'' 
+                             AND   co.name_lastpart='''||namelastpart||'''
+
+              UNION
+		select coalesce(sum(sa.size), 0) counter,
+		get_translation(''Area size of parcels in approved applications (m2)::::Area totale delle particelle in pratiche approvate (m2)'', NULL::character varying) descr,
+	        9 as order
+		from  cadastre.cadastre_object co,
+                                   application.application  aa, 
+                                   administrative.ba_unit_contains_spatial_unit su, 
+                                   application.application_property ap,
+                                   cadastre.spatial_value_area sa, application.service s 
+                where s.request_type_code::text = ''systematicRegn''::text
+		 AND s.application_id = aa.id
+		 AND   aa.change_time  between to_date('''|| fromDate || ''',''yyyy-mm-dd'')  and to_date('''|| toDate || ''',''yyyy-mm-dd'')
+		 AND  ap.ba_unit_id::text = su.ba_unit_id::text 
+                 AND   aa.id::text = ap.application_id::text
+                 AND   co.id = su.spatial_unit_id
+                 AND   sa.spatial_unit_id = su.spatial_unit_id
+                 AND   aa.status_code::text = ''approved'' 
+                 AND   co.name_lastpart='''||namelastpart||'''
+
+         UNION        
+                select count(distinct(co.id)) counter,
+                get_translation(''Residential parcels in approved applications::::Particelle residenziali in pratiche approvate'', NULL::character varying) descr,
+	        10 as order
+		from  cadastre.cadastre_object co,
+                                   application.application  aa, 
+                                   administrative.ba_unit_contains_spatial_unit su, 
+                                   application.application_property ap, application.service s 
+               where s.request_type_code::text = ''systematicRegn''::text
+               AND s.application_id = aa.id
+               AND   aa.change_time  between to_date('''|| fromDate || ''',''yyyy-mm-dd'')  and to_date('''|| toDate || ''',''yyyy-mm-dd'')
+	       AND  ap.ba_unit_id::text = su.ba_unit_id::text 
+               AND   aa.id::text = ap.application_id::text
+               AND   co.id = su.spatial_unit_id
+               AND   aa.status_code::text = ''approved''
+               AND   co.land_use_code=''residential'' 
+               AND   co.name_lastpart='''||namelastpart||'''
+          UNION
+              select coalesce(sum(sa.size), 0) counter,
+              get_translation(''Area size of Residential parcels in approved applications (m2)::::Area totale delle particelle residenziali in pratiche approvate (m2)'', NULL::character varying) descr,
+	      11 as order
+		from  cadastre.cadastre_object co,
+                                   application.application  aa, 
+                                   administrative.ba_unit_contains_spatial_unit su, 
+                                   application.application_property ap,
+                                   cadastre.spatial_value_area sa, application.service s 
+              where s.request_type_code::text = ''systematicRegn''::text
+		 AND s.application_id = aa.id
+		 AND   aa.change_time  between to_date('''|| fromDate || ''',''yyyy-mm-dd'')  and to_date('''|| toDate || ''',''yyyy-mm-dd'')
+			AND  ap.ba_unit_id::text = su.ba_unit_id::text 
+                 AND   aa.id::text = ap.application_id::text
+                 AND   co.id = su.spatial_unit_id
+                 AND   sa.spatial_unit_id = su.spatial_unit_id
+                 AND   aa.status_code::text = ''approved''
+                 AND   co.land_use_code=''residential'' 
+                 AND   co.name_lastpart='''||namelastpart||'''
+           UNION      
+             select count(distinct(co.id)) counter,
+             get_translation(''Commercial parcels in approved applications::::Particelle commerciali in pratiche approvate'', NULL::character varying) descr,
+	     12 as order
+		from  cadastre.cadastre_object co,
+                                   application.application  aa, 
+                                   administrative.ba_unit_contains_spatial_unit su, 
+                                   application.application_property ap, application.service s 
+             where s.request_type_code::text = ''systematicRegn''::text
+		 AND s.application_id = aa.id 
+		 AND   aa.change_time  between to_date('''|| fromDate || ''',''yyyy-mm-dd'')  and to_date('''|| toDate || ''',''yyyy-mm-dd'')
+	         AND  ap.ba_unit_id::text = su.ba_unit_id::text 
+                 AND   aa.id::text = ap.application_id::text
+                 AND   co.id = su.spatial_unit_id
+                 AND   aa.status_code::text = ''approved''
+                 AND   co.land_use_code=''commercial''
+                 AND   co.name_lastpart='''||namelastpart||'''
+           UNION
+             select coalesce(sum(sa.size), 0) counter,
+             get_translation(''Area size of Commercial parcels in approved applications (m2)::::Area totale delle particelle commerciali in pratiche approvate (m2)'', NULL::character varying) descr,
+	     13 as order
+		from  cadastre.cadastre_object co,
+                                   application.application  aa, 
+                                   administrative.ba_unit_contains_spatial_unit su, 
+                                   application.application_property ap,
+                                   cadastre.spatial_value_area sa, application.service s 
+             where s.request_type_code::text = ''systematicRegn''::text
+		     AND s.application_id = aa.id
+		     AND   aa.change_time  between to_date('''|| fromDate || ''',''yyyy-mm-dd'')  and to_date('''|| toDate || ''',''yyyy-mm-dd'')
+		     AND  ap.ba_unit_id::text = su.ba_unit_id::text 
+		     AND   aa.id::text = ap.application_id::text
+		     AND   co.id = su.spatial_unit_id
+		     AND   sa.spatial_unit_id = su.spatial_unit_id
+		     AND   aa.status_code::text = ''approved''
+                     AND   co.land_use_code=''commercial''
+                     AND   co.name_lastpart='''||namelastpart||''' 
+             UNION       
+		select count(distinct(co.id)) counter,
+                get_translation(''Industrial parcels in approved applications::::Particelle industriali in pratiche approvate'', NULL::character varying) descr,
+	        14 as order
+		from  cadastre.cadastre_object co,
+                                   application.application  aa, 
+                                   administrative.ba_unit_contains_spatial_unit su, 
+                                   application.application_property ap, application.service s 
+                where s.request_type_code::text = ''systematicRegn''::text
+			AND s.application_id = aa.id
+			AND   aa.change_time  between to_date('''|| fromDate || ''',''yyyy-mm-dd'')  and to_date('''|| toDate || ''',''yyyy-mm-dd'')
+			AND   ap.ba_unit_id::text = su.ba_unit_id::text 
+                        AND   aa.id::text = ap.application_id::text
+                        AND   co.id = su.spatial_unit_id
+                        AND   aa.status_code::text = ''approved''
+                        AND   co.land_use_code=''industrial''
+                        AND   co.name_lastpart='''||namelastpart||''' 
+
+              UNION
+		select coalesce(sum(sa.size), 0) counter,
+                get_translation(''Area size of Industrial parcels in approved applications (m2)::::Area totale delle particelle industriali in pratiche approvate (m2)'', NULL::character varying) descr,
+	        15 as order
+		from  cadastre.cadastre_object co,
+                                   application.application  aa, 
+                                   administrative.ba_unit_contains_spatial_unit su, 
+                                   application.application_property ap,
+                                   cadastre.spatial_value_area sa, application.service s 
+                where s.request_type_code::text = ''systematicRegn''::text
+			AND s.application_id = aa.id
+			AND   aa.change_time  between to_date('''|| fromDate || ''',''yyyy-mm-dd'')  and to_date('''|| toDate || ''',''yyyy-mm-dd'')
+			AND   ap.ba_unit_id::text = su.ba_unit_id::text 
+                        AND   aa.id::text = ap.application_id::text
+                        AND   co.id = su.spatial_unit_id
+                        AND   sa.spatial_unit_id = su.spatial_unit_id
+                        AND   aa.status_code::text = ''approved''
+                        AND   co.land_use_code=''industrial'' 
+                        AND   co.name_lastpart='''||namelastpart||'''
+         UNION
+		select count(distinct(co.id)) counter,
+                get_translation(''Agricultural parcels in approved applications (m2)::::Particelle agricole in pratiche approvate (m2)'', NULL::character varying) descr,
+	        16 as order
+		from  cadastre.cadastre_object co,
+                                   application.application  aa, 
+                                   administrative.ba_unit_contains_spatial_unit su, 
+                                   application.application_property ap, application.service s 
+                where s.request_type_code::text = ''systematicRegn''::text
+			AND s.application_id = aa.id
+			AND   aa.change_time  between to_date('''|| fromDate || ''',''yyyy-mm-dd'')  and to_date('''|| toDate || ''',''yyyy-mm-dd'')
+			AND   ap.ba_unit_id::text = su.ba_unit_id::text 
+                        AND   aa.id::text = ap.application_id::text
+                        AND   co.id = su.spatial_unit_id
+                        AND   aa.status_code::text = ''approved''
+                        AND   co.land_use_code=''agricultural''
+                        AND   co.name_lastpart='''||namelastpart||'''
+          UNION
+		select coalesce(sum(sa.size), 0) counter,
+                get_translation(''Area size of Agricultural parcels in approved applications (m2)::::Area totale delle particelle agricole in pratiche approvate (m2)'', NULL::character varying) descr,
+	        17 as order
+		from  cadastre.cadastre_object co,
+                                   application.application  aa, 
+                                   administrative.ba_unit_contains_spatial_unit su, 
+                                   application.application_property ap,
+                                   cadastre.spatial_value_area sa, application.service s 
+                where s.request_type_code::text = ''systematicRegn''::text
+			AND   s.application_id = aa.id
+			AND   aa.change_time  between to_date('''|| fromDate || ''',''yyyy-mm-dd'')  and to_date('''|| toDate || ''',''yyyy-mm-dd'')
+			AND   ap.ba_unit_id::text = su.ba_unit_id::text 
+                        AND   aa.id::text = ap.application_id::text
+                        AND   co.id = su.spatial_unit_id
+                        AND   sa.spatial_unit_id = su.spatial_unit_id
+                        AND   aa.status_code::text = ''approved''
+                        AND   co.land_use_code=''agricultural''
+                        AND   co.name_lastpart='''||namelastpart||'''
+          UNION
+		select count(distinct(ss.id)) counter,
+		get_translation(''Objections received::::Obiezioni ricevute'', NULL::character varying) descr,
+	        18 as order
+		from   source.source ss,
+                        application.application_uses_source aus,
+                        application.application  aa, application.service s 
+                 where s.request_type_code::text = ''systematicRegn''::text
+			AND s.application_id = aa.id
+			AND   ss.recordation  between to_date('''|| fromDate || ''',''yyyy-mm-dd'')  and to_date('''|| toDate || ''',''yyyy-mm-dd'')
+			AND   aus.source_id=ss.id
+			AND   aus.application_id=aa.id
+			AND   ss.type_code=''objection''
+	UNION
+		select count(distinct(ss.id)) counter,
+		get_translation(''Objections solved::::Obiezioni risolte'', NULL::character varying) descr,
+	        19 as order
+		from   source.source ss,
+                        application.application_uses_source aus,
+                        application.application  aa, application.service s 
+                 where s.request_type_code::text = ''systematicRegn''::text
+			AND s.application_id = aa.id
+			AND   ss.recordation  between to_date('''|| fromDate || ''',''yyyy-mm-dd'')  and to_date('''|| toDate || ''',''yyyy-mm-dd'')
+			AND   aus.source_id=ss.id
+			AND   aus.application_id=aa.id
+			AND   ss.type_code=''objectionSolved''		 
+
+   order by 3
+';
+
+
+
+
+    --raise exception '%',sqlSt;
+    managementFound = false;
+
+    -- Loop through results
+    
+    FOR rec in EXECUTE sqlSt loop
+
+      counter:= rec.counter;
+      descr:=   rec.descr;
+           
+  
+	  
+	  select into recToReturn
+	     counter::integer,
+	     descr::varchar;
+	     
+          return next recToReturn;
+          managementFound = true;
+    end loop;
+   
+    if (not managementFound) then
+        RAISE EXCEPTION 'no_management_found';
+    end if;
+    return;
+END;
+$$ LANGUAGE plpgsql;
+COMMENT ON FUNCTION administrative.getsysregmanagement(
+ fromdate varchar
+  , todate varchar
+  , namelastpart varchar
+) IS '';
+    
 -- Function cadastre.cadastre_object_name_is_valid --
 CREATE OR REPLACE FUNCTION cadastre.cadastre_object_name_is_valid(
  name_firstpart varchar
@@ -1556,8 +1895,10 @@ insert into source.administrative_source_type(code, display_value, status, descr
 insert into source.administrative_source_type(code, display_value, status, description) values('waiver', 'Waiver to Caveat or other requirement', 'c', 'Extension to LADM');
 insert into source.administrative_source_type(code, display_value, status, description) values('idVerification', 'Form of Identification including Personal ID', 'c', 'Extension to LADM');
 insert into source.administrative_source_type(code, display_value, status, description) values('caveat', 'Caveat::::', 'c', 'Extension to LADM');
-insert into source.administrative_source_type(code, display_value, status, description) values('publicNotification', 'Public Notification for Systematic Registration::::ITALIANO', 'c', 'Extension to LADM');
-insert into source.administrative_source_type(code, display_value, status, description) values('systematicRegn', 'Systematic Registration Application::::ITALIANO', 'c', 'Extension to LADM');
+insert into source.administrative_source_type(code, display_value, status, description) values('publicNotification', 'Public Notification for Systematic Registration::::Pubblica notifica per registrazione sistematica', 'c', 'Extension to LADM');
+insert into source.administrative_source_type(code, display_value, status, description) values('systematicRegn', 'Systematic Registration Application::::Registrazione sistematica', 'c', 'Extension to LADM');
+insert into source.administrative_source_type(code, display_value, status, description) values('objection', 'Objection supporting document::::Obiezione', 'c', 'Extension to LADM');
+insert into source.administrative_source_type(code, display_value, status) values('objectionSolved', 'Objection Solved supporting document::::ITALIANO', 'c');
 
 
 
