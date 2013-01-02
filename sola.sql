@@ -1557,7 +1557,8 @@ AS $$
 declare
   rec record;
 begin
-  for rec in select id from cadastre.level where id not in (select level_id from cadastre.spatial_unit) loop
+  for rec in select id from cadastre.level 
+    where id != 'cadastreObject' and id not in (select level_id from cadastre.spatial_unit) loop
     delete from cadastre.level where id = rec.id;
     delete from system.config_map_layer where added_from_bulk_operation and name = rec.id;
   end loop;
