@@ -553,7 +553,7 @@ BEGIN
 		    count (distinct(aa.id)) counter,
 		    get_translation(''Applications::::Pratiche'', NULL::character varying) descr,
 		    1 as order,
-		    get_translation(''Totals on all systematic registrations::::Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
+		    get_translation(''A. Totals on all systematic registrations::::A. Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
                     FROM  application.application aa,
 			  application.service s
 		    WHERE s.application_id = aa.id
@@ -567,7 +567,7 @@ BEGIN
 		     select count (distinct(aa.id)) counter,
 		     get_translation(''Applications with spatial object::::Pratiche con particelle'', NULL::character varying) descr,
 		     2 as order,
-		     get_translation(''Totals on all systematic registrations::::Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
+		     get_translation(''A. Totals on all systematic registrations::::A. Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
                  from application.application aa, 
 		     administrative.ba_unit_contains_spatial_unit su, 
 		     application.application_property ap,
@@ -581,7 +581,7 @@ BEGIN
 		select count (distinct(aa.id)) counter,
 		 get_translation(''Applications completed::::Pratiche completate'', NULL::character varying) descr,
 		 3 as order,
-		    get_translation(''Totals on all systematic registrations::::Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
+		    get_translation(''A. Totals on all systematic registrations::::A. Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
                     from application.application aa, application.service s where s.request_type_code::text = ''systematicRegn''::text
 		 AND s.status_code=''completed''
 		 AND s.application_id = aa.id
@@ -590,7 +590,7 @@ BEGIN
 		select count(aa.id) counter,
 		get_translation(''Applications approved::::Pratiche approvate'', NULL::character varying) descr,
 		4 as order,
-		 get_translation(''Totals on all systematic registrations::::Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
+		 get_translation(''A. Totals on all systematic registrations::::A. Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
                     from application.application  aa, application.service s where s.request_type_code::text = ''systematicRegn''::text
 		 AND aa.status_code=''approved'' 
 		 AND s.application_id = aa.id
@@ -599,7 +599,7 @@ BEGIN
 		select count(aa.id) counter,
 		 get_translation(''Application archived::::Pratiche archiviate'', NULL::character varying) descr,
 		 5 as order,
-		    get_translation(''Totals on all systematic registrations::::Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
+		    get_translation(''A. Totals on all systematic registrations::::A. Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
                     from application.application  aa, application.service s where s.request_type_code::text = ''systematicRegn''::text
 		 AND   aa.change_time  between to_date('''|| fromDate || ''',''yyyy-mm-dd'')  and to_date('''|| toDate || ''',''yyyy-mm-dd'')
 		 AND aa.status_code=''archived'' 
@@ -609,7 +609,7 @@ BEGIN
 		select count(distinct(ss.id)) counter,
 		get_translation(''Objections received::::Obiezioni ricevute'', NULL::character varying) descr,
 	        6 as order,
-		get_translation(''Totals on all systematic registrations::::Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
+		get_translation(''A. Totals on all systematic registrations::::A. Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
                 from   source.source ss,
                         application.application_uses_source aus,
                         application.application  aa, application.service s 
@@ -623,7 +623,7 @@ BEGIN
 		select count(distinct(ss.id)) counter,
 		get_translation(''Objections solved::::Obiezioni risolte'', NULL::character varying) descr,
 	        7 as order,
-	        get_translation(''Totals on all systematic registrations::::Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
+	        get_translation(''A. Totals on all systematic registrations::::A. Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
                 from   source.source ss,
                         application.application_uses_source aus,
                         application.application  aa, application.service s 
@@ -638,7 +638,7 @@ BEGIN
 		 select count(co.id) counter,
 		 get_translation(''Parcels in public notification::::Particelle in pubblica notifica'', NULL::character varying) descr,
 		 8 as order,
-		 get_translation(''Totals on all systematic registrations::::Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
+		 get_translation(''A. Totals on all systematic registrations::::A. Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
                     from cadastre.cadastre_object co, application.service s where s.request_type_code::text = ''systematicRegn''::text
                  AND co.name_lastpart in (select ss.reference_nr 
                                                         from   source.source ss 
@@ -649,7 +649,7 @@ BEGIN
 		select count(co.id) counter,
 		get_translation(''Parcels with public notification completed::::Particelle con pubblica notifica completata'', NULL::character varying) descr,
 		9 as order,
-		 get_translation(''Totals on all systematic registrations::::Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
+		 get_translation(''A. Totals on all systematic registrations::::A. Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
                     from cadastre.cadastre_object co, application.service s, application.application aa where s.request_type_code::text = ''systematicRegn''::text
 					      AND s.application_id = aa.id
 					      AND  co.name_lastpart in (select ss.reference_nr 
@@ -662,7 +662,7 @@ BEGIN
                select count(distinct(co.id)) counter,
                get_translation(''Parcels in approved applications::::Particelle in pratiche approvate'', NULL::character varying) descr,
 	       10 as order,
-		get_translation(''Totals on all systematic registrations::::Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
+		get_translation(''A. Totals on all systematic registrations::::A. Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
                     from  cadastre.cadastre_object co,
                                    application.application  aa, 
                                    administrative.ba_unit_contains_spatial_unit su, 
@@ -680,7 +680,7 @@ BEGIN
 		select coalesce(sum(sa.size), 0) counter,
 		get_translation(''Area size of parcels in approved applications (m2)::::Area totale delle particelle in pratiche approvate (m2)'', NULL::character varying) descr,
 	        11 as order,
-	        get_translation(''Totals on all systematic registrations::::Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
+	        get_translation(''A. Totals on all systematic registrations::::A. Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
                 from  cadastre.cadastre_object co,
                                    application.application  aa, 
                                    administrative.ba_unit_contains_spatial_unit su, 
@@ -700,7 +700,7 @@ BEGIN
                 select count(distinct(co.id)) counter,
                 get_translation(''Residential parcels in approved applications::::Particelle residenziali in pratiche approvate'', NULL::character varying) descr,
 	        12 as order,
-		get_translation(''Totals on all systematic registrations::::Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
+		get_translation(''A. Totals on all systematic registrations::::A. Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
                     from  cadastre.cadastre_object co,
                                    application.application  aa, 
                                    administrative.ba_unit_contains_spatial_unit su, 
@@ -718,7 +718,7 @@ BEGIN
               select coalesce(sum(sa.size), 0) counter,
               get_translation(''Area size of Residential parcels in approved applications (m2)::::Area totale delle particelle residenziali in pratiche approvate (m2)'', NULL::character varying) descr,
 	      13 as order,
-		get_translation(''Totals on all systematic registrations::::Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
+		get_translation(''A. Totals on all systematic registrations::::A. Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
                     from  cadastre.cadastre_object co,
                                    application.application  aa, 
                                    administrative.ba_unit_contains_spatial_unit su, 
@@ -738,7 +738,7 @@ BEGIN
              select count(distinct(co.id)) counter,
              get_translation(''Commercial parcels in approved applications::::Particelle commerciali in pratiche approvate'', NULL::character varying) descr,
 	     14 as order,
-		get_translation(''Totals on all systematic registrations::::Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
+		get_translation(''A. Totals on all systematic registrations::::A. Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
                     from  cadastre.cadastre_object co,
                                    application.application  aa, 
                                    administrative.ba_unit_contains_spatial_unit su, 
@@ -756,7 +756,7 @@ BEGIN
              select coalesce(sum(sa.size), 0) counter,
              get_translation(''Area size of Commercial parcels in approved applications (m2)::::Area totale delle particelle commerciali in pratiche approvate (m2)'', NULL::character varying) descr,
 	     15 as order,
-		get_translation(''Totals on all systematic registrations::::Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
+		get_translation(''A. Totals on all systematic registrations::::A. Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
                     from  cadastre.cadastre_object co,
                                    application.application  aa, 
                                    administrative.ba_unit_contains_spatial_unit su, 
@@ -776,7 +776,7 @@ BEGIN
 		select count(distinct(co.id)) counter,
                 get_translation(''Industrial parcels in approved applications::::Particelle industriali in pratiche approvate'', NULL::character varying) descr,
 	        16 as order,
-		get_translation(''Totals on all systematic registrations::::Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
+		get_translation(''A. Totals on all systematic registrations::::A. Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
                     from  cadastre.cadastre_object co,
                                    application.application  aa, 
                                    administrative.ba_unit_contains_spatial_unit su, 
@@ -795,7 +795,7 @@ BEGIN
 		select coalesce(sum(sa.size), 0) counter,
                 get_translation(''Area size of Industrial parcels in approved applications (m2)::::Area totale delle particelle industriali in pratiche approvate (m2)'', NULL::character varying) descr,
 	        17 as order,
-		get_translation(''Totals on all systematic registrations::::Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
+		get_translation(''A. Totals on all systematic registrations::::A. Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
                     from  cadastre.cadastre_object co,
                                    application.application  aa, 
                                    administrative.ba_unit_contains_spatial_unit su, 
@@ -815,7 +815,7 @@ BEGIN
 		select count(distinct(co.id)) counter,
                 get_translation(''Agricultural parcels in approved applications::::Particelle agricole in pratiche approvate'', NULL::character varying) descr,
 	        18 as order,
-		get_translation(''Totals on all systematic registrations::::Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
+		get_translation(''A. Totals on all systematic registrations::::A. Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
                     from  cadastre.cadastre_object co,
                                    application.application  aa, 
                                    administrative.ba_unit_contains_spatial_unit su, 
@@ -833,7 +833,7 @@ BEGIN
 		select coalesce(sum(sa.size), 0) counter,
                 get_translation(''Area size of Agricultural parcels in approved applications (m2)::::Area totale delle particelle agricole in pratiche approvate (m2)'', NULL::character varying) descr,
 	        19 as order,
-		get_translation(''Totals on all systematic registrations::::Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
+		get_translation(''A. Totals on all systematic registrations::::A. Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
                     from  cadastre.cadastre_object co,
                                    application.application  aa, 
                                    administrative.ba_unit_contains_spatial_unit su, 
@@ -853,7 +853,7 @@ BEGIN
                 SELECT     count(distinct(pp.id))  AS counter,
 		   get_translation(gt.display_value, NULL::character varying)|| '' owners''  descr,
 		   20 as order,
-		   get_translation(''Totals on all systematic registrations::::Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
+		   get_translation(''A. Totals on all systematic registrations::::A. Totali su tutte le registrazioni sistematiche   '', NULL::character varying) area
                     FROM party.gender_type gt, 
 		   cadastre.cadastre_object co,
 		   cadastre.spatial_value_area sa, 
@@ -1111,7 +1111,7 @@ BEGIN
 		  group by co.name_lastpart, descr 
 		 
                 
-   order by 3
+   order by 4 asc, 3
 ';
 
 
