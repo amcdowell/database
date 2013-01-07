@@ -258,17 +258,19 @@ VALUES('required-sources-are-present', 'critical', 'complete', 'service', 230);
 ------------------------------------------------------------------------------------------------
 
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES('service-has-person-verification', 'sql', 'Within the application personal identification verification should be attached.::::Non esistono dettagli identificativi registrati per la pratica',
+VALUES('service-has-person-verification', 'sql', 'Within the application for the service a personal identification verification should be attached.::::Non esistono dettagli identificativi registrati per la pratica',
  '#{id}(application.service.id) is requested');
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES('service-has-person-verification', now(), 'infinity', 
-'SELECT (case when sv.application_id is null then null else sc.id is not null end) as vl
+'SELECT (CASE 	WHEN sv.application_id is  NULL THEN NULL
+		ELSE COUNT(1) > 0
+	 END) as vl
 FROM application.service sv
   LEFT JOIN application.application_uses_source aus ON (aus.application_id = sv.application_id)
   LEFT JOIN source.source sc ON ((sc.id = aus.source_id) AND (sc.type_code = ''idVerification''))
 WHERE sv.id= #{id}
-ORDER BY sv.id
+GROUP BY sv.id
 LIMIT 1');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_service_moment, target_code, order_of_execution) 

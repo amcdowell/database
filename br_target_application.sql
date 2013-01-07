@@ -344,10 +344,15 @@ VALUES('application-verifies-identification', 'sql', 'Personal identification ve
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES('application-verifies-identification', now(), 'infinity', 
-'SELECT (COUNT(*) > 0) AS vl FROM source.source sc
-	INNER JOIN application.application_uses_source aus ON (sc.id = aus.source_id)
-WHERE aus.application_id= #{id}
-AND sc.type_code = ''idVerification''');
+'SELECT (CASE 	WHEN app.id is  NULL THEN NULL
+		ELSE COUNT(1) > 0
+	 END) as vl
+FROM application.application app
+  LEFT JOIN application.application_uses_source aus ON (aus.application_id = app.id)
+  LEFT JOIN source.source sc ON ((sc.id = aus.source_id) AND (sc.type_code = ''idVerification''))
+WHERE app.id= #{id}
+GROUP BY app.id
+LIMIT 1');
 
 
 INSERT INTO system.br_validation(br_id, target_code, target_application_moment, severity_code, order_of_execution)
