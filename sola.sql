@@ -7227,13 +7227,24 @@ CREATE VIEW administrative.sys_reg_state_land AS SELECT (pp.name::text || ' '::t
 
 -------View administrative.systematic_registration_listing ---------
 DROP VIEW IF EXISTS administrative.systematic_registration_listing CASCADE;
-CREATE VIEW administrative.systematic_registration_listing AS SELECT co.id, co.name_firstpart, co.name_lastpart, sa.size, 
-get_translation(lu.display_value, null) AS land_use_code,
-su.ba_unit_id
-   FROM cadastre.land_use_type lu,cadastre.cadastre_object co, cadastre.spatial_value_area sa, administrative.ba_unit_contains_spatial_unit su, 
-   application.application_property ap, application.application aa, application.service s
-  WHERE sa.spatial_unit_id::text = co.id::text AND sa.type_code::text = 'officialArea'::text AND su.spatial_unit_id::text = sa.spatial_unit_id::text AND ap.ba_unit_id::text = su.ba_unit_id::text AND aa.id::text = ap.application_id::text AND s.application_id::text = aa.id::text AND s.request_type_code::text = 'systematicRegn'::text AND s.status_code::text = 'completed'::text
-  AND COALESCE(co.land_use_code, 'residential'::character varying)=lu.code;
+CREATE VIEW administrative.systematic_registration_listing AS SELECT DISTINCT co.id, co.name_firstpart, co.name_lastpart, 
+ sa.size, get_translation(lu.display_value, NULL::character varying) AS land_use_code, 
+ su.ba_unit_id,
+ bu.name
+   FROM cadastre.land_use_type lu, 
+   cadastre.cadastre_object co, 
+   cadastre.spatial_value_area sa, 
+   administrative.ba_unit_contains_spatial_unit su, 
+   application.application_property ap, 
+   application.application aa, 
+   application.service s, 
+   administrative.ba_unit bu
+  WHERE sa.spatial_unit_id::text = co.id::text AND sa.type_code::text = 'officialArea'::text AND 
+  su.spatial_unit_id::text = sa.spatial_unit_id::text AND ap.ba_unit_id::text = su.ba_unit_id::text 
+  AND aa.id::text = ap.application_id::text AND s.application_id::text = aa.id::text 
+  AND s.request_type_code::text = 'systematicRegn'::text AND s.status_code::text = 'completed'::text 
+  AND COALESCE(co.land_use_code, 'residential'::character varying)::text = lu.code::text
+  AND bu.id::text = su.ba_unit_id::text;
 
 -------View administrative.sys_reg_owner_name ---------
 DROP VIEW IF EXISTS administrative.sys_reg_owner_name CASCADE;
