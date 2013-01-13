@@ -535,7 +535,7 @@ CREATE OR REPLACE FUNCTION administrative.getsysregmanagement(
 AS $$
 DECLARE 
 
-       counter    integer:=0 ;
+       counter   decimal:=0 ;
        descr    varchar; 
        area    varchar; 
 
@@ -1130,7 +1130,7 @@ BEGIN
 
 	  
 	  select into recToReturn
-	     counter::  integer,
+	     counter::  decimal,
 	     descr::varchar,
 	     area::varchar;
 	     
