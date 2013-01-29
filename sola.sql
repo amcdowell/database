@@ -6262,7 +6262,8 @@ insert into system.approle(code, display_value, status, description) values('var
 insert into system.approle(code, display_value, status, description) values('varyRight', 'Vary Right or Restriction', 'c', 'Allows to make changes for registration of a variation to a right or restriction');
 insert into system.approle(code, display_value, status, description) values('BulkApplication', 'Bulk operation application ', 'c', 'Allows usage of Bulk Application');
 insert into system.approle(code, display_value, status, description) values('sysRegnReports', 'Systematic Registration Reports', 'c', 'Allows generation of Systematic Registration Reports');
-insert into system.approle(code, display_value, status, description) values('systematicRegn', 'Systematic Registration', 'c', 'Allows access to Systematic Registration');
+insert into system.approle(code, display_value, status, description) values('systematicRegn', 'Systematic Registration', 'c', 'Allows to access Systematic Registration Service');
+insert into system.approle(code, display_value, status, description) values('lodgeObjection', 'Objection lodgment', 'c', 'Allows to access Lodge Objection Service');
 
 
 
@@ -6293,6 +6294,7 @@ insert into system.approle_appgroup(approle_code, appgroup_id) values('ApplnAssi
 insert into system.approle_appgroup(approle_code, appgroup_id) values('ApplnUnassignOthers', 'super-group-id');
 insert into system.approle_appgroup(approle_code, appgroup_id) values('BulkApplication', 'super-group-id');
 insert into system.approle_appgroup(approle_code, appgroup_id) values('systematicRegn', 'super-group-id');
+insert into system.approle_appgroup(approle_code, appgroup_id) values('lodgeObjection', 'super-group-id');
 
 
 
