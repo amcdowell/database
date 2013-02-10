@@ -2185,6 +2185,9 @@ insert into source.administrative_source_type(code, display_value, status, descr
 insert into source.administrative_source_type(code, display_value, status, description) values('systematicRegn', 'Systematic Registration Application::::Registrazione sistematica', 'c', 'Extension to LADM');
 insert into source.administrative_source_type(code, display_value, status, description) values('objection', 'Objection supporting document::::Obiezione', 'c', 'Extension to LADM');
 insert into source.administrative_source_type(code, display_value, status) values('objectionSolved', 'Objection Solved supporting document::::ITALIANO', 'c');
+insert into source.administrative_source_type(code, display_value, status) values('pdf', 'Pdf Scanned Document', 'c');
+insert into source.administrative_source_type(code, display_value, status) values('tiff', 'Tiff Scanned Document', 'c');
+insert into source.administrative_source_type(code, display_value, status) values('jpg', 'Jpg Scanned Document', 'c');
 
 
 
