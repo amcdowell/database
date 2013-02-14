@@ -2183,11 +2183,11 @@ insert into source.administrative_source_type(code, display_value, status, descr
 insert into source.administrative_source_type(code, display_value, status, description) values('caveat', 'Caveat::::', 'c', 'Extension to LADM');
 insert into source.administrative_source_type(code, display_value, status, description) values('publicNotification', 'Public Notification for Systematic Registration::::Pubblica notifica per registrazione sistematica', 'c', 'Extension to LADM');
 insert into source.administrative_source_type(code, display_value, status, description) values('systematicRegn', 'Systematic Registration Application::::Registrazione sistematica', 'c', 'Extension to LADM');
-insert into source.administrative_source_type(code, display_value, status, description) values('objection', 'Objection supporting document::::Obiezione', 'c', 'Extension to LADM');
-insert into source.administrative_source_type(code, display_value, status) values('objectionSolved', 'Objection Solved supporting document::::ITALIANO', 'c');
-insert into source.administrative_source_type(code, display_value, status) values('pdf', 'Pdf Scanned Document', 'c');
-insert into source.administrative_source_type(code, display_value, status) values('tiff', 'Tiff Scanned Document', 'c');
-insert into source.administrative_source_type(code, display_value, status) values('jpg', 'Jpg Scanned Document', 'c');
+insert into source.administrative_source_type(code, display_value, status, description) values('objection', 'Objection  document::::Obiezione', 'c', 'Extension to LADM');
+insert into source.administrative_source_type(code, display_value, status) values('pdf', 'Pdf Scanned Document', 'x');
+insert into source.administrative_source_type(code, display_value, status) values('tiff', 'Tiff Scanned Document', 'x');
+insert into source.administrative_source_type(code, display_value, status) values('jpg', 'Jpg Scanned Document', 'x');
+insert into source.administrative_source_type(code, display_value, status) values('tif', 'Tif Scanned Document', 'x');
 
 
 
@@ -2942,7 +2942,7 @@ insert into application.request_type(code, request_category_code, display_value,
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('varyCaveat', 'registrationServices', 'Vary caveat', 'c', 5, 5, 0, 0, 1, '<Caveat> <reference>', 'caveat', 'vary');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, type_action_code) values('cnclPowerOfAttorney', 'registrationServices', 'Cancel Power of Attorney', 'c', 1, 5.00, 0, 0, 0, 'cancel');
 insert into application.request_type(code, request_category_code, display_value, description, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('cnclStandardDocument', 'registrationServices', 'Withdraw Standard Document', 'To withdraw from use any standard document (such as standard mortgage or standard lease)', 'c', 1, 5.00, 0, 0, 0);
-insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('systematicRegn', 'registrationServices', 'Systematic Registration::::ITALIANO', 'c', 90, 50.00, 0, 0, 1, 'Title issued at completion of systematic registration', 'ownership', 'new');
+insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) values('systematicRegn', 'registrationServices', 'Systematic Registration Claim::::Registrazione Sistematica', 'c', 90, 50.00, 0, 0, 1, 'Title issued at completion of systematic registration', 'ownership', 'new');
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('lodgeObjection', 'registrationServices', 'Lodge Objection::::Obiezioni', 'c', 90, 5.00, 0, 0, 1);
 
 
