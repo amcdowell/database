@@ -16,14 +16,25 @@ insert into system.br(id, technical_type_code, feedback, technical_description)
 values('rrr-shares-total-check', 'sql', 'The sum of the shares (in ownership rights) must total to 1::::Le quote non raggiungono 1',
  '#{id}(administrative.rrr.id) is requested');
 
+-- insert into system.br_definition(br_id, active_from, active_until, body) 
+--values('rrr-shares-total-check', now(), 'infinity', 
+--'select 
+--  sum(((select multiply_agg(rrrsh2.denominator) 
+--    from administrative.rrr_share rrrsh2 where rrrsh1.rrr_id = rrrsh2.rrr_id) /rrrsh1.denominator)*rrrsh1.nominator) = 
+ -- (select multiply_agg(rrrsh2.denominator) 
+--    from administrative.rrr_share rrrsh2 where rrr_id = #{id}) as vl
+--from administrative.rrr_share rrrsh1 where rrr_id = #{id}'); 
+
+-- Issue #288 Fixes an issue where the original business rule has an interger overflow
+-- if there are a number of shares with a large denominator
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('rrr-shares-total-check', now(), 'infinity', 
-'select 
-  sum(((select multiply_agg(rrrsh2.denominator) 
-    from administrative.rrr_share rrrsh2 where rrrsh1.rrr_id = rrrsh2.rrr_id) /rrrsh1.denominator)*rrrsh1.nominator) = 
-  (select multiply_agg(rrrsh2.denominator) 
-    from administrative.rrr_share rrrsh2 where rrr_id = #{id}) as vl
-from administrative.rrr_share rrrsh1 where rrr_id = #{id}');
+'SELECT (SUM(nominator::DECIMAL/denominator::DECIMAL)*10000)::INT = 10000  AS vl
+FROM   administrative.rrr_share 
+WHERE  rrr_id = #{id}
+AND    denominator != 0');
+
+
 
 insert into system.br_validation(br_id, severity_code, target_reg_moment, target_code, order_of_execution) 
 values('rrr-shares-total-check', 'critical', 'current', 'rrr', 40);
