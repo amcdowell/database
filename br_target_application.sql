@@ -334,7 +334,29 @@ VALUES('application-on-approve-check-public-display', now(), 'infinity',
   and s.application_id = #{id};');
 
 INSERT INTO system.br_validation(br_id, target_code, target_application_moment, severity_code, order_of_execution)
-VALUES ('application-on-approve-check-public-display', 'application', 'approve', 'critical', 600);
+VALUES ('application-on-approve-check-public-display', 'application', 'approve', 'critical', 601);
+---------------------------------------------------------------------------------------------------------------------
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES('application-on-approve-check-systematic-reg-no-objection', 'sql', 'There must be no objection against the systematic registration::::Non ci devono essere obiezioni attive',
+'Checks the absence of objections for systematic registration service related to the application');
+
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES('application-on-approve-check-systematic-reg-no-objection', now(), 'infinity', 
+'  SELECT (COUNT(*) = 0)  AS vl
+   FROM  application.application aa, 
+   application.service s
+  WHERE  s.application_id::text = aa.id::text 
+  AND s.application_id::text in (select s.application_id 
+                                 FROM application.service s
+                                 where s.request_type_code::text = ''systematicRegn''::text
+                                 and s.application_id = #{id}) 
+  AND s.request_type_code::text = ''lodgeObjection''::text
+  AND s.status_code::text != ''cancelled''::text
+  and s.application_id = #{id};');
+
+INSERT INTO system.br_validation(br_id, target_code, target_application_moment, severity_code, order_of_execution)
+VALUES ('application-on-approve-check-systematic-reg-no-objection', 'application', 'approve', 'critical', 600);
+
 
 
 ----------------------------------------------------------------------------------------------------
