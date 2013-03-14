@@ -7361,20 +7361,22 @@ UNION
 
 -------View application.systematic_registration_certificates ---------
 DROP VIEW IF EXISTS application.systematic_registration_certificates CASCADE;
-CREATE VIEW application.systematic_registration_certificates AS SELECT aa.nr, co.id, co.name_firstpart, co.name_lastpart, sa.size, get_translation(lu.display_value, NULL::character varying) AS land_use_code, get_translation(ast.display_value, NULL::character varying) AS application_status, su.ba_unit_id, bu.name, bu.creation_date, get_translation(rtc.display_value, NULL::character varying) AS type_code
-   FROM application.application_status_type ast, cadastre.land_use_type lu, cadastre.cadastre_object co, administrative.ba_unit bu, cadastre.spatial_value_area sa, administrative.ba_unit_contains_spatial_unit su, application.application_property ap, application.application aa, application.service s, administrative.rrr rrr, administrative.rrr_type rtc
-  WHERE sa.spatial_unit_id::text = co.id::text 
-  AND sa.type_code::text = 'officialArea'::text 
-  AND su.spatial_unit_id::text = sa.spatial_unit_id::text 
-   AND (ap.ba_unit_id::text = su.ba_unit_id::text 
-           OR (ap.name_lastpart::text = bu.name_lastpart::text 
-           AND ap.name_firstpart::text = bu.name_firstpart::text)
-           )
-  AND aa.id::text = ap.application_id::text 
-  AND s.application_id::text = aa.id::text AND bu.id::text = su.ba_unit_id::text 
-  AND rrr.ba_unit_id::text = bu.id::text AND s.request_type_code::text = 'systematicRegn'::text 
-  AND aa.status_code::text = ast.code::text AND aa.status_code::text = 'approved'::text 
-  AND COALESCE(ap.land_use_code, 'residential'::character varying)::text = lu.code::text AND rrr.type_code::text = rtc.code::text;
+CREATE VIEW application.systematic_registration_certificates AS SELECT aa.nr, co.name_firstpart, co.name_lastpart,
+ su.ba_unit_id
+   FROM application.application_status_type ast, 
+   cadastre.land_use_type lu, cadastre.cadastre_object co, 
+   administrative.ba_unit bu, cadastre.spatial_value_area sa, 
+   administrative.ba_unit_contains_spatial_unit su, 
+   application.application_property ap, application.application aa, 
+   application.service s
+   WHERE sa.spatial_unit_id::text = co.id::text 
+   AND sa.type_code::text = 'officialArea'::text 
+   AND su.spatial_unit_id::text = sa.spatial_unit_id::text 
+   AND (ap.ba_unit_id::text = su.ba_unit_id::text OR ap.name_firstpart||ap.name_lastpart= bu.name_firstpart||bu.name_lastpart)
+   AND aa.id::text = ap.application_id::text AND s.application_id::text = aa.id::text 
+   AND s.request_type_code::text = 'systematicRegn'::text 
+   AND aa.status_code::text = ast.code::text AND aa.status_code::text = 'approved'::text 
+   AND COALESCE(ap.land_use_code, 'residential'::character varying)::text = lu.code::text ;
 
 
 -- Scan tables and views for geometry columns                 and populate geometry_columns table
