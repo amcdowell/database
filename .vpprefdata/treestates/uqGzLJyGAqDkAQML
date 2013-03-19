@@ -3,12 +3,11 @@
 	<TreeState name="ModelRepository" viewX="0" viewY="0">
 		<ExpandedPath>ModelRepository</ExpandedPath>
 	</TreeState>
-	<TreeState name="DiagramNavigator" viewX="0" viewY="432">
+	<TreeState name="DiagramNavigator" viewX="0" viewY="77">
 		<ExpandedPath>DiagramNavigator</ExpandedPath>
 		<ExpandedPath>DiagramNavigator,Database Modeling</ExpandedPath>
 		<ExpandedPath>ERDiagram</ExpandedPath>
-		<ExpandedPath>ERDiagram,5lew9JyGAqHKARVp</ExpandedPath>
-		<SelectedPath>ERDiagram,5lew9JyGAqHKARVp,059X.NyFS_kieBcf</SelectedPath>
+		<SelectedPath>ERDiagram,Ylew9JyGAqHKARTx</SelectedPath>
 	</TreeState>
 	<TreeState name="ClassBrowser" viewX="0" viewY="0"/>
 	<TreeState name="LogicalView" viewX="0" viewY="0">
