@@ -1529,7 +1529,26 @@ BEGIN
     end loop;
    
     if (not statusFound) then
-        RAISE EXCEPTION 'no_status_found';
+         block = 'none';
+                
+        select into recToReturn
+	       	block::			varchar,
+		TotApp::  		decimal,
+		appLodgedSP::  		decimal,
+		SPnoApp::  		decimal,
+		appPendObj::  		decimal,
+		appIncDoc::  		decimal,
+		appPDisp::  		decimal,
+		appCompPDispNoCert::  	decimal,
+		appCertificate::  	decimal,
+		appPrLand::  		decimal,
+		appPubLand::  		decimal,
+		TotSurvPar::  		decimal,
+		appLodgedNoSP::  	decimal;
+
+		                         
+          return next recToReturn;
+
     end if;
     return;
 END;
