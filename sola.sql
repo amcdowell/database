@@ -1280,7 +1280,7 @@ BEGIN
 			    AND   s.request_type_code::text = 'systematicRegn'::text
                             AND   aa.id::text = ap.application_id::text
 			    AND   ap.name_firstpart||ap.name_lastpart= bu.name_firstpart||bu.name_lastpart
-			    AND bu.name_lastpart = ''|| rec.area || ''
+			    AND bu.name_lastpart = ''|| rec.area ||''
 			    AND  (
 		          (aa.lodging_datetime  between to_date(''|| fromDate || '','yyyy-mm-dd')  and to_date(''|| toDate || '','yyyy-mm-dd'))
 		           or
@@ -1300,7 +1300,7 @@ BEGIN
 			 AND   aa.id::text = ap.application_id::text
 			 AND   s.request_type_code::text = 'systematicRegn'::text
 			 AND s.application_id = aa.id
-			 AND bu.name_lastpart = ''|| rec.area || ''
+			 AND bu.name_lastpart = ''|| rec.area ||''
 			 AND  (
 		          (aa.lodging_datetime  between to_date(''|| fromDate || '','yyyy-mm-dd')  and to_date(''|| toDate || '','yyyy-mm-dd'))
 		           or
@@ -1311,7 +1311,7 @@ BEGIN
 	            FROM cadastre.cadastre_object co
 			    WHERE co.type_code='parcel'
 			    AND   co.id not in (SELECT su.spatial_unit_id FROM administrative.ba_unit_contains_spatial_unit su)
-			    AND co.name_lastpart = ''|| rec.area || ''
+			    AND co.name_lastpart = ''|| rec.area ||''
 	          ),
 
                   (
@@ -1329,7 +1329,7 @@ BEGIN
 		  AND s.status_code::text != 'cancelled'::text
 		  AND   aa.id::text = ap.application_id::text
 		  AND   ap.name_firstpart||ap.name_lastpart= bu.name_firstpart||bu.name_lastpart
-		  AND bu.name_lastpart = ''|| rec.area || ''
+		  AND bu.name_lastpart = ''|| rec.area ||''
 		  AND  (
 		          (aa.lodging_datetime  between to_date(''|| fromDate || '','yyyy-mm-dd')  and to_date(''|| toDate || '','yyyy-mm-dd'))
 		           or
@@ -1347,7 +1347,7 @@ BEGIN
 			    AND   s.request_type_code::text = 'systematicRegn'::text
 			    AND   aa.id::text = ap.application_id::text
 		            AND   ap.name_firstpart||ap.name_lastpart= bu.name_firstpart||bu.name_lastpart
-		            AND bu.name_lastpart = ''|| rec.area || ''
+		            AND bu.name_lastpart = ''|| rec.area ||''
 		            AND  (
 		          (aa.lodging_datetime  between to_date(''|| fromDate || '','yyyy-mm-dd')  and to_date(''|| toDate || '','yyyy-mm-dd'))
 		           or
@@ -1374,51 +1374,61 @@ BEGIN
 			END 
 				  ),
      
-		  (select count(co.id)
-		    from cadastre.cadastre_object co, application.service s where s.request_type_code::text = 'systematicRegn'::text
-                    AND co.name_lastpart = ''|| rec.area || '' AND co.name_lastpart in (select ss.reference_nr 
-                                                        from   source.source ss 
-                                                        where  
-                                                        ss.recordation  between to_date(''|| fromDate ||'','yyyy-mm-dd')  and to_date(''|| toDate ||'','yyyy-mm-dd')
-                                                        AND 
-                                                        ss.expiration_date > now())
-                 ),
-
-                 (select count(co.id)
-                   from cadastre.cadastre_object co, application.service s, application.application aa
-                    where s.request_type_code::text = 'systematicRegn'::text
-					      AND s.application_id = aa.id
-					      AND co.name_lastpart = ''|| rec.area || '' 
-					      AND  co.name_lastpart in (select ss.reference_nr 
-									from   source.source ss 
-									where ss.type_code='publicNotification'
-									AND ss.recordation  between to_date(''|| fromDate ||'','yyyy-mm-dd')  and to_date(''|| toDate ||'','yyyy-mm-dd')
-                                                                        and ss.expiration_date <= now()
-                                                                        and ss.reference_nr not in (select ss.reference_nr 
-									from   source.source ss 
-									where ss.type_code='title')
-                                                                        )
-                                                  
+                 (select count(distinct (aa.id))
+                   from application.service s, application.application aa, 
+                   application.application_property ap
+                   where s.request_type_code::text = 'systematicRegn'::text
+		   AND s.application_id = aa.id
+		   AND ap.application_id = aa.id
+		   AND ap.name_lastpart = ''|| rec.area ||''
+		   AND ap.name_lastpart in ( select ss.reference_nr from   source.source ss 
+					     where ss.type_code='publicNotification'
+					     and ss.recordation  between to_date(''|| fromDate ||'','yyyy-mm-dd')  and to_date(''|| toDate ||'','yyyy-mm-dd')
+                                             and ss.expiration_date < to_date(''|| toDate ||'','yyyy-mm-dd')
+                                             and ss.reference_nr = ''|| rec.area ||''   
+					   )
 
                  ),
 
-                 (select count(co.id)
-                   from cadastre.cadastre_object co, application.service s, application.application aa
-                    where s.request_type_code::text = 'systematicRegn'::text
-					      AND s.application_id = aa.id
-					      AND co.name_lastpart = ''|| rec.area || '' 
-					      AND  co.name_lastpart in (select ss.reference_nr 
-									from   source.source ss 
-									where ss.type_code='publicNotification'
-									AND ss.recordation  between to_date(''|| fromDate ||'','yyyy-mm-dd')  and to_date(''|| toDate ||'','yyyy-mm-dd')
-                                                                        and ss.expiration_date <= now()
-                                                                        and ss.reference_nr  in (select ss.reference_nr 
-									from   source.source ss 
-									where ss.type_code='title')
-                                                                        )
-                                                  
-
+                 ( 
+                   select count(distinct (aa.id))
+                   from application.service s, application.application aa, 
+                   application.application_property ap
+                   where s.request_type_code::text = 'systematicRegn'::text
+		   AND s.application_id = aa.id
+		   AND ap.application_id = aa.id
+		   AND ap.name_lastpart = ''|| rec.area ||'' 
+		   AND ap.name_lastpart in ( select ss.reference_nr 
+					     from   source.source ss 
+					     where ss.type_code='publicNotification'
+					     and ss.expiration_date < to_date(''|| toDate ||'','yyyy-mm-dd')
+                                             and   ss.reference_nr not in ( select ss.reference_nr from   source.source ss 
+					     where ss.type_code='title'
+					     and ss.recordation  between to_date(''|| fromDate ||'','yyyy-mm-dd')  and to_date(''|| toDate ||'','yyyy-mm-dd')
+                                             and ss.reference_nr = ''|| rec.area ||''
+                                             )   
+					   )  
                  ),
+
+                 (
+                   select count(distinct (aa.id))
+                   from application.service s, application.application aa, 
+                   application.application_property ap
+                   where s.request_type_code::text = 'systematicRegn'::text
+		   AND s.application_id = aa.id
+		   AND ap.application_id = aa.id
+		   AND ap.name_lastpart = ''|| rec.area ||'' 
+		   AND ap.name_lastpart in ( select ss.reference_nr 
+					     from   source.source ss 
+					     where ss.type_code='publicNotification'
+					     and ss.expiration_date < to_date(''|| toDate ||'','yyyy-mm-dd')
+                                             and   ss.reference_nr in ( select ss.reference_nr from   source.source ss 
+					     where ss.type_code='title'
+					     and ss.recordation  between to_date(''|| fromDate ||'','yyyy-mm-dd')  and to_date(''|| toDate ||'','yyyy-mm-dd')
+                                             and ss.reference_nr = ''|| rec.area ||''
+                                             )   
+					   )  
+                ),
 		 (SELECT count (distinct (aa.id) )
 			FROM cadastre.land_use_type lu, cadastre.cadastre_object co, cadastre.spatial_value_area sa, 
 			administrative.ba_unit_contains_spatial_unit su, application.application_property ap, 
@@ -1430,7 +1440,7 @@ BEGIN
 			  AND aa.id::text = ap.application_id::text AND s.application_id::text = aa.id::text AND s.request_type_code::text = 'systematicRegn'::text 
 			  AND s.status_code::text = 'completed'::text AND pp.id::text = pr.party_id::text AND pr.rrr_id::text = rrr.id::text 
 			  AND rrr.ba_unit_id::text = su.ba_unit_id::text
-			  AND co.name_lastpart = ''|| rec.area || '' 
+			  AND co.name_lastpart = ''|| rec.area ||'' 
 			  AND  (
 		          (aa.lodging_datetime  between to_date(''|| fromDate || '','yyyy-mm-dd')  and to_date(''|| toDate || '','yyyy-mm-dd'))
 		           or
@@ -1454,7 +1464,7 @@ BEGIN
 			  AND aa.id::text = ap.application_id::text AND s.application_id::text = aa.id::text AND s.request_type_code::text = 'systematicRegn'::text 
 			  AND s.status_code::text = 'completed'::text AND pp.id::text = pr.party_id::text AND pr.rrr_id::text = rrr.id::text 
 			  AND rrr.ba_unit_id::text = su.ba_unit_id::text AND rrr.type_code::text = 'stateOwnership'::text AND bu.id::text = su.ba_unit_id::text
-			  AND co.name_lastpart = ''|| rec.area || ''
+			  AND co.name_lastpart = ''|| rec.area ||''
 			  AND  (
 		          (aa.lodging_datetime  between to_date(''|| fromDate || '','yyyy-mm-dd')  and to_date(''|| toDate || '','yyyy-mm-dd'))
 		           or
@@ -1464,7 +1474,7 @@ BEGIN
                  (SELECT count (*)
 	            FROM cadastre.cadastre_object co
 			    WHERE co.type_code='parcel'
-			    AND co.name_lastpart = ''|| rec.area || '' 
+			    AND co.name_lastpart = ''|| rec.area ||'' 
                  )    
               INTO       TotApp,
                          appLodgedSP,
@@ -1486,7 +1496,7 @@ BEGIN
 			    AND   s.request_type_code::text = 'systematicRegn'::text
 			    AND   ap.name_firstpart||ap.name_lastpart= bu.name_firstpart||bu.name_lastpart
 			    AND   aa.id::text = ap.application_id::text
-			    AND bu.name_lastpart = ''|| rec.area || ''
+			    AND bu.name_lastpart = ''|| rec.area ||''
                                                
 	  ;        
 
@@ -1570,7 +1580,7 @@ DECLARE
 
        	block  			varchar;	
        	TotAppLod		decimal:=0 ;	
-        TotParcLoaded		decimal:=0 ;	
+        TotParcLoaded		varchar:='none' ;	
         TotRecObj		decimal:=0 ;	
         TotSolvedObj		decimal:=0 ;	
         TotAppPDisp		decimal:=0 ;	
@@ -1580,7 +1590,7 @@ DECLARE
 
         Total  			varchar;	
        	TotalAppLod		decimal:=0 ;	
-        TotalParcLoaded		decimal:=0 ;	
+        TotalParcLoaded		varchar:='none' ;	
         TotalRecObj		decimal:=0 ;	
         TotalSolvedObj		decimal:=0 ;	
         TotalAppPDisp		decimal:=0 ;	
@@ -1646,7 +1656,7 @@ BEGIN
 			    AND   aa.action_code='lodge'
                             AND   aa.id::text = ap.application_id::text
 			    AND   ap.name_firstpart||ap.name_lastpart= bu.name_firstpart||bu.name_lastpart
-			    AND bu.name_lastpart = ''|| rec.area || ''
+			    AND bu.name_lastpart = ''|| rec.area ||''
 			    AND  (
 		          (aa.lodging_datetime  between to_date(''|| fromDate || '','yyyy-mm-dd')  and to_date(''|| toDate || '','yyyy-mm-dd'))
 		           or
@@ -1664,7 +1674,7 @@ BEGIN
 			    AND   aa.action_code='lodge'
                             AND   aa.id::text = ap.application_id::text
 			    AND   ap.name_firstpart||ap.name_lastpart= bu.name_firstpart||bu.name_lastpart
-			    AND bu.name_lastpart = ''|| rec.area || ''
+			    AND bu.name_lastpart = ''|| rec.area ||''
 			    AND  (
 		          (aa.lodging_datetime  between to_date(''|| fromDate || '','yyyy-mm-dd')  and to_date(''|| toDate || '','yyyy-mm-dd'))
 		           or
@@ -1674,13 +1684,26 @@ BEGIN
 		    
 
 	      ),  --- TotApp
-
-		   
-	          (SELECT count (*)
+          (           
+	   
+	   (
+	    SELECT count (DISTINCT co.id)
+	    FROM cadastre.land_use_type lu, cadastre.cadastre_object co, cadastre.spatial_value_area sa, administrative.ba_unit_contains_spatial_unit su, application.application_property ap, application.application aa, application.service s, administrative.ba_unit bu
+	    WHERE sa.spatial_unit_id::text = co.id::text AND sa.type_code::text = 'officialArea'::text AND su.spatial_unit_id::text = sa.spatial_unit_id::text 
+	    AND (ap.ba_unit_id::text = su.ba_unit_id::text OR ap.name_lastpart::text = bu.name_lastpart::text AND ap.name_firstpart::text = bu.name_firstpart::text) 
+	    AND aa.id::text = ap.application_id::text AND s.application_id::text = aa.id::text AND s.request_type_code::text = 'systematicRegn'::text 
+	    AND s.status_code::text = 'completed'::text AND COALESCE(co.land_use_code, 'residential'::character varying)::text = lu.code::text AND bu.id::text = su.ba_unit_id::text
+	    AND co.name_lastpart = ''|| rec.area ||''
+	    )
+            ||'/'||
+	    (SELECT count (*)
 	            FROM cadastre.cadastre_object co
 			    WHERE co.type_code='parcel'
-			    AND co.name_lastpart = ''|| rec.area || ''
-	          ),  ---TotParcelLoaded
+			    AND co.name_lastpart = ''|| rec.area ||''
+	     )
+
+	   )
+                 ,  ---TotParcelLoaded
                   
                   (
                   SELECT 
@@ -1699,7 +1722,7 @@ BEGIN
 			  AND s.status_code::text = 'lodged'::text
 			  AND   aa.id::text = ap.application_id::text
 			  AND   ap.name_firstpart||ap.name_lastpart= bu.name_firstpart||bu.name_lastpart
-			  AND bu.name_lastpart = ''|| rec.area || ''
+			  AND bu.name_lastpart = ''|| rec.area ||''
 			  AND  (
 		          (aa.lodging_datetime  between to_date(''|| fromDate || '','yyyy-mm-dd')  and to_date(''|| toDate || '','yyyy-mm-dd'))
 		           or
@@ -1720,7 +1743,7 @@ BEGIN
 			  AND s.status_code::text = 'lodged'::text
 			  AND   aa.id::text = ap.application_id::text
 			  AND   ap.name_firstpart||ap.name_lastpart= bu.name_firstpart||bu.name_lastpart
-			  AND bu.name_lastpart = ''|| rec.area || ''
+			  AND bu.name_lastpart = ''|| rec.area ||''
 			  AND  (
 		          (aa.lodging_datetime  between to_date(''|| fromDate || '','yyyy-mm-dd')  and to_date(''|| toDate || '','yyyy-mm-dd'))
 		           or
@@ -1745,7 +1768,7 @@ BEGIN
 		  AND s.status_code::text = 'cancelled'::text
 		  AND   aa.id::text = ap.application_id::text
 		  AND   ap.name_firstpart||ap.name_lastpart= bu.name_firstpart||bu.name_lastpart
-		  AND bu.name_lastpart = ''|| rec.area || ''
+		  AND bu.name_lastpart = ''|| rec.area ||''
 		  AND  (
 		          (aa.lodging_datetime  between to_date(''|| fromDate || '','yyyy-mm-dd')  and to_date(''|| toDate || '','yyyy-mm-dd'))
 		           or
@@ -1758,15 +1781,12 @@ BEGIN
 		    count (distinct(aa.id)) 
 		    FROM  application.application aa,
 			  application.service s,
-			  administrative.ba_unit bu, 
-		          application.application_property ap
+			  application.application_property ap
 			    WHERE s.application_id = aa.id
 			    AND   s.request_type_code::text = 'systematicRegn'::text
-			    ---AND   aa.status_code='lodged'
-                            AND   aa.id::text = ap.application_id::text
-			    AND   ap.name_firstpart||ap.name_lastpart= bu.name_firstpart||bu.name_lastpart
-			    AND bu.name_lastpart = ''|| rec.area || ''
-			    AND bu.name_lastpart in (select ss.reference_nr 
+			    AND   aa.id::text = ap.application_id::text
+			    AND ap.name_lastpart = ''|| rec.area ||''
+			    AND ap.name_lastpart in (select ss.reference_nr 
 									from   source.source ss 
 									where ss.type_code='publicNotification'
 									AND ss.recordation  between to_date(''|| fromDate ||'','yyyy-mm-dd')  and to_date(''|| toDate ||'','yyyy-mm-dd')
@@ -1775,32 +1795,33 @@ BEGIN
 
                  ),  ---TotAppPubDispl
 
-                 (select count(bu.id)
-                   FROM  application.application aa,
-			  application.service s,
-			  administrative.ba_unit bu, 
-		          application.application_property ap
-			    WHERE s.application_id = aa.id
-			    AND   s.request_type_code::text = 'systematicRegn'::text
-			    AND   aa.status_code='approved'
-                            AND   aa.id::text = ap.application_id::text
-			    AND   ap.name_firstpart||ap.name_lastpart= bu.name_firstpart||bu.name_lastpart
-			    AND bu.name_lastpart = ''|| rec.area || ''
-			    AND bu.name_lastpart in (select ss.reference_nr 
-									from   source.source ss 
-									where ss.type_code='publicNotification'
-									AND ss.recordation  between to_date(''|| fromDate ||'','yyyy-mm-dd')  and to_date(''|| toDate ||'','yyyy-mm-dd')
-                                                                        and ss.expiration_date >= now()
-                                                                        and ss.reference_nr  in (select ss.reference_nr 
-									from   source.source ss 
-									where ss.type_code='title')
-                 )),  ---TotCertificatesPrepared
+
+                 (
+                  select count(distinct (aa.id))
+                   from application.service s, application.application aa, 
+                   application.application_property ap
+                   where s.request_type_code::text = 'systematicRegn'::text
+		   AND s.application_id = aa.id
+		   AND ap.application_id = aa.id
+		   AND ap.name_lastpart = ''|| rec.area ||'' 
+		   AND ap.name_lastpart in ( select ss.reference_nr 
+					     from   source.source ss 
+					     where ss.type_code='publicNotification'
+					     and ss.expiration_date < to_date(''|| toDate ||'','yyyy-mm-dd')
+                                             and   ss.reference_nr in ( select ss.reference_nr from   source.source ss 
+					     where ss.type_code='title'
+					     and ss.recordation  between to_date(''|| fromDate ||'','yyyy-mm-dd')  and to_date(''|| toDate ||'','yyyy-mm-dd')
+                                             and ss.reference_nr = ''|| rec.area ||''
+                                             )   
+					   )  
+
+                 ),  ---TotCertificatesPrepared
                  (select count (distinct(s.id))
                    FROM 
                        application.service s   --,
 		   WHERE s.request_type_code::text = 'documentCopy'::text
 		   AND s.lodging_datetime between to_date(''|| fromDate ||'','yyyy-mm-dd')  and to_date(''|| toDate ||'','yyyy-mm-dd')
-                   AND s.action_notes = ''|| rec.area || '')  --TotCertificatesIssued
+                   AND s.action_notes = ''|| rec.area ||'')  --TotCertificatesIssued
 
                     
               INTO       TotAppLod,
@@ -1819,7 +1840,7 @@ BEGIN
 			  --  AND   s.request_type_code::text = 'systematicRegn'::text
 			    --AND   ap.name_firstpart||ap.name_lastpart= bu.name_firstpart||bu.name_lastpart
 			    --AND   aa.id::text = ap.application_id::text
-			    --AND bu.name_lastpart = ''|| rec.area || ''
+			    --AND bu.name_lastpart = ''|| rec.area ||''
                                                
 	  ;        
 
@@ -1835,7 +1856,7 @@ BEGIN
 	  select into recToReturn
 	       	block::			varchar,
 		TotAppLod::  		decimal,	
-		TotParcLoaded::  	decimal,	
+		TotParcLoaded::  	varchar,	
 		TotRecObj::  		decimal,	
 		TotSolvedObj::  	decimal,	
 		TotAppPDisp::  		decimal,	
@@ -1853,7 +1874,7 @@ BEGIN
         select into recToReturn
 	       	block::			varchar,
 		TotAppLod::  		decimal,	
-		TotParcLoaded::  	decimal,	
+		TotParcLoaded::  	varchar,	
 		TotRecObj::  		decimal,	
 		TotSolvedObj::  	decimal,	
 		TotAppPDisp::  		decimal,	
@@ -1898,10 +1919,23 @@ BEGIN
 	      ),  --- TotApp
 
 		   
-	          (SELECT count (*)
+	          (           
+	   
+	   (
+	    SELECT count (DISTINCT co.id)
+	    FROM cadastre.land_use_type lu, cadastre.cadastre_object co, cadastre.spatial_value_area sa, administrative.ba_unit_contains_spatial_unit su, application.application_property ap, application.application aa, application.service s, administrative.ba_unit bu
+	    WHERE sa.spatial_unit_id::text = co.id::text AND sa.type_code::text = 'officialArea'::text AND su.spatial_unit_id::text = sa.spatial_unit_id::text 
+	    AND (ap.ba_unit_id::text = su.ba_unit_id::text OR ap.name_lastpart::text = bu.name_lastpart::text AND ap.name_firstpart::text = bu.name_firstpart::text) 
+	    AND aa.id::text = ap.application_id::text AND s.application_id::text = aa.id::text AND s.request_type_code::text = 'systematicRegn'::text 
+	    AND s.status_code::text = 'completed'::text AND COALESCE(co.land_use_code, 'residential'::character varying)::text = lu.code::text AND bu.id::text = su.ba_unit_id::text
+	    )
+            ||'/'||
+	    (SELECT count (*)
 	            FROM cadastre.cadastre_object co
 			    WHERE co.type_code='parcel'
-	          ),  ---TotParcelLoaded
+	    )
+
+	   ),  ---TotParcelLoaded
                   
                   (
                   SELECT 
@@ -1964,14 +1998,11 @@ BEGIN
 		    count (distinct(aa.id)) 
 		    FROM  application.application aa,
 			  application.service s,
-			  administrative.ba_unit bu, 
-		          application.application_property ap
+			  application.application_property ap
 			    WHERE s.application_id = aa.id
 			    AND   s.request_type_code::text = 'systematicRegn'::text
-			    ---AND   aa.status_code='lodged'
-                            AND   aa.id::text = ap.application_id::text
-			    AND   ap.name_firstpart||ap.name_lastpart= bu.name_firstpart||bu.name_lastpart
-			    AND bu.name_lastpart in (select ss.reference_nr 
+			    AND   aa.id::text = ap.application_id::text
+			    AND ap.name_lastpart in (select ss.reference_nr 
 									from   source.source ss 
 									where ss.type_code='publicNotification'
 									AND ss.recordation  between to_date(''|| fromDate ||'','yyyy-mm-dd')  and to_date(''|| toDate ||'','yyyy-mm-dd')
@@ -1980,25 +2011,25 @@ BEGIN
 
                  ),  ---TotAppPubDispl
 
-                 (select count(bu.id)
-                   FROM  application.application aa,
-			  application.service s,
-			  administrative.ba_unit bu, 
-		          application.application_property ap
-			    WHERE s.application_id = aa.id
-			    AND   s.request_type_code::text = 'systematicRegn'::text
-			    AND   aa.status_code='approved'
-                            AND   aa.id::text = ap.application_id::text
-			    AND   ap.name_firstpart||ap.name_lastpart= bu.name_firstpart||bu.name_lastpart
-			    AND bu.name_lastpart in (select ss.reference_nr 
-									from   source.source ss 
-									where ss.type_code='publicNotification'
-									AND ss.recordation  between to_date(''|| fromDate ||'','yyyy-mm-dd')  and to_date(''|| toDate ||'','yyyy-mm-dd')
-                                                                        and ss.expiration_date >= now()
-                                                                        and ss.reference_nr  in (select ss.reference_nr 
-									from   source.source ss 
-									where ss.type_code='title')
-                 )),  ---TotCertificatesPrepared
+
+                 (
+                  select count(distinct (aa.id))
+                   from application.service s, application.application aa, 
+                   application.application_property ap
+                   where s.request_type_code::text = 'systematicRegn'::text
+		   AND s.application_id = aa.id
+		   AND ap.application_id = aa.id
+		   AND ap.name_lastpart in ( select ss.reference_nr 
+					     from   source.source ss 
+					     where ss.type_code='publicNotification'
+					     and ss.expiration_date < to_date(''|| toDate ||'','yyyy-mm-dd')
+                                             and   ss.reference_nr in ( select ss.reference_nr from   source.source ss 
+					     where ss.type_code='title'
+					     and ss.recordation  between to_date(''|| fromDate ||'','yyyy-mm-dd')  and to_date(''|| toDate ||'','yyyy-mm-dd')
+                                             )   
+					   )  
+
+                 ),  ---TotCertificatesPrepared
                  (select count (distinct(s.id))
                    FROM 
                        application.service s   --,
@@ -2027,9 +2058,9 @@ BEGIN
                 TotalIssuedCertificate = TotalIssuedCertificate;
 	  
 	  select into recTotalToReturn
-                Total::                   varchar, 
+                Total::                 varchar, 
                 TotalAppLod::  		decimal,	
-		TotalParcLoaded::  	decimal,	
+		TotalParcLoaded::  	varchar,	
 		TotalRecObj::  		decimal,	
 		TotalSolvedObj::  	decimal,	
 		TotalAppPDisp::  	decimal,	
@@ -2041,6 +2072,7 @@ BEGIN
 
                 
     return;
+
 END;
 $$ LANGUAGE plpgsql;
 COMMENT ON FUNCTION administrative.getsysregprogress(
