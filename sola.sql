@@ -3149,17 +3149,56 @@ CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
 --Table application.application_spatial_unit ----
 DROP TABLE IF EXISTS application.application_spatial_unit CASCADE;
 CREATE TABLE application.application_spatial_unit(
-    id varchar(40) NOT NULL,
     application_id varchar(40) NOT NULL,
     spatial_unit_id varchar(40) NOT NULL,
+    rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
+    rowversion integer NOT NULL DEFAULT (0),
+    change_action char(1) NOT NULL DEFAULT ('i'),
+    change_user varchar(50),
+    change_time timestamp NOT NULL DEFAULT (now()),
 
     -- Internal constraints
     
-    CONSTRAINT application_spatial_unit_pkey PRIMARY KEY (id)
+    CONSTRAINT application_spatial_unit_pkey PRIMARY KEY (application_id,spatial_unit_id)
 );
 
 
+
+-- Index application_spatial_unit_index_on_rowidentifier  --
+CREATE INDEX application_spatial_unit_index_on_rowidentifier ON application.application_spatial_unit (rowidentifier);
+    
+
 comment on table application.application_spatial_unit is '';
+    
+DROP TRIGGER IF EXISTS __track_changes ON application.application_spatial_unit CASCADE;
+CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
+   ON application.application_spatial_unit FOR EACH ROW
+   EXECUTE PROCEDURE f_for_trg_track_changes();
+    
+
+----Table application.application_spatial_unit_historic used for the history of data of table application.application_spatial_unit ---
+DROP TABLE IF EXISTS application.application_spatial_unit_historic CASCADE;
+CREATE TABLE application.application_spatial_unit_historic
+(
+    application_id varchar(40),
+    spatial_unit_id varchar(40),
+    rowidentifier varchar(40),
+    rowversion integer,
+    change_action char(1),
+    change_user varchar(50),
+    change_time timestamp,
+    change_time_valid_until TIMESTAMP NOT NULL default NOW()
+);
+
+
+-- Index application_spatial_unit_historic_index_on_rowidentifier  --
+CREATE INDEX application_spatial_unit_historic_index_on_rowidentifier ON application.application_spatial_unit_historic (rowidentifier);
+    
+
+DROP TRIGGER IF EXISTS __track_history ON application.application_spatial_unit CASCADE;
+CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
+   ON application.application_spatial_unit FOR EACH ROW
+   EXECUTE PROCEDURE f_for_trg_track_history();
     
 --Table application.application_status_type ----
 DROP TABLE IF EXISTS application.application_status_type CASCADE;
@@ -7976,11 +8015,11 @@ ALTER TABLE application.request_type_requires_source_type ADD CONSTRAINT request
 CREATE INDEX request_type_requires_source_type_request_type_code_fk109_ind ON application.request_type_requires_source_type (request_type_code);
 
 ALTER TABLE application.application_spatial_unit ADD CONSTRAINT application_spatial_unit_application_id_fk110 
-            FOREIGN KEY (application_id) REFERENCES application.application(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+            FOREIGN KEY (application_id) REFERENCES application.application(id) ON UPDATE CASCADE ON DELETE CASCADE;
 CREATE INDEX application_spatial_unit_application_id_fk110_ind ON application.application_spatial_unit (application_id);
 
 ALTER TABLE application.application_spatial_unit ADD CONSTRAINT application_spatial_unit_spatial_unit_id_fk111 
-            FOREIGN KEY (spatial_unit_id) REFERENCES cadastre.cadastre_object(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+            FOREIGN KEY (spatial_unit_id) REFERENCES cadastre.cadastre_object(id) ON UPDATE CASCADE ON DELETE CASCADE;
 CREATE INDEX application_spatial_unit_spatial_unit_id_fk111_ind ON application.application_spatial_unit (spatial_unit_id);
 
 ALTER TABLE system.appuser_setting ADD CONSTRAINT appuser_setting_user_id_fk112 
