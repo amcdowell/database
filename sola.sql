@@ -7608,6 +7608,27 @@ CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
    ON application.application_spatial_unit FOR EACH ROW
    EXECUTE PROCEDURE f_for_trg_track_history();
     
+--Table system.crs ----
+DROP TABLE IF EXISTS system.crs CASCADE;
+CREATE TABLE system.crs(
+    srid integer NOT NULL,
+    from_long double precision,
+    to_long double precision,
+
+    -- Internal constraints
+    
+    CONSTRAINT crs_pkey PRIMARY KEY (srid)
+);
+
+
+comment on table system.crs is '';
+    
+ -- Data for the table system.crs -- 
+insert into system.crs(srid, from_long, to_long) values(2193, 0, 175.085554442 );
+insert into system.crs(srid, from_long, to_long) values(2135, 175.085554442, 180);
+
+
+
 
 ALTER TABLE source.source ADD CONSTRAINT source_archive_id_fk0 
             FOREIGN KEY (archive_id) REFERENCES source.archive(id) ON UPDATE CASCADE ON DELETE RESTRICT;
