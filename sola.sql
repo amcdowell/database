@@ -232,7 +232,7 @@ CREATE OR REPLACE FUNCTION public.get_geometry_with_srid(
 ) RETURNS geometry 
 AS $$
 BEGIN
-  return st_setsrid(geom, coalesce((select vl::integer from system.setting where name='map-srid'),-1));
+  return geom;
 END;
 
 $$ LANGUAGE plpgsql;
