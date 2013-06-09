@@ -231,14 +231,21 @@ CREATE OR REPLACE FUNCTION public.get_geometry_with_srid(
  geom geometry
 ) RETURNS geometry 
 AS $$
-BEGIN
-  return geom;
-END;
-
+declare
+  srid_found integer;
+  x float;
+begin
+  if (select count(*) from system.crs) = 1 then
+    return geom;
+  end if;
+  x = st_x(st_transform(st_centroid(geom), 4326));
+  srid_found = (select srid from system.crs where x >= from_long and x < to_long );
+  return st_transform(geom, srid_found);
+end;
 $$ LANGUAGE plpgsql;
 COMMENT ON FUNCTION public.get_geometry_with_srid(
  geom geometry
-) IS 'This function assigns a srid found in the settings to the geometry passed as parameter.';
+) IS 'This function assigns a srid found in the settings to the geometry passed as parameter. The srid is chosen based in the longitude where the centroid of the geometry is.';
     
 -- Function public.get_translation --
 CREATE OR REPLACE FUNCTION public.get_translation(
@@ -2754,8 +2761,8 @@ declare
   query_name_v varchar;
   query_sql_template varchar;
 begin
-  query_sql_template = 'select id, label, st_asewkb(geom) as the_geom from cadastre.spatial_unit 
-where level_id = ''level_id_v'' and ST_Intersects(geom, ST_SetSRID(ST_MakeBox3D(ST_Point(#{minx}, #{miny}),ST_Point(#{maxx}, #{maxy})), #{srid}))';
+  query_sql_template = 'select id, label, st_asewkb(st_transform(geom, #{srid})) as the_geom from cadastre.spatial_unit 
+where level_id = ''level_id_v'' and ST_Intersects(st_transform(geom, #{srid}), ST_SetSRID(ST_MakeBox3D(ST_Point(#{minx}, #{miny}),ST_Point(#{maxx}, #{maxy})), #{srid}))';
   other_object_type = (select type_code 
     from bulk_operation.spatial_unit_temporary 
     where transaction_id = transaction_id_v limit 1);
@@ -7621,7 +7628,9 @@ CREATE TABLE system.crs(
 );
 
 
-comment on table system.crs is '';
+comment on table system.crs is 'In this table are given the coordinate reference systems (crs) that are applicable to the application.
+The one that is with the smallest item_order will be in the top of the list. Also the extent given in setting is within the context of this crs.
+from_long - to_long define the area in wgs84 that the crs is valid. This range can be used for different purposes like assigning/transforming a geometry before being stored in the database in the desired crs.';
     
  -- Data for the table system.crs -- 
 insert into system.crs(srid, from_long, to_long, item_order) values(2193, 0, 175.085554442 , 1);
