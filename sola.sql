@@ -7633,8 +7633,7 @@ The one that is with the smallest item_order will be in the top of the list. Als
 from_long - to_long define the area in wgs84 that the crs is valid. This range can be used for different purposes like assigning/transforming a geometry before being stored in the database in the desired crs.';
     
  -- Data for the table system.crs -- 
-insert into system.crs(srid, from_long, to_long, item_order) values(2193, 0, 175.085554442 , 1);
-insert into system.crs(srid, from_long, to_long, item_order) values(2135, 175.085554442, 180, 2);
+insert into system.crs(srid, from_long, to_long, item_order) values(2193, 0, 171805.085554442 , 1);
 
 
 
