@@ -2310,6 +2310,31 @@ COMMENT ON FUNCTION cadastre.get_new_cadastre_object_identifier_first_part(
 ) IS 'This function generates the first part of the cadastre object identifier.
 It has to be overridden to apply the algorithm specific to the situation.';
     
+-- Function cadastre.generate_spatial_unit_group_name --
+CREATE OR REPLACE FUNCTION cadastre.generate_spatial_unit_group_name(
+ geom_v geometry
+  , hierarchy_level_v integer
+  , label_v varchar
+) RETURNS varchar 
+AS $$
+declare
+  name_parent varchar;  
+BEGIN
+  if hierarchy_level_v = 0 then
+    return label_v;
+  end if;
+  name_parent =  coalesce( (select name 
+  from cadastre.spatial_unit_group 
+  where hierarchy_level = hierarchy_level_v - 1 and st_intersects(st_centroid(geom_v), geom)), '');
+  return name_parent || '/' || label_v;
+END;
+$$ LANGUAGE plpgsql;
+COMMENT ON FUNCTION cadastre.generate_spatial_unit_group_name(
+ geom_v geometry
+  , hierarchy_level_v integer
+  , label_v varchar
+) IS 'It generates the name of a new spatial unit group.';
+    
 -- Sequence application.application_nr_seq --
 DROP SEQUENCE IF EXISTS application.application_nr_seq;
 CREATE SEQUENCE application.application_nr_seq
@@ -7134,6 +7159,7 @@ insert into system.br_validation_target_type(code, display_value, status, descri
 insert into system.br_validation_target_type(code, display_value, status, description) values('cadastre_object', 'Cadastre Object::::Oggetto Catastale', 'c', 'The target of the validation is the transaction related with the cadastre change. It accepts one parameter {id} which is the transaction id.');
 insert into system.br_validation_target_type(code, display_value, status, description) values('bulkOperationSpatial', 'BUlk operation', 'c', 'The target of the validation is the transaction related with the bulk operations.');
 insert into system.br_validation_target_type(code, display_value, status, description) values('public_display', 'Public display', 'c', 'The target of the validation is the set of cadastre objects/ba units that belong to a certain last part. It accepts one parameter {lastPart} which is the last part.');
+insert into system.br_validation_target_type(code, display_value, status, description) values('spatial_unit_group', 'Spatial unit group', 'c', 'The target of the validation are the spatial unit groups');
 
 
 
@@ -7250,6 +7276,7 @@ insert into system.approle(code, display_value, status, description) values('sys
 insert into system.approle(code, display_value, status, description) values('systematicRegn', 'Systematic Registration', 'c', 'Allows to access Systematic Registration Service');
 insert into system.approle(code, display_value, status, description) values('lodgeObjection', 'Objection lodgment', 'c', 'Allows to access Lodge Objection Service');
 insert into system.approle(code, display_value, status, description) values('RightsExport', 'Export', 'c', 'Allows to export');
+insert into system.approle(code, display_value, status, description) values('editSpatialUnitGr', 'Edit spatial unit group', 'c', 'Allows the editing of spatial unit group');
 
 
 
@@ -7634,6 +7661,32 @@ from_long - to_long define the area in wgs84 that the crs is valid. This range c
     
  -- Data for the table system.crs -- 
 insert into system.crs(srid, from_long, to_long, item_order) values(2193, 0, 171805.085554442 , 1);
+
+
+
+--Table cadastre.hierarchy_level ----
+DROP TABLE IF EXISTS cadastre.hierarchy_level CASCADE;
+CREATE TABLE cadastre.hierarchy_level(
+    code varchar(20) NOT NULL,
+    display_value varchar(250) NOT NULL,
+    description varchar(555),
+    status char(1) NOT NULL DEFAULT ('t'),
+
+    -- Internal constraints
+    
+    CONSTRAINT hierarchy_level_display_value_unique UNIQUE (display_value),
+    CONSTRAINT hierarchy_level_pkey PRIMARY KEY (code)
+);
+
+
+comment on table cadastre.hierarchy_level is 'It maintains the list of hierarchies that is used together with spatial_unit_group.';
+    
+ -- Data for the table cadastre.hierarchy_level -- 
+insert into cadastre.hierarchy_level(code, display_value, status) values('0', 'Hierarchy 0', 'c');
+insert into cadastre.hierarchy_level(code, display_value, status) values('1', 'Hierarchy 1', 'c');
+insert into cadastre.hierarchy_level(code, display_value, status) values('2', 'Hierarchy 2', 'c');
+insert into cadastre.hierarchy_level(code, display_value, status) values('3', 'Hierarchy 3', 'c');
+insert into cadastre.hierarchy_level(code, display_value, status) values('4', 'Hierarchy 4', 'c');
 
 
 
