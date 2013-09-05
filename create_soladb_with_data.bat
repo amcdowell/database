@@ -21,6 +21,7 @@ set /p username= Username [%username%] :
 echo Creating database...
 echo Creating database... >> build.log 2>&1
 %psql_path% --host=%host% --port=5432 --username=%username% --dbname=%dbname% --file=sola.sql > build.log 2>&1
+%psql_path% --host=%host% --port=5432 --username=%username% --dbname=%dbname% --file=sola_extension.sql >> build.log 2>&1
 %psql_path% --host=%host% --port=5432 --username=%username% --dbname=%dbname% --file=test_data.sql >> build.log 2>&1
 
 echo Loading business rules...
