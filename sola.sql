@@ -54,29 +54,248 @@ CREATE SCHEMA bulk_operation;
 
 --Adding handy common functions --
 
-    --Adding trigger function to track changes--
+-- Enable/disable all the triggers in database --
+CREATE OR REPLACE FUNCTION fn_triggerall(DoEnable boolean) RETURNS integer AS
+$BODY$
+DECLARE
+rec RECORD;
+BEGIN
+  FOR rec IN select * from information_schema.tables where table_type = 'BASE TABLE' and table_schema not in ('pg_catalog', 'information_schema')
+  LOOP
+    IF DoEnable THEN
+      EXECUTE 'ALTER TABLE "'  || rec.table_schema || '"."' ||  rec.table_name || '" ENABLE TRIGGER ALL';
+    ELSE
+      EXECUTE 'ALTER TABLE "'  || rec.table_schema || '"."' ||  rec.table_name || '" DISABLE TRIGGER ALL';
+    END IF; 
+  END LOOP;
+ 
+  RETURN 1;
+ 
+END;
+$BODY$
+LANGUAGE 'plpgsql';
 
---Adding trigger function to track changes--
 
+-- to call to disable all triggers in all schemas in db
+--select fn_triggerall(false);
 
+-- to call to enable all triggers in all schemas in db
+--select fn_triggerall(true);
+
+CREATE OR REPLACE FUNCTION clean_db(schema_name character varying)
+  RETURNS integer AS
+$BODY$
+DECLARE
+rec RECORD;
+
+BEGIN
+  FOR rec IN select * from information_schema.tables 
+	where table_type = 'BASE TABLE' and table_schema = schema_name and table_name not in ('geometry_columns', 'spatial_ref_sys')
+  LOOP
+      EXECUTE 'DROP TABLE IF EXISTS "'  || rec.table_schema || '"."' ||  rec.table_name || '" CASCADE;';
+  END LOOP;
+  FOR rec IN select '"' || routine_schema || '"."' || routine_name || '"'  as full_name 
+        from information_schema.routines  where routine_schema='public' 
+            and data_type = 'trigger' and routine_name not in ('postgis_cache_bbox', 'checkauthtrigger', 'f_for_trg_track_history', 'f_for_trg_track_changes')
+  LOOP
+      EXECUTE 'DROP FUNCTION IF EXISTS '  || rec.full_name || '() CASCADE;';    
+  END LOOP;
+  RETURN 1;
+ 
+END;
+$BODY$
+  LANGUAGE plpgsql;
+
+-- Special string compare function
+CREATE OR REPLACE FUNCTION compare_strings(string1 text, string2 text)
+  RETURNS boolean AS
+$BODY$
+  DECLARE
+    rec record;
+    result boolean;
+  BEGIN
+      result = false;
+      for rec in select regexp_split_to_table(lower(string1),'[^a-z0-9]') as word loop
+          if rec.word != '' then 
+            if not string2 ~* rec.word then
+                return false;
+            end if;
+            result = true;
+          end if;
+      end loop;
+      return result;
+  END;
+$BODY$
+  LANGUAGE plpgsql;
+
+--Usage sample:
+-- select geom_to_snap, target_geom, snapped, target_is_changed 
+-- FROM snap_geometry_to_geometry(geomfromtext('POLYGON((0.1 0, 0.1 5.7, 4 3, 0.1 0))'), 
+--    geomfromtext('POLYGON((0 0, 0 6, 6 6, 6 0, 0 0),(1 1, 3 5, 4 5, 1 1))'), 1, true)
+
+create or replace function snap_geometry_to_geometry(
+  inout geom_to_snap geometry, -- Geometry that has to be snapped. It can be point, linestring or polygon
+  inout target_geom geometry, -- Geometry that will be the target to used for snapping
+  snap_distance float, -- The snap distance in meters
+  change_target_if_needed boolean, -- It gives if it is allowed to change target during snapping
+  out snapped boolean, -- An output value showing if the geometry is snapped. If it is a linestring or polygon, even if one point of them is snapped it returns true.
+  out target_is_changed boolean -- It shows if the target changed during the snapping process
+  ) 
+returns record as
+$BODY$
+DECLARE
+  i integer;
+  nr_elements integer;
+  rec record;
+  point_location float;
+  rings geometry[];
+  
+BEGIN
+  target_is_changed = false;
+  snapped = false;
+  if st_geometrytype(geom_to_snap) not in ('ST_Point', 'ST_LineString', 'ST_Polygon') then
+    raise exception 'geom_to_snap not supported. Only point, linestring and polygon is supported.';
+  end if;
+  if st_geometrytype(geom_to_snap) = 'ST_Point' then
+    -- If the geometry to snap is POINT
+    if st_geometrytype(target_geom) = 'ST_Point' then
+      if st_dwithin(geom_to_snap, target_geom, snap_distance) then
+        geom_to_snap = target_geom;
+        snapped = true;
+      end if;
+    elseif st_geometrytype(target_geom) = 'ST_LineString' then
+      -- Check first if there is any point of linestring where the point can be snapped.
+      select t.* into rec from ST_DumpPoints(target_geom) t where st_dwithin(geom_to_snap, t.geom, snap_distance);
+      if rec is not null then
+        geom_to_snap = rec.geom;
+        snapped = true;
+        return;
+      end if;
+      --Check second if the point is within distance from linestring and get an interpolation point in the line.
+      if st_dwithin(geom_to_snap, target_geom, snap_distance) then
+        point_location = ST_Line_Locate_Point(target_geom, geom_to_snap);
+        geom_to_snap = ST_Line_Interpolate_Point(target_geom, point_location);
+        if change_target_if_needed then
+          target_geom = ST_LineMerge(ST_Union(ST_Line_Substring(target_geom, 0, point_location), ST_Line_Substring(target_geom, point_location, 1)));
+          target_is_changed = true;
+        end if;
+        snapped = true;  
+      end if;
+    elseif st_geometrytype(target_geom) = 'ST_Polygon' then
+      select  array_agg(ST_ExteriorRing(geom)) into rings from ST_DumpRings(target_geom);
+      nr_elements = array_upper(rings,1);
+      i = 1;
+      while i <= nr_elements loop
+        select t.* into rec from snap_geometry_to_geometry(geom_to_snap, rings[i], snap_distance, change_target_if_needed) t;
+        if rec.snapped then
+          geom_to_snap = rec.geom_to_snap;
+          snapped = true;
+          if change_target_if_needed then
+            rings[i] = rec.target_geom;
+            target_geom = ST_MakePolygon(rings[1], rings[2:nr_elements]);
+            target_is_changed = rec.target_is_changed;
+            return;
+          end if;
+        end if;
+        i = i+1;
+      end loop;
+    end if;
+  elseif st_geometrytype(geom_to_snap) = 'ST_LineString' then
+    nr_elements = st_npoints(geom_to_snap);
+    i = 1;
+    while i <= nr_elements loop
+      select t.* into rec
+        from snap_geometry_to_geometry(st_pointn(geom_to_snap,i), target_geom, snap_distance, change_target_if_needed) t;
+      if rec.snapped then
+        if rec.target_is_changed then
+          target_geom= rec.target_geom;
+          target_is_changed = true;
+        end if;
+        geom_to_snap = st_setpoint(geom_to_snap, i-1, rec.geom_to_snap);
+        snapped = true;
+      end if;
+      i = i+1;
+    end loop;    
+  elseif st_geometrytype(geom_to_snap) = 'ST_Polygon' then
+    select  array_agg(ST_ExteriorRing(geom)) into rings from ST_DumpRings(geom_to_snap);
+    nr_elements = array_upper(rings,1);
+    i = 1;
+    while i <= nr_elements loop
+      select t.* into rec
+        from snap_geometry_to_geometry(rings[i], target_geom, snap_distance, change_target_if_needed) t;
+      if rec.snapped then
+        rings[i] = rec.geom_to_snap;
+        if rec.target_is_changed then
+          target_geom = rec.target_geom;
+          target_is_changed = true;
+        end if;
+        snapped = true;
+      end if;
+      i= i+1;
+    end loop;
+    if snapped then
+      geom_to_snap = ST_MakePolygon(rings[1], rings[2:nr_elements]);
+    end if;
+  end if;
+  return;
+END;
+$BODY$
+  LANGUAGE plpgsql;
+
+-- This function assigns a srid found in the settings to the geometry passed as parameter  
+CREATE OR REPLACE FUNCTION get_geometry_with_srid(geom geometry)
+  RETURNS geometry AS
+$BODY$
+BEGIN
+  return st_setsrid(geom, coalesce((select vl::integer from system.setting where name='map-srid'),-1));
+END;
+$BODY$
+  LANGUAGE plpgsql;
+
+-- This function is used to translate the values that are supposed to be multilingual like 
+-- the reference data values (display_value)
+CREATE OR REPLACE FUNCTION get_translation(mixed_value varchar, language_code varchar) RETURNS varchar AS
+$BODY$
+DECLARE
+  delimiter_word varchar;
+  language_index integer;
+  result varchar;
+BEGIN
+  if mixed_value is null then
+    return mixed_value;
+  end if;
+  delimiter_word = '::::';
+  language_index = (select item_order from system.language where code=language_code);
+  result = split_part(mixed_value, delimiter_word, language_index);
+  if result is null or result = '' then
+    language_index = (select item_order from system.language where is_default limit 1);
+    result = split_part(mixed_value, delimiter_word, language_index);
+    if result is null or result = '' then
+      result = mixed_value;
+    end if;
+  end if;
+  return result;
+END;
+$BODY$
+LANGUAGE 'plpgsql';
+
+    
 --Adding functions --
 
--- Sequence document.document_nr_seq --
-DROP SEQUENCE IF EXISTS document.document_nr_seq;
-CREATE SEQUENCE document.document_nr_seq
+
+-- Function document.document_nr_seq -----
+CREATE OR REPLACE FUNCTION document.document_nr_seq(
+    )
 INCREMENT 1
 MINVALUE 1
 MAXVALUE 9999
 START 1
 CACHE 1
 CYCLE;
-COMMENT ON SEQUENCE document.document_nr_seq IS 'Allocates numbers 1 to 9999 for document number.';
-    
--- Function public.f_for_trg_track_changes --
-CREATE OR REPLACE FUNCTION public.f_for_trg_track_changes(
 
-) RETURNS trigger 
-AS $$
+-- Function public.f_for_trg_track_changes -----
+CREATE OR REPLACE FUNCTION public.f_for_trg_track_changes(
+    )
 BEGIN
     IF (TG_OP = 'UPDATE') THEN
         IF (NEW.rowversion != OLD.rowversion) THEN
@@ -100,18 +319,10 @@ BEGIN
     END IF;
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION public.f_for_trg_track_changes(
 
-) IS 'This function is called from triggers in every table that has the columns to track changes. <br/>
-If the change_user is null then it is filled with the value from the database user prefixed by ''db:''.
-It also checks if the record has been already updated from another client application by checking the rowversion.';
-    
--- Function public.f_for_trg_track_history --
+-- Function public.f_for_trg_track_history -----
 CREATE OR REPLACE FUNCTION public.f_for_trg_track_history(
-
-) RETURNS trigger 
-AS $$
+    )
 DECLARE
     table_name_main varchar;
     table_name_historic varchar;
@@ -136,16 +347,10 @@ BEGIN
     END IF;
     RETURN NULL;
 END;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION public.f_for_trg_track_history(
 
-) IS 'This function is called after a change is happening in a table to push the former values to the historic keeping table.';
-    
--- Function public.fn_triggerall --
+-- Function public.fn_triggerall -----
 CREATE OR REPLACE FUNCTION public.fn_triggerall(
- doenable bool
-) RETURNS integer 
-AS $$
+    doenable bit)
 DECLARE
   rec RECORD;
 BEGIN
@@ -159,24 +364,10 @@ BEGIN
   END LOOP; 
   RETURN 1;
 END;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION public.fn_triggerall(
- doenable bool
-) IS 'This function can be used to disable all triggers in the database.
 
-<b>How to use </b>
-to call to disable all triggers in all schemas in db
-select fn_triggerall(false);
-
-to call to enable all triggers in all schemas in db
-select fn_triggerall(true);
-';
-    
--- Function public.clean_db --
+-- Function public.clean_db -----
 CREATE OR REPLACE FUNCTION public.clean_db(
- schema_name varchar
-) RETURNS integer 
-AS $$
+    schema_name varchar)
 DECLARE
   rec RECORD;
 
@@ -194,17 +385,11 @@ BEGIN
   END LOOP;
   RETURN 1; 
 END;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION public.clean_db(
- schema_name varchar
-) IS 'This function will delete any table and function in a schema that does not belong to the standard postgis template.';
-    
--- Function public.compare_strings --
+
+-- Function public.compare_strings -----
 CREATE OR REPLACE FUNCTION public.compare_strings(
- string1 varchar
-  , string2 varchar
-) RETURNS bool 
-AS $$
+    string1 varchar,
+    string2 varchar)
   DECLARE
     rec record;
     result boolean;
@@ -220,17 +405,10 @@ AS $$
       end loop;
       return result;
   END;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION public.compare_strings(
- string1 varchar
-  , string2 varchar
-) IS 'Special string compare function.';
-    
--- Function public.get_geometry_with_srid --
+
+-- Function public.get_geometry_with_srid -----
 CREATE OR REPLACE FUNCTION public.get_geometry_with_srid(
- geom geometry
-) RETURNS geometry 
-AS $$
+    geom varbinary)
 declare
   srid_found integer;
   x float;
@@ -242,17 +420,11 @@ begin
   srid_found = (select srid from system.crs where x >= from_long and x < to_long );
   return st_transform(geom, srid_found);
 end;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION public.get_geometry_with_srid(
- geom geometry
-) IS 'This function assigns a srid found in the settings to the geometry passed as parameter. The srid is chosen based in the longitude where the centroid of the geometry is.';
-    
--- Function public.get_translation --
+
+-- Function public.get_translation -----
 CREATE OR REPLACE FUNCTION public.get_translation(
- mixed_value varchar
-  , language_code varchar
-) RETURNS varchar 
-AS $$
+    mixed_value varchar,
+    language_code varchar)
 DECLARE
   delimiter_word varchar;
   language_index integer;
@@ -273,17 +445,10 @@ BEGIN
   end if;
   return result;
 END;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION public.get_translation(
- mixed_value varchar
-  , language_code varchar
-) IS 'This function is used to translate the values that are supposed to be multilingual like the reference data values (display_value)';
-    
--- Function public.clean_db_foreign_constraints --
-CREATE OR REPLACE FUNCTION public.clean_db_foreign_constraints(
 
-) RETURNS void 
-AS $$
+-- Function public.clean_db_foreign_constraints -----
+CREATE OR REPLACE FUNCTION public.clean_db_foreign_constraints(
+    )
 declare
   rec record;
 begin
@@ -292,16 +457,10 @@ begin
     execute 'DROP INDEX IF EXISTS ' || rec.constraint_name || '_ind';
   end loop;
 end;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION public.clean_db_foreign_constraints(
 
-) IS 'This function can be used to drop all foreign key constraints from the database.';
-    
--- Function public.clean_db_triggers --
+-- Function public.clean_db_triggers -----
 CREATE OR REPLACE FUNCTION public.clean_db_triggers(
-
-) RETURNS void 
-AS $$
+    )
 declare
   rec record;
 begin
@@ -316,84 +475,67 @@ begin
       execute 'DROP FUNCTION IF EXISTS '  || rec.full_name || '() CASCADE;';
   end loop;
 end;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION public.clean_db_triggers(
 
-) IS 'This function removes all triggers and their related functions in the database. It assumes that the trigger functions are found in the public schema.';
-    
--- Sequence source.source_la_nr_seq --
-DROP SEQUENCE IF EXISTS source.source_la_nr_seq;
-CREATE SEQUENCE source.source_la_nr_seq
+-- Function source.source_la_nr_seq -----
+CREATE OR REPLACE FUNCTION source.source_la_nr_seq(
+    )
 INCREMENT 1
 MINVALUE 1
 MAXVALUE 999999999
 START 1
 CACHE 1
 CYCLE;
-COMMENT ON SEQUENCE source.source_la_nr_seq IS 'Allocates numbers 1 to 999999999 for source la number.';
-    
--- Function party.is_rightholder --
+
+-- Function party.is_rightholder -----
 CREATE OR REPLACE FUNCTION party.is_rightholder(
- id varchar
-) RETURNS boolean 
-AS $$
+    id varchar)
 BEGIN
   return (SELECT (CASE (SELECT COUNT(1) FROM administrative.party_for_rrr ap WHERE ap.party_id = id) WHEN 0 THEN false ELSE true END));
 END;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION party.is_rightholder(
- id varchar
-) IS 'Gets if a party is rightholder.';
-    
--- Sequence administrative.rrr_nr_seq --
-DROP SEQUENCE IF EXISTS administrative.rrr_nr_seq;
-CREATE SEQUENCE administrative.rrr_nr_seq
+
+-- Function administrative.rrr_nr_seq -----
+CREATE OR REPLACE FUNCTION administrative.rrr_nr_seq(
+    )
 INCREMENT 1
 MINVALUE 1
 MAXVALUE 9999
 START 1
 CACHE 1
 CYCLE;
-COMMENT ON SEQUENCE administrative.rrr_nr_seq IS 'Allocates numbers 1 to 9999 for rrr number';
-    
--- Sequence administrative.notation_reference_nr_seq --
-DROP SEQUENCE IF EXISTS administrative.notation_reference_nr_seq;
-CREATE SEQUENCE administrative.notation_reference_nr_seq
+
+-- Function administrative.notation_reference_nr_seq -----
+CREATE OR REPLACE FUNCTION administrative.notation_reference_nr_seq(
+    )
 INCREMENT 1
 MINVALUE 1
 MAXVALUE 9999
 START 1
 CACHE 1
 CYCLE;
-COMMENT ON SEQUENCE administrative.notation_reference_nr_seq IS 'Allocates numbers 1 to 9999 for reference number for notation.';
-    
--- Sequence administrative.ba_unit_first_name_part_seq --
-DROP SEQUENCE IF EXISTS administrative.ba_unit_first_name_part_seq;
-CREATE SEQUENCE administrative.ba_unit_first_name_part_seq
+
+-- Function administrative.ba_unit_first_name_part_seq -----
+CREATE OR REPLACE FUNCTION administrative.ba_unit_first_name_part_seq(
+    )
   INCREMENT 1
   MINVALUE 1
   MAXVALUE 9999
   START 1
   CACHE 1
   CYCLE;
-COMMENT ON SEQUENCE administrative.ba_unit_first_name_part_seq IS 'Allocates numbers 1 to 9999 for ba unit first name part.';
-    
--- Sequence administrative.ba_unit_last_name_part_seq --
-DROP SEQUENCE IF EXISTS administrative.ba_unit_last_name_part_seq;
-CREATE SEQUENCE administrative.ba_unit_last_name_part_seq
+
+-- Function administrative.ba_unit_last_name_part_seq -----
+CREATE OR REPLACE FUNCTION administrative.ba_unit_last_name_part_seq(
+    )
   INCREMENT 1
   MINVALUE 1
   MAXVALUE 9999
   START 1
   CACHE 1
   CYCLE;
-COMMENT ON SEQUENCE administrative.ba_unit_last_name_part_seq IS 'Allocates numbers 1 to 9999 for ba unit last name part.';
-    
--- Function administrative.get_ba_unit_pending_action --
+
+-- Function administrative.get_ba_unit_pending_action -----
 CREATE OR REPLACE FUNCTION administrative.get_ba_unit_pending_action(
- baunit_id varchar
-) RETURNS varchar 
-AS $$
+    baunit_id varchar)
 BEGIN
   return (SELECT rt.type_action_code
   FROM ((administrative.ba_unit_target bt INNER JOIN transaction.transaction t ON bt.transaction_id = t.id)
@@ -402,17 +544,11 @@ BEGIN
   WHERE bt.ba_unit_id = baunit_id AND t.status_code = 'pending'
   LIMIT 1);
 END;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION administrative.get_ba_unit_pending_action(
- baunit_id varchar
-) IS 'It returns the action that must be taken in the pending ba_unit.';
-    
--- Function administrative.ba_unit_name_is_valid --
+
+-- Function administrative.ba_unit_name_is_valid -----
 CREATE OR REPLACE FUNCTION administrative.ba_unit_name_is_valid(
- name_firstpart varchar
-  , name_lastpart varchar
-) RETURNS boolean 
-AS $$
+    name_firstpart varchar,
+    name_lastpart varchar)
 begin
   if name_firstpart is null then return false; end if;
   if name_lastpart is null then return false; end if;
@@ -420,17 +556,10 @@ begin
   if name_lastpart not similar to '[0-9]+' then return false; end if;
   return true;
 end;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION administrative.ba_unit_name_is_valid(
- name_firstpart varchar
-  , name_lastpart varchar
-) IS 'This function, checks if the name parts of the ba unit are valid.';
-    
--- Function administrative.get_calculated_area_size_action --
+
+-- Function administrative.get_calculated_area_size_action -----
 CREATE OR REPLACE FUNCTION administrative.get_calculated_area_size_action(
- co_list varchar
-) RETURNS numeric 
-AS $$
+    co_list varchar)
 BEGIN
 
   return (
@@ -440,16 +569,10 @@ BEGIN
 	  and a.spatial_unit_id = ANY(string_to_array(co_list, ' '))
          );
 END;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION administrative.get_calculated_area_size_action(
- co_list varchar
-) IS 'It returns the sum of parcel areas for the selected ba unit id if any';
-    
--- Function administrative.get_concatenated_name --
+
+-- Function administrative.get_concatenated_name -----
 CREATE OR REPLACE FUNCTION administrative.get_concatenated_name(
- baunit_id varchar
-) RETURNS varchar 
-AS $$
+    baunit_id varchar)
 declare
   rec record;
   name character varying;
@@ -484,17 +607,10 @@ BEGIN
 return name;
 END;
 
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION administrative.get_concatenated_name(
- baunit_id varchar
-) IS 'This function returns the concatenated list of spatial objects contained in a ba_unit for each rrr, if any.
-If there are no spatial objects then it only returns that it is a property.';
-    
--- Function administrative.get_parcel_ownernames --
+
+-- Function administrative.get_parcel_ownernames -----
 CREATE OR REPLACE FUNCTION administrative.get_parcel_ownernames(
- baunit_id  varchar
-) RETURNS varchar 
-AS $$
+    baunit_id  varchar)
 declare
   rec record;
   name character varying;
@@ -528,18 +644,12 @@ BEGIN
         end if;
 return name;
 END;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION administrative.get_parcel_ownernames(
- baunit_id  varchar
-) IS '';
-    
--- Function administrative.getsysregmanagement --
+
+-- Function administrative.getsysregmanagement -----
 CREATE OR REPLACE FUNCTION administrative.getsysregmanagement(
- fromdate varchar
-  , todate varchar
-  , namelastpart varchar
-) RETURNS SETOF record 
-AS $$
+    fromdate varchar,
+    todate varchar,
+    namelastpart varchar)
 DECLARE 
 
        counter   decimal:=0 ;
@@ -1150,18 +1260,10 @@ BEGIN
     end if;
     return;
 END;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION administrative.getsysregmanagement(
- fromdate varchar
-  , todate varchar
-  , namelastpart varchar
-) IS '';
-    
--- Function administrative.get_objections --
+
+-- Function administrative.get_objections -----
 CREATE OR REPLACE FUNCTION administrative.get_objections(
- namelastpart varchar
-) RETURNS varchar 
-AS $$
+    namelastpart varchar)
 declare
   rec record;
   name character varying;
@@ -1199,18 +1301,12 @@ BEGIN
         end if;
 return name;
 END;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION administrative.get_objections(
- namelastpart varchar
-) IS '';
-    
--- Function administrative.getsysregstatus --
+
+-- Function administrative.getsysregstatus -----
 CREATE OR REPLACE FUNCTION administrative.getsysregstatus(
- fromdate varchar
-  , todate varchar
-  , namelastpart varchar
-) RETURNS SETOF record 
-AS $$
+    fromdate varchar,
+    todate varchar,
+    namelastpart varchar)
 DECLARE 
 
        	block  			varchar;	
@@ -1569,20 +1665,12 @@ BEGIN
     end if;
     return;
 END;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION administrative.getsysregstatus(
- fromdate varchar
-  , todate varchar
-  , namelastpart varchar
-) IS '';
-    
--- Function administrative.getsysregprogress --
+
+-- Function administrative.getsysregprogress -----
 CREATE OR REPLACE FUNCTION administrative.getsysregprogress(
- fromdate varchar
-  , todate varchar
-  , namelastpart varchar
-) RETURNS SETOF record 
-AS $$
+    fromdate varchar,
+    todate varchar,
+    namelastpart varchar)
 DECLARE 
 
        	block  			varchar;	
@@ -2081,19 +2169,11 @@ BEGIN
     return;
 
 END;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION administrative.getsysregprogress(
- fromdate varchar
-  , todate varchar
-  , namelastpart varchar
-) IS '';
-    
--- Function cadastre.cadastre_object_name_is_valid --
+
+-- Function cadastre.cadastre_object_name_is_valid -----
 CREATE OR REPLACE FUNCTION cadastre.cadastre_object_name_is_valid(
- name_firstpart varchar
-  , name_lastpart varchar
-) RETURNS boolean 
-AS $$
+    name_firstpart varchar,
+    name_lastpart varchar)
 begin
   if name_firstpart is null then return false; end if;
   if name_lastpart is null then return false; end if;
@@ -2101,18 +2181,11 @@ begin
   if name_lastpart not similar to '(D|S)P [0-9 ]+' then return false;  end if;
   return true;
 end;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION cadastre.cadastre_object_name_is_valid(
- name_firstpart varchar
-  , name_lastpart varchar
-) IS '';
-    
--- Function cadastre.add_topo_points --
+
+-- Function cadastre.add_topo_points -----
 CREATE OR REPLACE FUNCTION cadastre.add_topo_points(
- source geometry
-  , target geometry
-) RETURNS geometry 
-AS $$
+    source varbinary,
+    target varbinary)
 declare
   rec record;
   point_location float;
@@ -2144,23 +2217,15 @@ begin
   end if;
   return target;
 end;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION cadastre.add_topo_points(
- source geometry
-  , target geometry
-) IS 'This function searches for any point in source that falls into target. If a point is found then the point it is added in the target.
-It returns the modified target.';
-    
--- Function cadastre.snap_geometry_to_geometry --
+
+-- Function cadastre.snap_geometry_to_geometry -----
 CREATE OR REPLACE FUNCTION cadastre.snap_geometry_to_geometry(
-inout geom_to_snap geometry
-  ,inout target_geom geometry
-  , snap_distance float
-  , change_target_if_needed bool
-  ,out snapped bool
-  ,out target_is_changed bool
-) RETURNS record 
-AS $$
+    geom_to_snap varbinary,
+    target_geom varbinary,
+    snap_distance float,
+    change_target_if_needed bit,
+    snapped bit,
+    target_is_changed bit)
 DECLARE
   i integer;
   nr_elements integer;
@@ -2268,55 +2333,28 @@ BEGIN
   end if;
   return;
 END;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION cadastre.snap_geometry_to_geometry(
-inout geom_to_snap geometry
-  ,inout target_geom geometry
-  , snap_distance float
-  , change_target_if_needed bool
-  ,out snapped bool
-  ,out target_is_changed bool
-) IS 'It snaps one geometry to the other. If points needs to be added they will be added.';
-    
--- Function cadastre.get_new_cadastre_object_identifier_last_part --
+
+-- Function cadastre.get_new_cadastre_object_identifier_last_part -----
 CREATE OR REPLACE FUNCTION cadastre.get_new_cadastre_object_identifier_last_part(
- geom geometry
-  , cadastre_object_type varchar
-) RETURNS varchar 
-AS $$
+    geom varbinary,
+    cadastre_object_type varchar)
 begin
   return cadastre_object_type;
 end;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION cadastre.get_new_cadastre_object_identifier_last_part(
- geom geometry
-  , cadastre_object_type varchar
-) IS 'This function generates the last part of the cadastre object identifier.
-It has to be overridden to apply the algorithm specific to the situation.';
-    
--- Function cadastre.get_new_cadastre_object_identifier_first_part --
+
+-- Function cadastre.get_new_cadastre_object_identifier_first_part -----
 CREATE OR REPLACE FUNCTION cadastre.get_new_cadastre_object_identifier_first_part(
- last_part varchar
-  , cadastre_object_type varchar
-) RETURNS varchar 
-AS $$
+    last_part varchar,
+    cadastre_object_type varchar)
 begin
   return '1';
 end;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION cadastre.get_new_cadastre_object_identifier_first_part(
- last_part varchar
-  , cadastre_object_type varchar
-) IS 'This function generates the first part of the cadastre object identifier.
-It has to be overridden to apply the algorithm specific to the situation.';
-    
--- Function cadastre.generate_spatial_unit_group_name --
+
+-- Function cadastre.generate_spatial_unit_group_name -----
 CREATE OR REPLACE FUNCTION cadastre.generate_spatial_unit_group_name(
- geom_v geometry
-  , hierarchy_level_v integer
-  , label_v varchar
-) RETURNS varchar 
-AS $$
+    geom_v varbinary,
+    hierarchy_level_v integer,
+    label_v varchar)
 declare
   name_parent varchar;  
 BEGIN
@@ -2328,30 +2366,21 @@ BEGIN
   where hierarchy_level = hierarchy_level_v - 1 and st_intersects(st_centroid(geom_v), geom)), '');
   return name_parent || '/' || label_v;
 END;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION cadastre.generate_spatial_unit_group_name(
- geom_v geometry
-  , hierarchy_level_v integer
-  , label_v varchar
-) IS 'It generates the name of a new spatial unit group.';
-    
--- Sequence application.application_nr_seq --
-DROP SEQUENCE IF EXISTS application.application_nr_seq;
-CREATE SEQUENCE application.application_nr_seq
+
+-- Function application.application_nr_seq -----
+CREATE OR REPLACE FUNCTION application.application_nr_seq(
+    )
 INCREMENT 1
 MINVALUE 1
 MAXVALUE 9999
 START 1
 CACHE 1
 CYCLE;
-COMMENT ON SEQUENCE application.application_nr_seq IS 'Allocates numbers 1 to 9999 for application number';
-    
--- Function application.getlodgement --
+
+-- Function application.getlodgement -----
 CREATE OR REPLACE FUNCTION application.getlodgement(
- fromdate varchar
-  , todate varchar
-) RETURNS SETOF record 
-AS $$
+    fromdate varchar,
+    todate varchar)
 DECLARE 
     resultType  varchar;
     resultGroup varchar;
@@ -2513,18 +2542,11 @@ where    application.service_historic.request_type_code = application.request_ty
     end if;
     return;
 END;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION application.getlodgement(
- fromdate varchar
-  , todate varchar
-) IS '';
-    
--- Function application.getlodgetiming --
+
+-- Function application.getlodgetiming -----
 CREATE OR REPLACE FUNCTION application.getlodgetiming(
- fromdate date
-  , todate date
-) RETURNS SETOF record 
-AS $$
+    fromdate date,
+    todate date)
 DECLARE 
     timeDiff integer:=0 ;
 BEGIN
@@ -2556,17 +2578,10 @@ where change_time between fromdate and todate and action_code = 'withdraw'
 order by ord;
 
 END;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION application.getlodgetiming(
- fromdate date
-  , todate date
-) IS '';
-    
--- Function application.get_concatenated_name --
+
+-- Function application.get_concatenated_name -----
 CREATE OR REPLACE FUNCTION application.get_concatenated_name(
- service_id varchar
-) RETURNS varchar 
-AS $$
+    service_id varchar)
 declare
   rec record;
   name character varying;
@@ -2608,18 +2623,11 @@ BEGIN
 return name;
 END;
 
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION application.get_concatenated_name(
- service_id varchar
-) IS 'This function returns the concatenated list of spatial objects contained in a ba_unit for each service, if any.
-If there are no spatial objects then it only returns that it is a property.';
-    
--- Function system.setPassword --
+
+-- Function system.setPassword -----
 CREATE OR REPLACE FUNCTION system.setPassword(
- usrName varchar
-  , pass varchar
-) RETURNS int 
-AS $$
+    usrName varchar,
+    pass varchar)
 DECLARE
   result int;
 BEGIN
@@ -2627,31 +2635,18 @@ BEGIN
   GET DIAGNOSTICS result = ROW_COUNT;
   return result;
 END;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION system.setPassword(
- usrName varchar
-  , pass varchar
-) IS 'This function changes the password of the user.';
-    
--- Function system.get_setting --
+
+-- Function system.get_setting -----
 CREATE OR REPLACE FUNCTION system.get_setting(
- setting_name varchar
-) RETURNS varchar 
-AS $$
+    setting_name varchar)
 begin
   return (select vl from system.setting where name= setting_name);
 end;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION system.get_setting(
- setting_name varchar
-) IS 'Gets the value of a setting.';
-    
--- Function bulk_operation.move_spatial_units --
+
+-- Function bulk_operation.move_spatial_units -----
 CREATE OR REPLACE FUNCTION bulk_operation.move_spatial_units(
- transaction_id_v varchar
-  , change_user_v varchar
-) RETURNS void 
-AS $$
+    transaction_id_v varchar,
+    change_user_v varchar)
 declare
   spatial_unit_type varchar;
 begin
@@ -2667,18 +2662,11 @@ begin
     execute bulk_operation.move_other_objects(transaction_id_v, change_user_v);
   end if;
 end;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION bulk_operation.move_spatial_units(
- transaction_id_v varchar
-  , change_user_v varchar
-) IS 'This function moves the temporary spatial units to the destination tables. This function is called after the bulk opearation transaction is created from the bulk opeation apllication.';
-    
--- Function bulk_operation.move_cadastre_objects --
+
+-- Function bulk_operation.move_cadastre_objects -----
 CREATE OR REPLACE FUNCTION bulk_operation.move_cadastre_objects(
- transaction_id_v varchar
-  , change_user_v varchar
-) RETURNS void 
-AS $$
+    transaction_id_v varchar,
+    change_user_v varchar)
 declare
   generate_name_first_part boolean;
   rec record;
@@ -2767,18 +2755,11 @@ begin
     end if;
     delete from bulk_operation.spatial_unit_temporary where transaction_id = transaction_id_v;
 end;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION bulk_operation.move_cadastre_objects(
- transaction_id_v varchar
-  , change_user_v varchar
-) IS 'This function will move the cadastre objects from the bulk operation schema to the cadastre schema.';
-    
--- Function bulk_operation.move_other_objects --
+
+-- Function bulk_operation.move_other_objects -----
 CREATE OR REPLACE FUNCTION bulk_operation.move_other_objects(
- transaction_id_v varchar
-  , change_user_v varchar
-) RETURNS void 
-AS $$
+    transaction_id_v varchar,
+    change_user_v varchar)
 declare
   other_object_type varchar;
   level_id_v varchar;
@@ -2822,18 +2803,10 @@ where level_id = ''level_id_v'' and ST_Intersects(st_transform(geom, #{srid}), S
   update transaction.transaction set status_code = 'approved', change_user = change_user_v where id = transaction_id_v;
   delete from bulk_operation.spatial_unit_temporary where transaction_id = transaction_id_v;
 end;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION bulk_operation.move_other_objects(
- transaction_id_v varchar
-  , change_user_v varchar
-) IS 'This function is used to move other kinds of spatial objects except the cadastre objects. <br/>
-The function will add a new level if need together with a new structure type if it is not found.';
-    
--- Function bulk_operation.clean_after_rollback --
-CREATE OR REPLACE FUNCTION bulk_operation.clean_after_rollback(
 
-) RETURNS void 
-AS $$
+-- Function bulk_operation.clean_after_rollback -----
+CREATE OR REPLACE FUNCTION bulk_operation.clean_after_rollback(
+    )
 declare
   rec record;
 begin
@@ -2842,11 +2815,53 @@ begin
     delete from cadastre.level where id = rec.id;
     delete from system.config_map_layer where added_from_bulk_operation and name = rec.id;
   end loop;
-end;
-$$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION bulk_operation.clean_after_rollback(
+end;--Adding trigger function to track changes--
 
-) IS 'This function is executed to run clean up tasks after the transaction of bulk operation is rolledback.';
+CREATE OR REPLACE FUNCTION f_for_trg_track_changes() RETURNS TRIGGER 
+AS $$
+BEGIN
+    IF (TG_OP = 'UPDATE') THEN
+        IF (NEW.rowversion != OLD.rowversion) THEN
+            RAISE EXCEPTION 'row_has_different_change_time';
+        END IF;
+        IF (NEW.change_action != 'd') THEN
+            NEW.change_action := 'u';
+        END IF;
+        IF OLD.rowversion > 200000000 THEN
+            NEW.rowversion = 1;
+        ELSE
+            NEW.rowversion = OLD.rowversion + 1;
+        END IF;
+    ELSIF (TG_OP = 'INSERT') THEN
+        NEW.change_action := 'i';
+        NEW.rowversion = 1;
+    END IF;
+    NEW.change_time := now();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+    --Adding trigger function to track changes--
+
+CREATE OR REPLACE FUNCTION f_for_trg_track_history() RETURNS TRIGGER 
+AS $$
+DECLARE
+    table_name varchar;
+    table_name_historic varchar;
+BEGIN
+    table_name = TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME;
+    table_name_historic = table_name || '_historic';
+	IF (TG_OP = 'DELETE') THEN
+		OLD.change_action := 'd';
+    END IF;
+    EXECUTE 'INSERT INTO ' || table_name_historic || ' SELECT $1.*;' USING OLD;
+    IF (TG_OP = 'DELETE') THEN
+        RETURN OLD;
+    ELSE
+        RETURN NEW;
+    END IF;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
     
     
 select clean_db('public');
@@ -2873,16 +2888,8 @@ CREATE TABLE document.document(
 );
 
 
-
--- Index document_index_on_rowidentifier  --
 CREATE INDEX document_index_on_rowidentifier ON document.document (rowidentifier);
-    
 
-comment on table document.document is 'An extension of the source table to contain the image files of scanned documents forming part of the land office archive including the paper documents presented or created through cadastre or registration processes
-LADM Reference Object
-FLOSS SOLA Extension
-LADM Definition
-Not Applicable';
     
 DROP TRIGGER IF EXISTS __track_changes ON document.document CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -2907,10 +2914,8 @@ CREATE TABLE document.document_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index document_historic_index_on_rowidentifier  --
 CREATE INDEX document_historic_index_on_rowidentifier ON document.document_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON document.document CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -2951,16 +2956,8 @@ CREATE TABLE source.source(
 );
 
 
-
--- Index source_index_on_rowidentifier  --
 CREATE INDEX source_index_on_rowidentifier ON source.source (rowidentifier);
-    
 
-comment on table source.source is 'Documents or recognised facts providing the basis for the recording of a registration, cadastre change, right, responsibility or administrative action performed by the land office
-LADM Reference Object 
-LA_Source
-LADM Definition
-Not defined';
     
 DROP TRIGGER IF EXISTS __track_changes ON source.source CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -2999,10 +2996,8 @@ CREATE TABLE source.source_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index source_historic_index_on_rowidentifier  --
 CREATE INDEX source_historic_index_on_rowidentifier ON source.source_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON source.source CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -3026,16 +3021,8 @@ CREATE TABLE source.archive(
 );
 
 
-
--- Index archive_index_on_rowidentifier  --
 CREATE INDEX archive_index_on_rowidentifier ON source.archive (rowidentifier);
-    
 
-comment on table source.archive is 'Details about collections of sources (documents) in both paper and digital formats
-LADM Reference Object
-FLOSS SOLA Extension
-LADM Definition
-Not Applicable';
     
 DROP TRIGGER IF EXISTS __track_changes ON source.archive CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -3057,10 +3044,8 @@ CREATE TABLE source.archive_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index archive_historic_index_on_rowidentifier  --
 CREATE INDEX archive_historic_index_on_rowidentifier ON source.archive_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON source.archive CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -3081,12 +3066,6 @@ CREATE TABLE source.presentation_form_type(
     CONSTRAINT presentation_form_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table source.presentation_form_type is 'Reference Table / Code list for the different formats of sources (documents) that are presented to the land office
-LADM Reference Object 
-CI_PresentationFormCode
-LADM Definition
-The type of document;';
     
  -- Data for the table source.presentation_form_type -- 
 insert into source.presentation_form_type(code, display_value, status) values('documentDigital', 'Digital Document::::Documento Digitale', 'c');
@@ -3120,12 +3099,6 @@ CREATE TABLE source.availability_status_type(
     CONSTRAINT availability_status_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table source.availability_status_type is 'Reference Table / Code list of source (document) availability status type
-LADM Reference Object 
-LA_AvailabilityStatusType
-LADM Definition
-Not Defined';
     
  -- Data for the table source.availability_status_type -- 
 insert into source.availability_status_type(code, display_value, status) values('archiveConverted', 'Converted::::Convertito', 'c');
@@ -3151,12 +3124,6 @@ CREATE TABLE source.administrative_source_type(
     CONSTRAINT administrative_source_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table source.administrative_source_type is 'Reference Table / Code list of administrative source types
-LADM Reference Object 
-LA_AdministrativeSourceType
-LADM Definition
-Not Defined';
     
  -- Data for the table source.administrative_source_type -- 
 insert into source.administrative_source_type(code, display_value, status) values('agriConsent', 'Agricultural Consent::::Permesso Agricolo', 'x');
@@ -3202,8 +3169,6 @@ CREATE TABLE transaction.reg_status_type(
     CONSTRAINT reg_status_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table transaction.reg_status_type is 'This table has the list of statuses that a registration about Rights/Restrictions/ Responsabilities/ Cadastral objects / Sources can have.	';
     
  -- Data for the table transaction.reg_status_type -- 
 insert into transaction.reg_status_type(code, display_value, status) values('current', 'Current', 'c');
@@ -3235,12 +3200,8 @@ CREATE TABLE transaction.transaction(
 );
 
 
-
--- Index transaction_index_on_rowidentifier  --
 CREATE INDEX transaction_index_on_rowidentifier ON transaction.transaction (rowidentifier);
-    
 
-comment on table transaction.transaction is 'Changes in the system come by transactions. A transaction is initiated (optionally) by a service. By introducing the concept of transaction it can be traced how the changes in the administrative schema came. Also by approving the transaction we can approve changes or by rejecting a transaction we can remove the pending changes that came with it and restore the previous state of the administrative schema.';
     
 DROP TRIGGER IF EXISTS __track_changes ON transaction.transaction CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -3266,10 +3227,8 @@ CREATE TABLE transaction.transaction_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index transaction_historic_index_on_rowidentifier  --
 CREATE INDEX transaction_historic_index_on_rowidentifier ON transaction.transaction_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON transaction.transaction CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -3303,16 +3262,8 @@ CREATE TABLE application.service(
 );
 
 
-
--- Index service_index_on_rowidentifier  --
 CREATE INDEX service_index_on_rowidentifier ON application.service (rowidentifier);
-    
 
-comment on table application.service is 'Various forms of services provided by a land office
-LADM Reference Object
-FLOSS SOLA Extension
-LADM Definition
-Not Applicable';
     
 DROP TRIGGER IF EXISTS __track_changes ON application.service CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -3344,20 +3295,14 @@ CREATE TABLE application.service_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index service_historic_index_on_rowidentifier  --
 CREATE INDEX service_historic_index_on_rowidentifier ON application.service_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON application.service CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
    ON application.service FOR EACH ROW
    EXECUTE PROCEDURE f_for_trg_track_history();
     
- -- Extra script for the table application.service -- 
-CREATE INDEX service_application_historic_ind ON application.service_historic (application_id);
-
-
 --Table application.application ----
 DROP TABLE IF EXISTS application.application CASCADE;
 CREATE TABLE application.application(
@@ -3369,11 +3314,11 @@ CREATE TABLE application.application(
     expected_completion_date date NOT NULL DEFAULT (now()),
     assignee_id varchar(40),
     assigned_datetime timestamp,
-    location GEOMETRY
-        CONSTRAINT enforce_dims_location CHECK (st_ndims(location) = 2),
-        CONSTRAINT enforce_srid_location CHECK (st_srid(location) = 2193),
-        CONSTRAINT enforce_valid_location CHECK (st_isvalid(location)),
-        CONSTRAINT enforce_geotype_location CHECK (geometrytype(location) = 'MULTIPOINT'::text OR location IS NULL),
+    location GEOMETRY,
+    CONSTRAINT enforce_dims_location CHECK (st_ndims(location) = 2),
+    
+            CONSTRAINT enforce_srid_location CHECK (st_srid(location) = 2193),
+    CONSTRAINT enforce_geotype_location CHECK (geometrytype(location) = 'MULTIPOINT'::text OR location IS NULL),
     services_fee numeric(20, 2) NOT NULL DEFAULT (0),
     tax numeric(20, 2) NOT NULL DEFAULT (0),
     total_fee numeric(20, 2) NOT NULL DEFAULT (0),
@@ -3396,19 +3341,9 @@ CREATE TABLE application.application(
 );
 
 
-
--- Index application_index_on_location  --
-CREATE INDEX application_index_on_location ON application.application using gist(location);
-    
--- Index application_index_on_rowidentifier  --
 CREATE INDEX application_index_on_rowidentifier ON application.application (rowidentifier);
-    
+CREATE INDEX application_index_on_location ON application.application USING gist (location);
 
-comment on table application.application is 'An application is a bundle of services that a client or customer wants from the registration office.
-LADM Reference Object
-FLOSS SOLA Extension
-LADM Definition
-Not Applicable';
     
 DROP TRIGGER IF EXISTS __track_changes ON application.application CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -3428,11 +3363,11 @@ CREATE TABLE application.application_historic
     expected_completion_date date,
     assignee_id varchar(40),
     assigned_datetime timestamp,
-    location GEOMETRY
-        CONSTRAINT enforce_dims_location CHECK (st_ndims(location) = 2),
-        CONSTRAINT enforce_srid_location CHECK (st_srid(location) = 2193),
-        CONSTRAINT enforce_valid_location CHECK (st_isvalid(location)),
-        CONSTRAINT enforce_geotype_location CHECK (geometrytype(location) = 'MULTIPOINT'::text OR location IS NULL),
+    location GEOMETRY,
+    CONSTRAINT enforce_dims_location CHECK (st_ndims(location) = 2),
+    
+            CONSTRAINT enforce_srid_location CHECK (st_srid(location) = 2193),
+    CONSTRAINT enforce_geotype_location CHECK (geometrytype(location) = 'MULTIPOINT'::text OR location IS NULL),
     services_fee numeric(20, 2),
     tax numeric(20, 2),
     total_fee numeric(20, 2),
@@ -3450,23 +3385,15 @@ CREATE TABLE application.application_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index application_historic_index_on_location  --
-CREATE INDEX application_historic_index_on_location ON application.application_historic using gist(location);
-    
--- Index application_historic_index_on_rowidentifier  --
 CREATE INDEX application_historic_index_on_rowidentifier ON application.application_historic (rowidentifier);
-    
+CREATE INDEX application_historic_index_on_location ON application.application_historic USING gist (location);
+
 
 DROP TRIGGER IF EXISTS __track_history ON application.application CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
    ON application.application FOR EACH ROW
    EXECUTE PROCEDURE f_for_trg_track_history();
     
- -- Extra script for the table application.application -- 
-CREATE INDEX application_historic_id_ind ON application.application_historic (id);
-
-
 --Table party.party ----
 DROP TABLE IF EXISTS party.party CASCADE;
 CREATE TABLE party.party(
@@ -3500,17 +3427,8 @@ CREATE TABLE party.party(
 );
 
 
-
--- Index party_index_on_rowidentifier  --
 CREATE INDEX party_index_on_rowidentifier ON party.party (rowidentifier);
-    
 
-comment on table party.party is 'An individual or group of individual people or a non-person organisation that is associated in some way with land office services.
-Also refer to LADM Definition
-LADM Reference Object 
-LA_Party
-LADM Definition
-Registered and identified as a constituent of a group party.';
     
 DROP TRIGGER IF EXISTS __track_changes ON party.party CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -3547,10 +3465,8 @@ CREATE TABLE party.party_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index party_historic_index_on_rowidentifier  --
 CREATE INDEX party_historic_index_on_rowidentifier ON party.party_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON party.party CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -3571,12 +3487,6 @@ CREATE TABLE party.party_type(
     CONSTRAINT party_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table party.party_type is 'Reference Table / Code list of party types
-LADM Reference Object 
-LA_
-LADM Definition
-The type of party';
     
  -- Data for the table party.party_type -- 
 insert into party.party_type(code, display_value, status) values('naturalPerson', 'Natural Person::::Persona Naturale', 'c');
@@ -3604,16 +3514,8 @@ CREATE TABLE address.address(
 );
 
 
-
--- Index address_index_on_rowidentifier  --
 CREATE INDEX address_index_on_rowidentifier ON address.address (rowidentifier);
-    
 
-comment on table address.address is 'Describes a postal or location address
-LADM Reference Object
-FLOSS SOLA Extension
-LADM Definition
-Not Applicable';
     
 DROP TRIGGER IF EXISTS __track_changes ON address.address CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -3636,10 +3538,8 @@ CREATE TABLE address.address_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index address_historic_index_on_rowidentifier  --
 CREATE INDEX address_historic_index_on_rowidentifier ON address.address_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON address.address CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -3660,12 +3560,6 @@ CREATE TABLE party.communication_type(
     CONSTRAINT communication_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table party.communication_type is 'Reference Table / Code list for the different means of communication (from land office to their clients)
-LADM Reference Object 
-FLOSS SOLA Extension
-LADM Definition
-Not Applicable';
     
  -- Data for the table party.communication_type -- 
 insert into party.communication_type(code, display_value, status) values('eMail', 'e-Mail::::E-mail', 'c');
@@ -3690,12 +3584,6 @@ CREATE TABLE party.id_type(
     CONSTRAINT id_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table party.id_type is 'Reference Table / Code list for the types of the documents that can be used to identify a party.
-LADM Reference Object 
-FLOSS SOLA Extension
-LADM Definition
-Not Applicable';
     
  -- Data for the table party.id_type -- 
 insert into party.id_type(code, display_value, status, description) values('nationalID', 'National ID::::Carta Identita Nazionale', 'c', 'The main person ID that exists in the country::::Il principale documento identificativo nel paese');
@@ -3718,8 +3606,6 @@ CREATE TABLE party.gender_type(
     CONSTRAINT gender_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table party.gender_type is 'The gender type list a party can have.';
     
  -- Data for the table party.gender_type -- 
 insert into party.gender_type(code, display_value, status) values('male', 'Male', 'c');
@@ -3750,12 +3636,8 @@ CREATE TABLE system.appuser(
 );
 
 
-
--- Index appuser_index_on_rowidentifier  --
 CREATE INDEX appuser_index_on_rowidentifier ON system.appuser (rowidentifier);
-    
 
-comment on table system.appuser is 'This table contains list of users, who has an access to the application, can login and do certain actions.';
     
 DROP TRIGGER IF EXISTS __track_changes ON system.appuser CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -3782,10 +3664,8 @@ CREATE TABLE system.appuser_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index appuser_historic_index_on_rowidentifier  --
 CREATE INDEX appuser_historic_index_on_rowidentifier ON system.appuser_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON system.appuser CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -3812,12 +3692,6 @@ CREATE TABLE application.application_action_type(
     CONSTRAINT application_action_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table application.application_action_type is 'Reference Table / Code list of action types that are performed in relation to an (land office) application for services
-LADM Reference Object 
-FLOSS SOLA Extension
-LADM Definition
-Not Applicable';
     
  -- Data for the table application.application_action_type -- 
 insert into application.application_action_type(code, display_value, status_to_set, status, description) values('lodge', 'Lodgement Notice Prepared::::Ricevuta della Registrazione Preparata', 'lodged', 'c', 'Lodgement notice is prepared (action is automatically logged when application details are saved for the first time::::La ricevuta della registrazione pronta');
@@ -3852,12 +3726,6 @@ CREATE TABLE application.application_status_type(
     CONSTRAINT application_status_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table application.application_status_type is 'Reference Table / Code list for application status type
-LADM Reference Object 
-FLOSS SOLA Extension
-LADM Definition
-Not Applicable';
     
  -- Data for the table application.application_status_type -- 
 insert into application.application_status_type(code, display_value, status, description) values('lodged', 'Lodged::::Registrata', 'c', 'Application has been lodged and officially received by land office::::La pratica registrata e formalmente ricevuta da ufficio territoriale');
@@ -3891,12 +3759,6 @@ CREATE TABLE application.request_type(
     CONSTRAINT request_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table application.request_type is 'Reference Table / Code list of the (service) request types received by a land office
-LADM Reference Object 
-FLOSS SOLA Extension
-LADM Definition
-Not Applicable';
     
  -- Data for the table application.request_type -- 
 insert into application.request_type(code, request_category_code, display_value, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required) values('cadastreChange', 'registrationServices', 'Change to Cadastre::::Cambio del Catasto', 'c', 30, 25.00, 0.10, 0, 1);
@@ -3958,12 +3820,6 @@ CREATE TABLE application.request_category_type(
     CONSTRAINT request_category_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table application.request_category_type is 'Reference Table / Code list for categories of (service) requests received by a land office
-LADM Reference Object 
-FLOSS SOLA Extension
-LADM Definition
-Not Applicable';
     
  -- Data for the table application.request_category_type -- 
 insert into application.request_category_type(code, display_value, status) values('registrationServices', 'Registration Services::::Servizi di Registrazione', 'c');
@@ -3989,13 +3845,6 @@ CREATE TABLE administrative.rrr_type(
     CONSTRAINT rrr_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table administrative.rrr_type is 'Reference Table / Code list of rrr types
-LADM Reference Object 
-LA_RightType, LA_RestrictionType &
-LA_ResponsibilityType
-LADM Definition
-The type of right/restriction/responsibility';
     
  -- Data for the table administrative.rrr_type -- 
 insert into administrative.rrr_type(code, rrr_group_type_code, display_value, is_primary, share_check, party_required, status) values('agriActivity', 'rights', 'Agriculture Activity::::Attivita Agricola', false, true, true, 'x');
@@ -4043,12 +3892,6 @@ CREATE TABLE administrative.rrr_group_type(
     CONSTRAINT rrr_group_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table administrative.rrr_group_type is 'Reference Table / Code list for different categories of LA_RRR
-LADM Reference Object 
-LA_Responsibility, LA_Right, LA_Restriction as specialisations of LA_RR
-LADM Definition
-Not Defined';
     
  -- Data for the table administrative.rrr_group_type -- 
 insert into administrative.rrr_group_type(code, display_value, status) values('rights', 'Rights::::Diritti', 'c');
@@ -4071,8 +3914,6 @@ CREATE TABLE application.type_action(
     CONSTRAINT type_action_pkey PRIMARY KEY (code)
 );
 
-
-comment on table application.type_action is 'This is the coded list of allowed operations on rrr and ba_unit. Present values are: new, remove, vary.';
     
  -- Data for the table application.type_action -- 
 insert into application.type_action(code, display_value, status) values('new', 'New::::Nuovo', 'c');
@@ -4095,8 +3936,6 @@ CREATE TABLE application.service_status_type(
     CONSTRAINT service_status_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table application.service_status_type is 'It is the status that a service can have.';
     
  -- Data for the table application.service_status_type -- 
 insert into application.service_status_type(code, display_value, status, description) values('lodged', 'Lodged::::Registrata', 'c', 'Application for a service has been lodged and officially received by land office::::La pratica per un servizio, registrata e formalmente ricevuta da ufficio territoriale');
@@ -4121,12 +3960,6 @@ CREATE TABLE application.service_action_type(
     CONSTRAINT service_action_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table application.service_action_type is 'Reference Table / Code list of types of action that a land officer can perform to complete a service request
-LADM Reference Object 
-FLOSS SOLA Extension
-LADM Definition
-Not Applicable';
     
  -- Data for the table application.service_action_type -- 
 insert into application.service_action_type(code, display_value, status_to_set, status, description) values('lodge', 'Lodge::::Registrata', 'lodged', 'c', 'Application for service(s) is officially received by land office (action is automatically logged when application is saved for the first time)::::La pratica per i servizi formalmente ricevuta da ufficio territoriale');
@@ -4151,9 +3984,6 @@ CREATE TABLE transaction.transaction_status_type(
     CONSTRAINT transaction_status_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table transaction.transaction_status_type is 'This table has the list of statuses that a transaction can take.
-Potential values are current, pending, rejected.';
     
  -- Data for the table transaction.transaction_status_type -- 
 insert into transaction.transaction_status_type(code, display_value, status) values('approved', 'Approved::::Approvata', 'c');
@@ -4181,16 +4011,8 @@ CREATE TABLE source.spatial_source(
 );
 
 
-
--- Index spatial_source_index_on_rowidentifier  --
 CREATE INDEX spatial_source_index_on_rowidentifier ON source.spatial_source (rowidentifier);
-    
 
-comment on table source.spatial_source is 'Refer to LADM Definition
-LADM Reference Object 
-LA_Source
-LADM Definition 
-A spatial source may be the final (sometimes formal) documents, or all documents related to a survey. Sometimes serveral documents are the result of a single survey. A spatial source may be official or not (ie a registered survey plan or an aerial photograph).';
     
 DROP TRIGGER IF EXISTS __track_changes ON source.spatial_source CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -4213,10 +4035,8 @@ CREATE TABLE source.spatial_source_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index spatial_source_historic_index_on_rowidentifier  --
 CREATE INDEX spatial_source_historic_index_on_rowidentifier ON source.spatial_source_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON source.spatial_source CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -4237,12 +4057,6 @@ CREATE TABLE source.spatial_source_type(
     CONSTRAINT spatial_source_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table source.spatial_source_type is 'Reference Table / Code list of spatial source type
-LADM Reference Object 
-LA_SpatialSourceType
-LADM Definition
-Type of Spatial Source';
     
  -- Data for the table source.spatial_source_type -- 
 insert into source.spatial_source_type(code, display_value, status) values('fieldSketch', 'Field Sketch::::Schizzo Campo', 'c');
@@ -4273,16 +4087,8 @@ CREATE TABLE source.spatial_source_measurement(
 );
 
 
-
--- Index spatial_source_measurement_index_on_rowidentifier  --
 CREATE INDEX spatial_source_measurement_index_on_rowidentifier ON source.spatial_source_measurement (rowidentifier);
-    
 
-comment on table source.spatial_source_measurement is 'Refer to LADM Definition
-LADM Reference Object 
-OM_Observation
-LADM Definition
-The observations, and measurements, as a basis for mapping, and as a basis for historical reconstruction of the location of (parts of) the spatial unit in the field';
     
 DROP TRIGGER IF EXISTS __track_changes ON source.spatial_source_measurement CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -4304,10 +4110,8 @@ CREATE TABLE source.spatial_source_measurement_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index spatial_source_measurement_historic_index_on_rowidentifier  --
 CREATE INDEX spatial_source_measurement_historic_index_on_rowidentifier ON source.spatial_source_measurement_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON source.spatial_source_measurement CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -4332,12 +4136,8 @@ CREATE TABLE source.power_of_attorney(
 );
 
 
-
--- Index power_of_attorney_index_on_rowidentifier  --
 CREATE INDEX power_of_attorney_index_on_rowidentifier ON source.power_of_attorney (rowidentifier);
-    
 
-comment on table source.power_of_attorney is '';
     
 DROP TRIGGER IF EXISTS __track_changes ON source.power_of_attorney CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -4360,10 +4160,8 @@ CREATE TABLE source.power_of_attorney_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index power_of_attorney_historic_index_on_rowidentifier  --
 CREATE INDEX power_of_attorney_historic_index_on_rowidentifier ON source.power_of_attorney_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON source.power_of_attorney CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -4387,16 +4185,8 @@ CREATE TABLE party.group_party(
 );
 
 
-
--- Index group_party_index_on_rowidentifier  --
 CREATE INDEX group_party_index_on_rowidentifier ON party.group_party (rowidentifier);
-    
 
-comment on table party.group_party is 'Refer to LADM Definition
-LADM Reference Object 
-LA_GroupParty
-LADM Definition
-Any number of parties, forming together a distinct entity, with each party identified';
     
 DROP TRIGGER IF EXISTS __track_changes ON party.group_party CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -4418,10 +4208,8 @@ CREATE TABLE party.group_party_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index group_party_historic_index_on_rowidentifier  --
 CREATE INDEX group_party_historic_index_on_rowidentifier ON party.group_party_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON party.group_party CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -4442,12 +4230,6 @@ CREATE TABLE party.group_party_type(
     CONSTRAINT group_party_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table party.group_party_type is 'Reference Table / Code list to identify different types of groups being a party to some form of land office transaction
-LADM Reference Object 
-LA_
-LADM Definition
-Not Defined';
     
  -- Data for the table party.group_party_type -- 
 insert into party.group_party_type(code, display_value, status) values('tribe', 'Tribe::::Tribu', 'x');
@@ -4475,16 +4257,8 @@ CREATE TABLE party.party_member(
 );
 
 
-
--- Index party_member_index_on_rowidentifier  --
 CREATE INDEX party_member_index_on_rowidentifier ON party.party_member (rowidentifier);
-    
 
-comment on table party.party_member is 'Refer to LADM Definition
-LADM Reference Object 
-LA_PartyMember
-LADM Definition
-A member belonging to a party.';
     
 DROP TRIGGER IF EXISTS __track_changes ON party.party_member CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -4507,10 +4281,8 @@ CREATE TABLE party.party_member_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index party_member_historic_index_on_rowidentifier  --
 CREATE INDEX party_member_historic_index_on_rowidentifier ON party.party_member_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON party.party_member CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -4534,16 +4306,8 @@ CREATE TABLE party.party_role(
 );
 
 
-
--- Index party_role_index_on_rowidentifier  --
 CREATE INDEX party_role_index_on_rowidentifier ON party.party_role (rowidentifier);
-    
 
-comment on table party.party_role is 'Records the role(s) a party has in land office processes
-LADM Reference Object
-FLOSS SOLA Extension LA_Party.role
-LADM Definition
-The role of a party in the data update and maintenance process';
     
 DROP TRIGGER IF EXISTS __track_changes ON party.party_role CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -4565,10 +4329,8 @@ CREATE TABLE party.party_role_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index party_role_historic_index_on_rowidentifier  --
 CREATE INDEX party_role_historic_index_on_rowidentifier ON party.party_role_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON party.party_role CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -4589,12 +4351,6 @@ CREATE TABLE party.party_role_type(
     CONSTRAINT party_role_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table party.party_role_type is 'Reference Table / Code list of types of party roles
-LADM Reference Object 
-LA_
-LADM Definition
-The role of the party in the data update and maintenance process;';
     
  -- Data for the table party.party_role_type -- 
 insert into party.party_role_type(code, display_value, status) values('conveyor', 'Conveyor::::Trasportatore', 'x');
@@ -4641,17 +4397,8 @@ CREATE TABLE administrative.ba_unit(
 );
 
 
-
--- Index ba_unit_index_on_rowidentifier  --
 CREATE INDEX ba_unit_index_on_rowidentifier ON administrative.ba_unit (rowidentifier);
-    
 
-comment on table administrative.ba_unit is 'Refer to LADM Definition
-LADM Reference Object 
-LA_BAUnit
-LADM Definition
-Basic administrative units (abbreviated as baunits), are needed, among other things, to register ‘basic property units’, which consist of several spatial units, belonging to a party, under the same right (a right must be ''homogeneous'' over the whole baunit).
-.';
     
 DROP TRIGGER IF EXISTS __track_changes ON administrative.ba_unit CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -4680,10 +4427,8 @@ CREATE TABLE administrative.ba_unit_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index ba_unit_historic_index_on_rowidentifier  --
 CREATE INDEX ba_unit_historic_index_on_rowidentifier ON administrative.ba_unit_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON administrative.ba_unit CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -4704,12 +4449,6 @@ CREATE TABLE administrative.ba_unit_type(
     CONSTRAINT ba_unit_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table administrative.ba_unit_type is 'Reference Table / Code list for types of BA Units
-LADM Reference Object 
-LA_BAUnitType
-LADM Definition
-Not Defined';
     
  -- Data for the table administrative.ba_unit_type -- 
 insert into administrative.ba_unit_type(code, display_value, description, status) values('basicPropertyUnit', 'Basic Property Unit::::Unita base Proprieta', 'This is the basic property unit that is used by default', 'c');
@@ -4749,16 +4488,8 @@ CREATE TABLE administrative.rrr(
 );
 
 
-
--- Index rrr_index_on_rowidentifier  --
 CREATE INDEX rrr_index_on_rowidentifier ON administrative.rrr (rowidentifier);
-    
 
-comment on table administrative.rrr is 'Refer to LADM Definition
-LADM Reference Object 
-LA_RRR
-LADM Definition
-A right, restriction or responsibility.';
     
 DROP TRIGGER IF EXISTS __track_changes ON administrative.rrr CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -4793,10 +4524,8 @@ CREATE TABLE administrative.rrr_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index rrr_historic_index_on_rowidentifier  --
 CREATE INDEX rrr_historic_index_on_rowidentifier ON administrative.rrr_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON administrative.rrr CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -4817,12 +4546,6 @@ CREATE TABLE administrative.mortgage_type(
     CONSTRAINT mortgage_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table administrative.mortgage_type is 'Reference Table / Code list for types of mortgage
-LADM Reference Object 
-LA_
-LADM Definition
-Not Defined';
     
  -- Data for the table administrative.mortgage_type -- 
 insert into administrative.mortgage_type(code, display_value, status) values('levelPayment', 'Level Payment::::Livello Pagamento', 'c');
@@ -4848,18 +4571,8 @@ CREATE TABLE administrative.mortgage_isbased_in_rrr(
 );
 
 
-
--- Index mortgage_isbased_in_rrr_index_on_rowidentifier  --
 CREATE INDEX mortgage_isbased_in_rrr_index_on_rowidentifier ON administrative.mortgage_isbased_in_rrr (rowidentifier);
-    
 
-comment on table administrative.mortgage_isbased_in_rrr is 'This is left in the data model but is not implemented, because the right that is basis for the mortgage can be implied by the primary right for ba_unit.
-
-LADM Reference Object 
-LA_Mortgage - LA_Right Relationship
-
-LADM Definition
-Identifies the right that is the basis for a mortgage.';
     
 DROP TRIGGER IF EXISTS __track_changes ON administrative.mortgage_isbased_in_rrr CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -4881,10 +4594,8 @@ CREATE TABLE administrative.mortgage_isbased_in_rrr_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index mortgage_isbased_in_rrr_historic_index_on_rowidentifier  --
 CREATE INDEX mortgage_isbased_in_rrr_historic_index_on_rowidentifier ON administrative.mortgage_isbased_in_rrr_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON administrative.mortgage_isbased_in_rrr CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -4908,16 +4619,8 @@ CREATE TABLE administrative.source_describes_rrr(
 );
 
 
-
--- Index source_describes_rrr_index_on_rowidentifier  --
 CREATE INDEX source_describes_rrr_index_on_rowidentifier ON administrative.source_describes_rrr (rowidentifier);
-    
 
-comment on table administrative.source_describes_rrr is 'Implements the many-to-many relationship identifying administrative source instances with rrr instances
-LADM Reference Object 
-Relationship LA_AdministrativeSource - LA_RRR
-LADM Definition
-Not Defined';
     
 DROP TRIGGER IF EXISTS __track_changes ON administrative.source_describes_rrr CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -4939,10 +4642,8 @@ CREATE TABLE administrative.source_describes_rrr_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index source_describes_rrr_historic_index_on_rowidentifier  --
 CREATE INDEX source_describes_rrr_historic_index_on_rowidentifier ON administrative.source_describes_rrr_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON administrative.source_describes_rrr CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -4966,16 +4667,8 @@ CREATE TABLE administrative.source_describes_ba_unit(
 );
 
 
-
--- Index source_describes_ba_unit_index_on_rowidentifier  --
 CREATE INDEX source_describes_ba_unit_index_on_rowidentifier ON administrative.source_describes_ba_unit (rowidentifier);
-    
 
-comment on table administrative.source_describes_ba_unit is 'Implements the many-to-many relationship identifying administrative source instances with ba_unit instances
-LADM Reference Object 
-Relationship LA_AdministrativeSource - LA_BAUnit
-LADM Definition
-Not Defined';
     
 DROP TRIGGER IF EXISTS __track_changes ON administrative.source_describes_ba_unit CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -4997,10 +4690,8 @@ CREATE TABLE administrative.source_describes_ba_unit_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index source_describes_ba_unit_historic_index_on_rowidentifier  --
 CREATE INDEX source_describes_ba_unit_historic_index_on_rowidentifier ON administrative.source_describes_ba_unit_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON administrative.source_describes_ba_unit CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -5025,16 +4716,8 @@ CREATE TABLE administrative.required_relationship_baunit(
 );
 
 
-
--- Index required_relationship_baunit_index_on_rowidentifier  --
 CREATE INDEX required_relationship_baunit_index_on_rowidentifier ON administrative.required_relationship_baunit (rowidentifier);
-    
 
-comment on table administrative.required_relationship_baunit is 'Refer to LADM Definition
-LADM Reference Object 
-LA_RequiredRelationshipBAUnit
-LADM Definition
-A required relationship between basic administrative units.';
     
 DROP TRIGGER IF EXISTS __track_changes ON administrative.required_relationship_baunit CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -5057,10 +4740,8 @@ CREATE TABLE administrative.required_relationship_baunit_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index required_relationship_baunit_historic_index_on_rowidentifier  --
 CREATE INDEX required_relationship_baunit_historic_index_on_rowidentifier ON administrative.required_relationship_baunit_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON administrative.required_relationship_baunit CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -5081,8 +4762,6 @@ CREATE TABLE administrative.ba_unit_rel_type(
     CONSTRAINT ba_unit_rel_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table administrative.ba_unit_rel_type is 'The types of relation two ba_units can have between each other.';
     
  -- Data for the table administrative.ba_unit_rel_type -- 
 insert into administrative.ba_unit_rel_type(code, display_value, description, status) values('priorTitle', 'Prior Title', 'Prior Title', 'c');
@@ -5099,15 +4778,15 @@ CREATE TABLE cadastre.spatial_unit(
     surface_relation_code varchar(20) NOT NULL DEFAULT ('onSurface'),
     level_id varchar(40),
     land_use_code varchar(20),
-    reference_point GEOMETRY
-        CONSTRAINT enforce_dims_reference_point CHECK (st_ndims(reference_point) = 2),
-        CONSTRAINT enforce_srid_reference_point CHECK (st_srid(reference_point) = 2193),
-        CONSTRAINT enforce_valid_reference_point CHECK (st_isvalid(reference_point)),
-        CONSTRAINT enforce_geotype_reference_point CHECK (geometrytype(reference_point) = 'POINT'::text OR reference_point IS NULL),
-    geom GEOMETRY
-        CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
-        CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
-        CONSTRAINT enforce_valid_geom CHECK (st_isvalid(geom)),
+    reference_point GEOMETRY,
+    CONSTRAINT enforce_dims_reference_point CHECK (st_ndims(reference_point) = 2),
+    
+            CONSTRAINT enforce_srid_reference_point CHECK (st_srid(reference_point) = 2193),
+    CONSTRAINT enforce_geotype_reference_point CHECK (geometrytype(reference_point) = 'POINT'::text OR reference_point IS NULL),
+    geom GEOMETRY,
+    CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
+    
+            CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
     transaction_id varchar(40),
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
     rowversion integer NOT NULL DEFAULT (0),
@@ -5121,22 +4800,10 @@ CREATE TABLE cadastre.spatial_unit(
 );
 
 
-
--- Index spatial_unit_index_on_reference_point  --
-CREATE INDEX spatial_unit_index_on_reference_point ON cadastre.spatial_unit using gist(reference_point);
-    
--- Index spatial_unit_index_on_geom  --
-CREATE INDEX spatial_unit_index_on_geom ON cadastre.spatial_unit using gist(geom);
-    
--- Index spatial_unit_index_on_rowidentifier  --
 CREATE INDEX spatial_unit_index_on_rowidentifier ON cadastre.spatial_unit (rowidentifier);
-    
+CREATE INDEX spatial_unit_index_on_reference_point ON cadastre.spatial_unit USING gist (reference_point);
+CREATE INDEX spatial_unit_index_on_geom ON cadastre.spatial_unit USING gist (geom);
 
-comment on table cadastre.spatial_unit is 'Single area (or multiple areas) of land or water, or a single volume (or multiple volumes) of space
-LADM Reference Object 
-LA_SpatialUnit
-LADM Definition
-Not Defined';
     
 DROP TRIGGER IF EXISTS __track_changes ON cadastre.spatial_unit CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -5154,15 +4821,15 @@ CREATE TABLE cadastre.spatial_unit_historic
     surface_relation_code varchar(20),
     level_id varchar(40),
     land_use_code varchar(20),
-    reference_point GEOMETRY
-        CONSTRAINT enforce_dims_reference_point CHECK (st_ndims(reference_point) = 2),
-        CONSTRAINT enforce_srid_reference_point CHECK (st_srid(reference_point) = 2193),
-        CONSTRAINT enforce_valid_reference_point CHECK (st_isvalid(reference_point)),
-        CONSTRAINT enforce_geotype_reference_point CHECK (geometrytype(reference_point) = 'POINT'::text OR reference_point IS NULL),
-    geom GEOMETRY
-        CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
-        CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
-        CONSTRAINT enforce_valid_geom CHECK (st_isvalid(geom)),
+    reference_point GEOMETRY,
+    CONSTRAINT enforce_dims_reference_point CHECK (st_ndims(reference_point) = 2),
+    
+            CONSTRAINT enforce_srid_reference_point CHECK (st_srid(reference_point) = 2193),
+    CONSTRAINT enforce_geotype_reference_point CHECK (geometrytype(reference_point) = 'POINT'::text OR reference_point IS NULL),
+    geom GEOMETRY,
+    CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
+    
+            CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
     transaction_id varchar(40),
     rowidentifier varchar(40),
     rowversion integer,
@@ -5172,16 +4839,10 @@ CREATE TABLE cadastre.spatial_unit_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index spatial_unit_historic_index_on_reference_point  --
-CREATE INDEX spatial_unit_historic_index_on_reference_point ON cadastre.spatial_unit_historic using gist(reference_point);
-    
--- Index spatial_unit_historic_index_on_geom  --
-CREATE INDEX spatial_unit_historic_index_on_geom ON cadastre.spatial_unit_historic using gist(geom);
-    
--- Index spatial_unit_historic_index_on_rowidentifier  --
 CREATE INDEX spatial_unit_historic_index_on_rowidentifier ON cadastre.spatial_unit_historic (rowidentifier);
-    
+CREATE INDEX spatial_unit_historic_index_on_reference_point ON cadastre.spatial_unit_historic USING gist (reference_point);
+CREATE INDEX spatial_unit_historic_index_on_geom ON cadastre.spatial_unit_historic USING gist (geom);
+
 
 DROP TRIGGER IF EXISTS __track_history ON cadastre.spatial_unit CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -5202,12 +4863,6 @@ CREATE TABLE cadastre.dimension_type(
     CONSTRAINT dimension_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table cadastre.dimension_type is 'Reference Table / Code list to identify the number of dimensions used to define a spatial unit
-LADM Reference Object 
-LA_DimensionType
-LADM Definition
-Not Defined';
     
  -- Data for the table cadastre.dimension_type -- 
 insert into cadastre.dimension_type(code, display_value, status) values('0D', '0D::::0D', 'c');
@@ -5232,12 +4887,6 @@ CREATE TABLE cadastre.surface_relation_type(
     CONSTRAINT surface_relation_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table cadastre.surface_relation_type is 'Refer to LADM Definition
-LADM Reference Object 
-LA_SurfaceRelationType
-LADM Definition
-The  type of relation that exists between spatial objects and space (surface)';
     
  -- Data for the table cadastre.surface_relation_type -- 
 insert into cadastre.surface_relation_type(code, display_value, status) values('above', 'Above::::Sopra', 'x');
@@ -5267,16 +4916,8 @@ CREATE TABLE cadastre.level(
 );
 
 
-
--- Index level_index_on_rowidentifier  --
 CREATE INDEX level_index_on_rowidentifier ON cadastre.level (rowidentifier);
-    
 
-comment on table cadastre.level is 'Refer to LADM Definition
-LADM Reference Object 
-LA_Level
-LADM Definition
-A set of spatial units, with a geometric, and/or topologic, and/or thematic coherence EXAMPLE 1 One level for an urban cadastre and another level for a rural cadastre. EXAMPLE 2 One level with rights and another level with restrictions. EXAMPLE 3 One level with formal rights, a second level with informal rights and a third level with customary rights. EXAMPLE 4 One level with point based spatial units, a second level with line based spatial units, and a third level with polygon based spatial units..';
     
 DROP TRIGGER IF EXISTS __track_changes ON cadastre.level CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -5301,10 +4942,8 @@ CREATE TABLE cadastre.level_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index level_historic_index_on_rowidentifier  --
 CREATE INDEX level_historic_index_on_rowidentifier ON cadastre.level_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON cadastre.level CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -5330,12 +4969,6 @@ CREATE TABLE cadastre.register_type(
     CONSTRAINT register_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table cadastre.register_type is 'Reference Table / Code list for register types
-LADM Reference Object 
-LA_
-LADM Definition
-The register type of the content of the [map] level';
     
  -- Data for the table cadastre.register_type -- 
 insert into cadastre.register_type(code, display_value, status) values('all', 'All::::Tutti', 'c');
@@ -5361,12 +4994,6 @@ CREATE TABLE cadastre.structure_type(
     CONSTRAINT structure_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table cadastre.structure_type is 'Reference Table / Code list of different forms of spatial unit definitions (within a level)
-LADM Reference Object 
-LA_StructureType
-LADM Definition
-Not Defined';
     
  -- Data for the table cadastre.structure_type -- 
 insert into cadastre.structure_type(code, display_value, status) values('point', 'Point::::Punto', 'c');
@@ -5392,12 +5019,6 @@ CREATE TABLE cadastre.level_content_type(
     CONSTRAINT level_content_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table cadastre.level_content_type is 'Reference Table / Code list for the content type of a level
-LADM Reference Object 
-LA_
-LADM Definition
-The type of the content of the level;';
     
  -- Data for the table cadastre.level_content_type -- 
 insert into cadastre.level_content_type(code, display_value, status) values('building', 'Building::::Costruzione', 'x');
@@ -5424,11 +5045,11 @@ CREATE TABLE cadastre.cadastre_object(
     name_firstpart varchar(20) NOT NULL,
     name_lastpart varchar(50) NOT NULL,
     status_code varchar(20) NOT NULL DEFAULT ('pending'),
-    geom_polygon GEOMETRY
-        CONSTRAINT enforce_dims_geom_polygon CHECK (st_ndims(geom_polygon) = 2),
-        CONSTRAINT enforce_srid_geom_polygon CHECK (st_srid(geom_polygon) = 2193),
-        CONSTRAINT enforce_valid_geom_polygon CHECK (st_isvalid(geom_polygon)),
-        CONSTRAINT enforce_geotype_geom_polygon CHECK (geometrytype(geom_polygon) = 'POLYGON'::text OR geom_polygon IS NULL),
+    geom_polygon GEOMETRY,
+    CONSTRAINT enforce_dims_geom_polygon CHECK (st_ndims(geom_polygon) = 2),
+    
+            CONSTRAINT enforce_srid_geom_polygon CHECK (st_srid(geom_polygon) = 2193),
+    CONSTRAINT enforce_geotype_geom_polygon CHECK (geometrytype(geom_polygon) = 'POLYGON'::text OR geom_polygon IS NULL),
     transaction_id varchar(40) NOT NULL,
     land_use_code varchar(255) DEFAULT ('residential'),
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
@@ -5444,15 +5065,9 @@ CREATE TABLE cadastre.cadastre_object(
 );
 
 
-
--- Index cadastre_object_index_on_geom_polygon  --
-CREATE INDEX cadastre_object_index_on_geom_polygon ON cadastre.cadastre_object using gist(geom_polygon);
-    
--- Index cadastre_object_index_on_rowidentifier  --
 CREATE INDEX cadastre_object_index_on_rowidentifier ON cadastre.cadastre_object (rowidentifier);
-    
+CREATE INDEX cadastre_object_index_on_geom_polygon ON cadastre.cadastre_object USING gist (geom_polygon);
 
-comment on table cadastre.cadastre_object is 'It is a specialisation of spatial_unit. Cadastre objects are targeted from cadastre change and redefine cadastre processes.';
     
 DROP TRIGGER IF EXISTS __track_changes ON cadastre.cadastre_object CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -5473,11 +5088,11 @@ CREATE TABLE cadastre.cadastre_object_historic
     name_firstpart varchar(20),
     name_lastpart varchar(50),
     status_code varchar(20),
-    geom_polygon GEOMETRY
-        CONSTRAINT enforce_dims_geom_polygon CHECK (st_ndims(geom_polygon) = 2),
-        CONSTRAINT enforce_srid_geom_polygon CHECK (st_srid(geom_polygon) = 2193),
-        CONSTRAINT enforce_valid_geom_polygon CHECK (st_isvalid(geom_polygon)),
-        CONSTRAINT enforce_geotype_geom_polygon CHECK (geometrytype(geom_polygon) = 'POLYGON'::text OR geom_polygon IS NULL),
+    geom_polygon GEOMETRY,
+    CONSTRAINT enforce_dims_geom_polygon CHECK (st_ndims(geom_polygon) = 2),
+    
+            CONSTRAINT enforce_srid_geom_polygon CHECK (st_srid(geom_polygon) = 2193),
+    CONSTRAINT enforce_geotype_geom_polygon CHECK (geometrytype(geom_polygon) = 'POLYGON'::text OR geom_polygon IS NULL),
     transaction_id varchar(40),
     land_use_code varchar(255),
     rowidentifier varchar(40),
@@ -5488,13 +5103,9 @@ CREATE TABLE cadastre.cadastre_object_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index cadastre_object_historic_index_on_geom_polygon  --
-CREATE INDEX cadastre_object_historic_index_on_geom_polygon ON cadastre.cadastre_object_historic using gist(geom_polygon);
-    
--- Index cadastre_object_historic_index_on_rowidentifier  --
 CREATE INDEX cadastre_object_historic_index_on_rowidentifier ON cadastre.cadastre_object_historic (rowidentifier);
-    
+CREATE INDEX cadastre_object_historic_index_on_geom_polygon ON cadastre.cadastre_object_historic USING gist (geom_polygon);
+
 
 DROP TRIGGER IF EXISTS __track_history ON cadastre.cadastre_object CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -5516,8 +5127,6 @@ CREATE TABLE cadastre.cadastre_object_type(
     CONSTRAINT cadastre_object_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table cadastre.cadastre_object_type is 'The type of spatial object. This defines the specialisation of the spatial unit. It can be a parcel, building_unit or backgroup data like a road etc.';
     
  -- Data for the table cadastre.cadastre_object_type -- 
 insert into cadastre.cadastre_object_type(code, display_value, status, in_topology) values('parcel', 'Parcel::::Particella', 'c', true);
@@ -5540,12 +5149,6 @@ CREATE TABLE cadastre.building_unit_type(
     CONSTRAINT building_unit_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table cadastre.building_unit_type is 'Reference Table / Code list for types of building units
-LADM Reference Object 
-LA_BuildingUnitType
-LADM Definition
-Not Defined';
     
  -- Data for the table cadastre.building_unit_type -- 
 insert into cadastre.building_unit_type(code, display_value, status) values('individual', 'Individual::::Individuale', 'c');
@@ -5570,17 +5173,8 @@ CREATE TABLE administrative.ba_unit_contains_spatial_unit(
 );
 
 
-
--- Index ba_unit_contains_spatial_unit_index_on_rowidentifier  --
 CREATE INDEX ba_unit_contains_spatial_unit_index_on_rowidentifier ON administrative.ba_unit_contains_spatial_unit (rowidentifier);
-    
 
-comment on table administrative.ba_unit_contains_spatial_unit is 'Defines the spatial unit(s) associated with ba_unit
-LADM Reference Object 
-Implements the many to many relationship LA_BAUnit - LA_SpatialUnit
-LADM Definition 
-Not defined
-.';
     
 DROP TRIGGER IF EXISTS __track_changes ON administrative.ba_unit_contains_spatial_unit CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -5602,10 +5196,8 @@ CREATE TABLE administrative.ba_unit_contains_spatial_unit_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index ba_unit_contains_spatial_unit_historic_index_on_rowidentifier  --
 CREATE INDEX ba_unit_contains_spatial_unit_historic_index_on_rowidentifier ON administrative.ba_unit_contains_spatial_unit_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON administrative.ba_unit_contains_spatial_unit CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -5623,12 +5215,6 @@ CREATE TABLE administrative.ba_unit_as_party(
     CONSTRAINT ba_unit_as_party_pkey PRIMARY KEY (ba_unit_id,party_id)
 );
 
-
-comment on table administrative.ba_unit_as_party is 'LADM Definition
-LA_BAUnit is associated to class LA_Party (a party may be an basic administrative unit, indicated by the attribute ‘partyType’).
-
-LADM Reference Object
-Association baunitAsParty';
     
 --Table administrative.notation ----
 DROP TABLE IF EXISTS administrative.notation CASCADE;
@@ -5653,12 +5239,8 @@ CREATE TABLE administrative.notation(
 );
 
 
-
--- Index notation_index_on_rowidentifier  --
 CREATE INDEX notation_index_on_rowidentifier ON administrative.notation (rowidentifier);
-    
 
-comment on table administrative.notation is 'All notations related with a baunit are maintained here. Every notation gets a reference number and it is always associated with a transaction.';
     
 DROP TRIGGER IF EXISTS __track_changes ON administrative.notation CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -5686,10 +5268,8 @@ CREATE TABLE administrative.notation_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index notation_historic_index_on_rowidentifier  --
 CREATE INDEX notation_historic_index_on_rowidentifier ON administrative.notation_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON administrative.notation CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -5715,12 +5295,8 @@ CREATE TABLE administrative.ba_unit_area(
 );
 
 
-
--- Index ba_unit_area_index_on_rowidentifier  --
 CREATE INDEX ba_unit_area_index_on_rowidentifier ON administrative.ba_unit_area (rowidentifier);
-    
 
-comment on table administrative.ba_unit_area is '';
     
 DROP TRIGGER IF EXISTS __track_changes ON administrative.ba_unit_area CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -5744,10 +5320,8 @@ CREATE TABLE administrative.ba_unit_area_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index ba_unit_area_historic_index_on_rowidentifier  --
 CREATE INDEX ba_unit_area_historic_index_on_rowidentifier ON administrative.ba_unit_area_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON administrative.ba_unit_area CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -5768,12 +5342,6 @@ CREATE TABLE cadastre.area_type(
     CONSTRAINT area_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table cadastre.area_type is 'Reference Table / Code list of the different versions or means of calculated area
-LADM Reference Object 
-LA_AreaType
-LADM Definition
-Not Defined';
     
  -- Data for the table cadastre.area_type -- 
 insert into cadastre.area_type(code, display_value, status) values('calculatedArea', 'Calculated Area::::Area calcolata', 'c');
@@ -5802,14 +5370,8 @@ CREATE TABLE administrative.rrr_share(
 );
 
 
-
--- Index rrr_share_index_on_rowidentifier  --
 CREATE INDEX rrr_share_index_on_rowidentifier ON administrative.rrr_share (rowidentifier);
-    
 
-comment on table administrative.rrr_share is 'If parties are involved in an rrr then they partecipate in shares. There is at least one share for each rrr.
-LADM Reference Object 
-LA_RRR.share';
     
 DROP TRIGGER IF EXISTS __track_changes ON administrative.rrr_share CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -5833,10 +5395,8 @@ CREATE TABLE administrative.rrr_share_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index rrr_share_historic_index_on_rowidentifier  --
 CREATE INDEX rrr_share_historic_index_on_rowidentifier ON administrative.rrr_share_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON administrative.rrr_share CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -5861,12 +5421,8 @@ CREATE TABLE administrative.party_for_rrr(
 );
 
 
-
--- Index party_for_rrr_index_on_rowidentifier  --
 CREATE INDEX party_for_rrr_index_on_rowidentifier ON administrative.party_for_rrr (rowidentifier);
-    
 
-comment on table administrative.party_for_rrr is 'There may be parties involved in an RRR. Parties can be involved also in Shares.';
     
 DROP TRIGGER IF EXISTS __track_changes ON administrative.party_for_rrr CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -5889,10 +5445,8 @@ CREATE TABLE administrative.party_for_rrr_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index party_for_rrr_historic_index_on_rowidentifier  --
 CREATE INDEX party_for_rrr_historic_index_on_rowidentifier ON administrative.party_for_rrr_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON administrative.party_for_rrr CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -5916,12 +5470,8 @@ CREATE TABLE administrative.ba_unit_target(
 );
 
 
-
--- Index ba_unit_target_index_on_rowidentifier  --
 CREATE INDEX ba_unit_target_index_on_rowidentifier ON administrative.ba_unit_target (rowidentifier);
-    
 
-comment on table administrative.ba_unit_target is 'This table holds information about which ba units are being targets of a transaction. It is used when a ba unit is marked for cancellation.';
     
 DROP TRIGGER IF EXISTS __track_changes ON administrative.ba_unit_target CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -5943,10 +5493,8 @@ CREATE TABLE administrative.ba_unit_target_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index ba_unit_target_historic_index_on_rowidentifier  --
 CREATE INDEX ba_unit_target_historic_index_on_rowidentifier ON administrative.ba_unit_target_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON administrative.ba_unit_target CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -5971,16 +5519,8 @@ CREATE TABLE cadastre.spatial_value_area(
 );
 
 
-
--- Index spatial_value_area_index_on_rowidentifier  --
 CREATE INDEX spatial_value_area_index_on_rowidentifier ON cadastre.spatial_value_area (rowidentifier);
-    
 
-comment on table cadastre.spatial_value_area is 'Refer to LADM Definition
-LADM Reference Object 
-LA_AreaValue
-LADM Definition
-The area (size) of  2 dimension spatial unit';
     
 DROP TRIGGER IF EXISTS __track_changes ON cadastre.spatial_value_area CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -6003,10 +5543,8 @@ CREATE TABLE cadastre.spatial_value_area_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index spatial_value_area_historic_index_on_rowidentifier  --
 CREATE INDEX spatial_value_area_historic_index_on_rowidentifier ON cadastre.spatial_value_area_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON cadastre.spatial_value_area CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -6030,16 +5568,8 @@ CREATE TABLE cadastre.spatial_unit_address(
 );
 
 
-
--- Index spatial_unit_address_index_on_rowidentifier  --
 CREATE INDEX spatial_unit_address_index_on_rowidentifier ON cadastre.spatial_unit_address (rowidentifier);
-    
 
-comment on table cadastre.spatial_unit_address is 'Implements the many-to-many relationship between address and spatial_unit
-LADM Reference Object
-FLOSS SOLA Extension
-LADM Definition
-Not Applicable';
     
 DROP TRIGGER IF EXISTS __track_changes ON cadastre.spatial_unit_address CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -6061,10 +5591,8 @@ CREATE TABLE cadastre.spatial_unit_address_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index spatial_unit_address_historic_index_on_rowidentifier  --
 CREATE INDEX spatial_unit_address_historic_index_on_rowidentifier ON cadastre.spatial_unit_address_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON cadastre.spatial_unit_address CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -6078,16 +5606,16 @@ CREATE TABLE cadastre.spatial_unit_group(
     hierarchy_level integer NOT NULL,
     label varchar(50),
     name varchar(50),
-    reference_point GEOMETRY
-        CONSTRAINT enforce_dims_reference_point CHECK (st_ndims(reference_point) = 2),
-        CONSTRAINT enforce_srid_reference_point CHECK (st_srid(reference_point) = 2193),
-        CONSTRAINT enforce_valid_reference_point CHECK (st_isvalid(reference_point)),
-        CONSTRAINT enforce_geotype_reference_point CHECK (geometrytype(reference_point) = 'POINT'::text OR reference_point IS NULL),
-    geom GEOMETRY
-        CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
-        CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
-        CONSTRAINT enforce_valid_geom CHECK (st_isvalid(geom)),
-        CONSTRAINT enforce_geotype_geom CHECK (geometrytype(geom) = 'POLYGON'::text OR geom IS NULL),
+    reference_point GEOMETRY,
+    CONSTRAINT enforce_dims_reference_point CHECK (st_ndims(reference_point) = 2),
+    
+            CONSTRAINT enforce_srid_reference_point CHECK (st_srid(reference_point) = 2193),
+    CONSTRAINT enforce_geotype_reference_point CHECK (geometrytype(reference_point) = 'POINT'::text OR reference_point IS NULL),
+    geom GEOMETRY,
+    CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
+    
+            CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
+    CONSTRAINT enforce_geotype_geom CHECK (geometrytype(geom) = 'POLYGON'::text OR geom IS NULL),
     found_in_spatial_unit_group_id varchar(40),
     seq_nr integer,
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
@@ -6102,22 +5630,10 @@ CREATE TABLE cadastre.spatial_unit_group(
 );
 
 
-
--- Index spatial_unit_group_index_on_reference_point  --
-CREATE INDEX spatial_unit_group_index_on_reference_point ON cadastre.spatial_unit_group using gist(reference_point);
-    
--- Index spatial_unit_group_index_on_geom  --
-CREATE INDEX spatial_unit_group_index_on_geom ON cadastre.spatial_unit_group using gist(geom);
-    
--- Index spatial_unit_group_index_on_rowidentifier  --
 CREATE INDEX spatial_unit_group_index_on_rowidentifier ON cadastre.spatial_unit_group (rowidentifier);
-    
+CREATE INDEX spatial_unit_group_index_on_reference_point ON cadastre.spatial_unit_group USING gist (reference_point);
+CREATE INDEX spatial_unit_group_index_on_geom ON cadastre.spatial_unit_group USING gist (geom);
 
-comment on table cadastre.spatial_unit_group is 'Refer to LADM Definition
-LADM Reference Object 
-LA_SpatialUnitGroup
-LADM Definition
-Any number of spatial units, considered as a single entity';
     
 DROP TRIGGER IF EXISTS __track_changes ON cadastre.spatial_unit_group CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -6133,16 +5649,16 @@ CREATE TABLE cadastre.spatial_unit_group_historic
     hierarchy_level integer,
     label varchar(50),
     name varchar(50),
-    reference_point GEOMETRY
-        CONSTRAINT enforce_dims_reference_point CHECK (st_ndims(reference_point) = 2),
-        CONSTRAINT enforce_srid_reference_point CHECK (st_srid(reference_point) = 2193),
-        CONSTRAINT enforce_valid_reference_point CHECK (st_isvalid(reference_point)),
-        CONSTRAINT enforce_geotype_reference_point CHECK (geometrytype(reference_point) = 'POINT'::text OR reference_point IS NULL),
-    geom GEOMETRY
-        CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
-        CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
-        CONSTRAINT enforce_valid_geom CHECK (st_isvalid(geom)),
-        CONSTRAINT enforce_geotype_geom CHECK (geometrytype(geom) = 'POLYGON'::text OR geom IS NULL),
+    reference_point GEOMETRY,
+    CONSTRAINT enforce_dims_reference_point CHECK (st_ndims(reference_point) = 2),
+    
+            CONSTRAINT enforce_srid_reference_point CHECK (st_srid(reference_point) = 2193),
+    CONSTRAINT enforce_geotype_reference_point CHECK (geometrytype(reference_point) = 'POINT'::text OR reference_point IS NULL),
+    geom GEOMETRY,
+    CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
+    
+            CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
+    CONSTRAINT enforce_geotype_geom CHECK (geometrytype(geom) = 'POLYGON'::text OR geom IS NULL),
     found_in_spatial_unit_group_id varchar(40),
     seq_nr integer,
     rowidentifier varchar(40),
@@ -6153,16 +5669,10 @@ CREATE TABLE cadastre.spatial_unit_group_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index spatial_unit_group_historic_index_on_reference_point  --
-CREATE INDEX spatial_unit_group_historic_index_on_reference_point ON cadastre.spatial_unit_group_historic using gist(reference_point);
-    
--- Index spatial_unit_group_historic_index_on_geom  --
-CREATE INDEX spatial_unit_group_historic_index_on_geom ON cadastre.spatial_unit_group_historic using gist(geom);
-    
--- Index spatial_unit_group_historic_index_on_rowidentifier  --
 CREATE INDEX spatial_unit_group_historic_index_on_rowidentifier ON cadastre.spatial_unit_group_historic (rowidentifier);
-    
+CREATE INDEX spatial_unit_group_historic_index_on_reference_point ON cadastre.spatial_unit_group_historic USING gist (reference_point);
+CREATE INDEX spatial_unit_group_historic_index_on_geom ON cadastre.spatial_unit_group_historic USING gist (geom);
+
 
 DROP TRIGGER IF EXISTS __track_history ON cadastre.spatial_unit_group CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -6186,16 +5696,8 @@ CREATE TABLE cadastre.spatial_unit_in_group(
 );
 
 
-
--- Index spatial_unit_in_group_index_on_rowidentifier  --
 CREATE INDEX spatial_unit_in_group_index_on_rowidentifier ON cadastre.spatial_unit_in_group (rowidentifier);
-    
 
-comment on table cadastre.spatial_unit_in_group is 'Implements the many-to-may relationship between spatial_unit_group and spatial_unit
-LADM Reference Object 
-Relationship LA_SpatialUnitGroup - LA_SpatialUnit
-LADM Definition
-Not defined';
     
 DROP TRIGGER IF EXISTS __track_changes ON cadastre.spatial_unit_in_group CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -6217,10 +5719,8 @@ CREATE TABLE cadastre.spatial_unit_in_group_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index spatial_unit_in_group_historic_index_on_rowidentifier  --
 CREATE INDEX spatial_unit_in_group_historic_index_on_rowidentifier ON cadastre.spatial_unit_in_group_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON cadastre.spatial_unit_in_group CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -6234,10 +5734,10 @@ CREATE TABLE cadastre.legal_space_utility_network(
     ext_physical_network_id varchar(40),
     status_code varchar(20),
     type_code varchar(20) NOT NULL,
-    geom GEOMETRY
-        CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
-        CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
-        CONSTRAINT enforce_valid_geom CHECK (st_isvalid(geom)),
+    geom GEOMETRY,
+    CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
+    
+            CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
     rowversion integer NOT NULL DEFAULT (0),
     change_action char(1) NOT NULL DEFAULT ('i'),
@@ -6250,19 +5750,9 @@ CREATE TABLE cadastre.legal_space_utility_network(
 );
 
 
-
--- Index legal_space_utility_network_index_on_geom  --
-CREATE INDEX legal_space_utility_network_index_on_geom ON cadastre.legal_space_utility_network using gist(geom);
-    
--- Index legal_space_utility_network_index_on_rowidentifier  --
 CREATE INDEX legal_space_utility_network_index_on_rowidentifier ON cadastre.legal_space_utility_network (rowidentifier);
-    
+CREATE INDEX legal_space_utility_network_index_on_geom ON cadastre.legal_space_utility_network USING gist (geom);
 
-comment on table cadastre.legal_space_utility_network is 'Refer to LADM Definition
-LADM Reference Object 
-LA_LegalSpaceUtilityNetwork
-LADM Definition
-A utility network concerns legal space, which does not necessarily coincide with the physical space of a utility network..';
     
 DROP TRIGGER IF EXISTS __track_changes ON cadastre.legal_space_utility_network CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -6278,10 +5768,10 @@ CREATE TABLE cadastre.legal_space_utility_network_historic
     ext_physical_network_id varchar(40),
     status_code varchar(20),
     type_code varchar(20),
-    geom GEOMETRY
-        CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
-        CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
-        CONSTRAINT enforce_valid_geom CHECK (st_isvalid(geom)),
+    geom GEOMETRY,
+    CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
+    
+            CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
     rowidentifier varchar(40),
     rowversion integer,
     change_action char(1),
@@ -6290,13 +5780,9 @@ CREATE TABLE cadastre.legal_space_utility_network_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index legal_space_utility_network_historic_index_on_geom  --
-CREATE INDEX legal_space_utility_network_historic_index_on_geom ON cadastre.legal_space_utility_network_historic using gist(geom);
-    
--- Index legal_space_utility_network_historic_index_on_rowidentifier  --
 CREATE INDEX legal_space_utility_network_historic_index_on_rowidentifier ON cadastre.legal_space_utility_network_historic (rowidentifier);
-    
+CREATE INDEX legal_space_utility_network_historic_index_on_geom ON cadastre.legal_space_utility_network_historic USING gist (geom);
+
 
 DROP TRIGGER IF EXISTS __track_history ON cadastre.legal_space_utility_network CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -6317,12 +5803,6 @@ CREATE TABLE cadastre.utility_network_status_type(
     CONSTRAINT utility_network_status_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table cadastre.utility_network_status_type is 'Reference Table / Code list for the status of utility networks
-LADM Reference Object 
-LA_UtilityNetworkStatusType
-LADM Definition
-Status of the type of utility network';
     
  -- Data for the table cadastre.utility_network_status_type -- 
 insert into cadastre.utility_network_status_type(code, display_value, status) values('inUse', 'In Use::::In uso', 'c');
@@ -6345,12 +5825,6 @@ CREATE TABLE cadastre.utility_network_type(
     CONSTRAINT utility_network_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table cadastre.utility_network_type is 'Reference Table / Code list of utility network types
-LADM Reference Object 
-LA_
-LADM Definition
-Not Defined';
     
  -- Data for the table cadastre.utility_network_type -- 
 insert into cadastre.utility_network_type(code, display_value, status) values('chemical', 'Chemicals::::Cimica', 'c');
@@ -6368,11 +5842,11 @@ DROP TABLE IF EXISTS cadastre.cadastre_object_target CASCADE;
 CREATE TABLE cadastre.cadastre_object_target(
     transaction_id varchar(40) NOT NULL,
     cadastre_object_id varchar(40) NOT NULL,
-    geom_polygon GEOMETRY
-        CONSTRAINT enforce_dims_geom_polygon CHECK (st_ndims(geom_polygon) = 2),
-        CONSTRAINT enforce_srid_geom_polygon CHECK (st_srid(geom_polygon) = 2193),
-        CONSTRAINT enforce_valid_geom_polygon CHECK (st_isvalid(geom_polygon)),
-        CONSTRAINT enforce_geotype_geom_polygon CHECK (geometrytype(geom_polygon) = 'POLYGON'::text OR geom_polygon IS NULL),
+    geom_polygon GEOMETRY,
+    CONSTRAINT enforce_dims_geom_polygon CHECK (st_ndims(geom_polygon) = 2),
+    
+            CONSTRAINT enforce_srid_geom_polygon CHECK (st_srid(geom_polygon) = 2193),
+    CONSTRAINT enforce_geotype_geom_polygon CHECK (geometrytype(geom_polygon) = 'POLYGON'::text OR geom_polygon IS NULL),
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
     rowversion integer NOT NULL DEFAULT (0),
     change_action char(1) NOT NULL DEFAULT ('i'),
@@ -6385,15 +5859,9 @@ CREATE TABLE cadastre.cadastre_object_target(
 );
 
 
-
--- Index cadastre_object_target_index_on_geom_polygon  --
-CREATE INDEX cadastre_object_target_index_on_geom_polygon ON cadastre.cadastre_object_target using gist(geom_polygon);
-    
--- Index cadastre_object_target_index_on_rowidentifier  --
 CREATE INDEX cadastre_object_target_index_on_rowidentifier ON cadastre.cadastre_object_target (rowidentifier);
-    
+CREATE INDEX cadastre_object_target_index_on_geom_polygon ON cadastre.cadastre_object_target USING gist (geom_polygon);
 
-comment on table cadastre.cadastre_object_target is 'This is a cadastre object that is a target of a cadastre related transaction. If the transaction is not yet approved or cancelled, the cadastre object gets a pending status.';
     
 DROP TRIGGER IF EXISTS __track_changes ON cadastre.cadastre_object_target CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -6407,11 +5875,11 @@ CREATE TABLE cadastre.cadastre_object_target_historic
 (
     transaction_id varchar(40),
     cadastre_object_id varchar(40),
-    geom_polygon GEOMETRY
-        CONSTRAINT enforce_dims_geom_polygon CHECK (st_ndims(geom_polygon) = 2),
-        CONSTRAINT enforce_srid_geom_polygon CHECK (st_srid(geom_polygon) = 2193),
-        CONSTRAINT enforce_valid_geom_polygon CHECK (st_isvalid(geom_polygon)),
-        CONSTRAINT enforce_geotype_geom_polygon CHECK (geometrytype(geom_polygon) = 'POLYGON'::text OR geom_polygon IS NULL),
+    geom_polygon GEOMETRY,
+    CONSTRAINT enforce_dims_geom_polygon CHECK (st_ndims(geom_polygon) = 2),
+    
+            CONSTRAINT enforce_srid_geom_polygon CHECK (st_srid(geom_polygon) = 2193),
+    CONSTRAINT enforce_geotype_geom_polygon CHECK (geometrytype(geom_polygon) = 'POLYGON'::text OR geom_polygon IS NULL),
     rowidentifier varchar(40),
     rowversion integer,
     change_action char(1),
@@ -6420,13 +5888,9 @@ CREATE TABLE cadastre.cadastre_object_target_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index cadastre_object_target_historic_index_on_geom_polygon  --
-CREATE INDEX cadastre_object_target_historic_index_on_geom_polygon ON cadastre.cadastre_object_target_historic using gist(geom_polygon);
-    
--- Index cadastre_object_target_historic_index_on_rowidentifier  --
 CREATE INDEX cadastre_object_target_historic_index_on_rowidentifier ON cadastre.cadastre_object_target_historic (rowidentifier);
-    
+CREATE INDEX cadastre_object_target_historic_index_on_geom_polygon ON cadastre.cadastre_object_target_historic USING gist (geom_polygon);
+
 
 DROP TRIGGER IF EXISTS __track_history ON cadastre.cadastre_object_target CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -6440,16 +5904,16 @@ CREATE TABLE cadastre.survey_point(
     id varchar(40) NOT NULL,
     boundary bool NOT NULL DEFAULT (true),
     linked bool NOT NULL DEFAULT (false),
-    geom GEOMETRY NOT NULL
-        CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
-        CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
-        CONSTRAINT enforce_valid_geom CHECK (st_isvalid(geom)),
-        CONSTRAINT enforce_geotype_geom CHECK (geometrytype(geom) = 'POINT'::text OR geom IS NULL),
-    original_geom GEOMETRY NOT NULL
-        CONSTRAINT enforce_dims_original_geom CHECK (st_ndims(original_geom) = 2),
-        CONSTRAINT enforce_srid_original_geom CHECK (st_srid(original_geom) = 2193),
-        CONSTRAINT enforce_valid_original_geom CHECK (st_isvalid(original_geom)),
-        CONSTRAINT enforce_geotype_original_geom CHECK (geometrytype(original_geom) = 'POINT'::text OR original_geom IS NULL),
+    geom GEOMETRY NOT NULL,
+    CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
+    
+            CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
+    CONSTRAINT enforce_geotype_geom CHECK (geometrytype(geom) = 'POINT'::text OR geom IS NULL),
+    original_geom GEOMETRY NOT NULL,
+    CONSTRAINT enforce_dims_original_geom CHECK (st_ndims(original_geom) = 2),
+    
+            CONSTRAINT enforce_srid_original_geom CHECK (st_srid(original_geom) = 2193),
+    CONSTRAINT enforce_geotype_original_geom CHECK (geometrytype(original_geom) = 'POINT'::text OR original_geom IS NULL),
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
     rowversion integer NOT NULL DEFAULT (0),
     change_action char(1) NOT NULL DEFAULT ('i'),
@@ -6462,18 +5926,10 @@ CREATE TABLE cadastre.survey_point(
 );
 
 
-
--- Index survey_point_index_on_geom  --
-CREATE INDEX survey_point_index_on_geom ON cadastre.survey_point using gist(geom);
-    
--- Index survey_point_index_on_original_geom  --
-CREATE INDEX survey_point_index_on_original_geom ON cadastre.survey_point using gist(original_geom);
-    
--- Index survey_point_index_on_rowidentifier  --
 CREATE INDEX survey_point_index_on_rowidentifier ON cadastre.survey_point (rowidentifier);
-    
+CREATE INDEX survey_point_index_on_geom ON cadastre.survey_point USING gist (geom);
+CREATE INDEX survey_point_index_on_original_geom ON cadastre.survey_point USING gist (original_geom);
 
-comment on table cadastre.survey_point is '';
     
 DROP TRIGGER IF EXISTS __track_changes ON cadastre.survey_point CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -6489,16 +5945,16 @@ CREATE TABLE cadastre.survey_point_historic
     id varchar(40),
     boundary bool,
     linked bool,
-    geom GEOMETRY
-        CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
-        CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
-        CONSTRAINT enforce_valid_geom CHECK (st_isvalid(geom)),
-        CONSTRAINT enforce_geotype_geom CHECK (geometrytype(geom) = 'POINT'::text OR geom IS NULL),
-    original_geom GEOMETRY
-        CONSTRAINT enforce_dims_original_geom CHECK (st_ndims(original_geom) = 2),
-        CONSTRAINT enforce_srid_original_geom CHECK (st_srid(original_geom) = 2193),
-        CONSTRAINT enforce_valid_original_geom CHECK (st_isvalid(original_geom)),
-        CONSTRAINT enforce_geotype_original_geom CHECK (geometrytype(original_geom) = 'POINT'::text OR original_geom IS NULL),
+    geom GEOMETRY,
+    CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
+    
+            CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
+    CONSTRAINT enforce_geotype_geom CHECK (geometrytype(geom) = 'POINT'::text OR geom IS NULL),
+    original_geom GEOMETRY,
+    CONSTRAINT enforce_dims_original_geom CHECK (st_ndims(original_geom) = 2),
+    
+            CONSTRAINT enforce_srid_original_geom CHECK (st_srid(original_geom) = 2193),
+    CONSTRAINT enforce_geotype_original_geom CHECK (geometrytype(original_geom) = 'POINT'::text OR original_geom IS NULL),
     rowidentifier varchar(40),
     rowversion integer,
     change_action char(1),
@@ -6507,16 +5963,10 @@ CREATE TABLE cadastre.survey_point_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index survey_point_historic_index_on_geom  --
-CREATE INDEX survey_point_historic_index_on_geom ON cadastre.survey_point_historic using gist(geom);
-    
--- Index survey_point_historic_index_on_original_geom  --
-CREATE INDEX survey_point_historic_index_on_original_geom ON cadastre.survey_point_historic using gist(original_geom);
-    
--- Index survey_point_historic_index_on_rowidentifier  --
 CREATE INDEX survey_point_historic_index_on_rowidentifier ON cadastre.survey_point_historic (rowidentifier);
-    
+CREATE INDEX survey_point_historic_index_on_geom ON cadastre.survey_point_historic USING gist (geom);
+CREATE INDEX survey_point_historic_index_on_original_geom ON cadastre.survey_point_historic USING gist (original_geom);
+
 
 DROP TRIGGER IF EXISTS __track_history ON cadastre.survey_point CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -6540,12 +5990,8 @@ CREATE TABLE transaction.transaction_source(
 );
 
 
-
--- Index transaction_source_index_on_rowidentifier  --
 CREATE INDEX transaction_source_index_on_rowidentifier ON transaction.transaction_source (rowidentifier);
-    
 
-comment on table transaction.transaction_source is '';
     
 DROP TRIGGER IF EXISTS __track_changes ON transaction.transaction_source CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -6567,10 +6013,8 @@ CREATE TABLE transaction.transaction_source_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index transaction_source_historic_index_on_rowidentifier  --
 CREATE INDEX transaction_source_historic_index_on_rowidentifier ON transaction.transaction_source_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON transaction.transaction_source CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -6582,11 +6026,11 @@ DROP TABLE IF EXISTS cadastre.cadastre_object_node_target CASCADE;
 CREATE TABLE cadastre.cadastre_object_node_target(
     transaction_id varchar(40) NOT NULL,
     node_id varchar(40) NOT NULL,
-    geom GEOMETRY NOT NULL
-        CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
-        CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
-        CONSTRAINT enforce_valid_geom CHECK (st_isvalid(geom)),
-        CONSTRAINT enforce_geotype_geom CHECK (geometrytype(geom) = 'POINT'::text OR geom IS NULL),
+    geom GEOMETRY NOT NULL,
+    CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
+    
+            CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
+    CONSTRAINT enforce_geotype_geom CHECK (geometrytype(geom) = 'POINT'::text OR geom IS NULL),
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
     rowversion integer NOT NULL DEFAULT (0),
     change_action char(1) NOT NULL DEFAULT ('i'),
@@ -6599,15 +6043,9 @@ CREATE TABLE cadastre.cadastre_object_node_target(
 );
 
 
-
--- Index cadastre_object_node_target_index_on_geom  --
-CREATE INDEX cadastre_object_node_target_index_on_geom ON cadastre.cadastre_object_node_target using gist(geom);
-    
--- Index cadastre_object_node_target_index_on_rowidentifier  --
 CREATE INDEX cadastre_object_node_target_index_on_rowidentifier ON cadastre.cadastre_object_node_target (rowidentifier);
-    
+CREATE INDEX cadastre_object_node_target_index_on_geom ON cadastre.cadastre_object_node_target USING gist (geom);
 
-comment on table cadastre.cadastre_object_node_target is 'The nodes that have been changed or added from the transaction.';
     
 DROP TRIGGER IF EXISTS __track_changes ON cadastre.cadastre_object_node_target CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -6621,11 +6059,11 @@ CREATE TABLE cadastre.cadastre_object_node_target_historic
 (
     transaction_id varchar(40),
     node_id varchar(40),
-    geom GEOMETRY
-        CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
-        CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
-        CONSTRAINT enforce_valid_geom CHECK (st_isvalid(geom)),
-        CONSTRAINT enforce_geotype_geom CHECK (geometrytype(geom) = 'POINT'::text OR geom IS NULL),
+    geom GEOMETRY,
+    CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
+    
+            CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
+    CONSTRAINT enforce_geotype_geom CHECK (geometrytype(geom) = 'POINT'::text OR geom IS NULL),
     rowidentifier varchar(40),
     rowversion integer,
     change_action char(1),
@@ -6634,13 +6072,9 @@ CREATE TABLE cadastre.cadastre_object_node_target_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index cadastre_object_node_target_historic_index_on_geom  --
-CREATE INDEX cadastre_object_node_target_historic_index_on_geom ON cadastre.cadastre_object_node_target_historic using gist(geom);
-    
--- Index cadastre_object_node_target_historic_index_on_rowidentifier  --
 CREATE INDEX cadastre_object_node_target_historic_index_on_rowidentifier ON cadastre.cadastre_object_node_target_historic (rowidentifier);
-    
+CREATE INDEX cadastre_object_node_target_historic_index_on_geom ON cadastre.cadastre_object_node_target_historic USING gist (geom);
+
 
 DROP TRIGGER IF EXISTS __track_history ON cadastre.cadastre_object_node_target CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -6673,16 +6107,8 @@ CREATE TABLE application.application_property(
 );
 
 
-
--- Index application_property_index_on_rowidentifier  --
 CREATE INDEX application_property_index_on_rowidentifier ON application.application_property (rowidentifier);
-    
 
-comment on table application.application_property is 'Details of the property associated with an application
-LADM Reference Object
-FLOSS SOLA Extension
-LADM Definition
-Not Applicable';
     
 DROP TRIGGER IF EXISTS __track_changes ON application.application_property CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -6712,10 +6138,8 @@ CREATE TABLE application.application_property_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index application_property_historic_index_on_rowidentifier  --
 CREATE INDEX application_property_historic_index_on_rowidentifier ON application.application_property_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON application.application_property CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -6739,16 +6163,8 @@ CREATE TABLE application.application_uses_source(
 );
 
 
-
--- Index application_uses_source_index_on_rowidentifier  --
 CREATE INDEX application_uses_source_index_on_rowidentifier ON application.application_uses_source (rowidentifier);
-    
 
-comment on table application.application_uses_source is 'Sources (documents) submitted with an application, created as a result of the application by land officers or further documents added to assist in the processing of the application
-LADM Reference Object
-FLOSS SOLA Extension
-LADM Definition
-Not Applicable';
     
 DROP TRIGGER IF EXISTS __track_changes ON application.application_uses_source CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -6770,10 +6186,8 @@ CREATE TABLE application.application_uses_source_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index application_uses_source_historic_index_on_rowidentifier  --
 CREATE INDEX application_uses_source_historic_index_on_rowidentifier ON application.application_uses_source_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON application.application_uses_source CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -6791,12 +6205,6 @@ CREATE TABLE application.request_type_requires_source_type(
     CONSTRAINT request_type_requires_source_type_pkey PRIMARY KEY (source_type_code,request_type_code)
 );
 
-
-comment on table application.request_type_requires_source_type is 'Source (documents) required for a particular (Service) Request received by a land office
-LADM Reference Object
-FLOSS SOLA Extension
-LADM Definition
-Not Applicable';
     
  -- Data for the table application.request_type_requires_source_type -- 
 insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('cadastralSurvey', 'cadastreChange');
@@ -6851,12 +6259,6 @@ CREATE TABLE system.setting(
     CONSTRAINT setting_pkey PRIMARY KEY (name)
 );
 
-
-comment on table system.setting is 'Global settings for the FLOSS SOLA application
-LADM Reference Object
-FLOSS SOLA Extension
-LADM Definition
-Not Applicable';
     
  -- Data for the table system.setting -- 
 insert into system.setting(name, vl, active, description) values('map-west', '1776400', true, 'The most west coordinate. It is used in the map control.');
@@ -6883,12 +6285,6 @@ CREATE TABLE system.appuser_setting(
     CONSTRAINT appuser_setting_pkey PRIMARY KEY (user_id,name)
 );
 
-
-comment on table system.appuser_setting is 'Software settings specific for a user within the FLOSS SOLA application
-LADM Reference Object
-FLOSS SOLA Extension
-LADM Definition
-Not Applicable';
     
 --Table system.language ----
 DROP TABLE IF EXISTS system.language CASCADE;
@@ -6905,12 +6301,6 @@ CREATE TABLE system.language(
     CONSTRAINT language_pkey PRIMARY KEY (code)
 );
 
-
-comment on table system.language is 'Thelanguages that can be used within the FLOSS SOLA application.
-LADM Reference Object
-FLOSS SOLA Extension
-LADM Definition
-Not Applicable';
     
  -- Data for the table system.language -- 
 insert into system.language(code, display_value, active, is_default, item_order) values('en-US', 'English::::Inglese', true, true, 1);
@@ -6949,8 +6339,6 @@ CREATE TABLE system.config_map_layer(
     CONSTRAINT config_map_layer_pkey PRIMARY KEY (name)
 );
 
-
-comment on table system.config_map_layer is 'Sola extension: In this table are defined map layers for configuring the map component. The layers can be of different types. For the type of layers supported, check out the data in the table config_map_layer_type.';
     
  -- Data for the table system.config_map_layer -- 
 insert into system.config_map_layer(name, title, type_code, active, visible_in_start, item_order, style, pojo_structure, pojo_query_name, pojo_query_name_for_select, use_in_public_display) values('parcels', 'Parcels::::Particelle', 'pojo', true, true, 20, 'parcel.xml', 'theGeom:Polygon,label:""', 'SpatialResult.getParcels', 'dynamic.informationtool.get_parcel', false);
@@ -6981,12 +6369,6 @@ CREATE TABLE system.config_map_layer_type(
     CONSTRAINT config_map_layer_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table system.config_map_layer_type is 'Parameters for defining categories/types of map layers in FLOSS SOLA gis component
-LADM Reference Object 
-FLOSS SOLA Extension
-LADM Definition
-Not Applicable';
     
  -- Data for the table system.config_map_layer_type -- 
 insert into system.config_map_layer_type(code, display_value, status) values('wms', 'WMS server with layers::::Server WMS con layer', 'c');
@@ -7008,8 +6390,6 @@ CREATE TABLE system.query(
     CONSTRAINT query_pkey PRIMARY KEY (name)
 );
 
-
-comment on table system.query is 'It defines a query that can be executed by the search ejb.';
     
  -- Data for the table system.query -- 
 insert into system.query(name, sql) values('SpatialResult.getParcels', 'select co.id, co.name_firstpart || ''/'' || co.name_lastpart as label,  st_asewkb(st_transform(co.geom_polygon, #{srid})) as the_geom from cadastre.cadastre_object co where type_code= ''parcel'' and status_code= ''current'' and ST_Intersects(st_transform(co.geom_polygon, #{srid}), ST_SetSRID(ST_MakeBox3D(ST_Point(#{minx}, #{miny}),ST_Point(#{maxx}, #{maxy})), #{srid})) and st_area(co.geom_polygon)> power(5 * #{pixel_res}, 2)');
@@ -7052,8 +6432,6 @@ CREATE TABLE system.br(
     CONSTRAINT br_pkey PRIMARY KEY (id)
 );
 
-
-comment on table system.br is 'In this table there are defined the business rules that are used in the system.';
     
 --Table system.br_technical_type ----
 DROP TABLE IF EXISTS system.br_technical_type CASCADE;
@@ -7069,8 +6447,6 @@ CREATE TABLE system.br_technical_type(
     CONSTRAINT br_technical_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table system.br_technical_type is 'Here are specified the types of techincal implementations of the business rule.';
     
  -- Data for the table system.br_technical_type -- 
 insert into system.br_technical_type(code, display_value, status, description) values('sql', 'SQL::::SQL', 'c', 'The rule definition is based in sql and it is executed by the database engine.');
@@ -7105,9 +6481,6 @@ CREATE TABLE system.br_validation(
     CONSTRAINT br_validation_pkey PRIMARY KEY (id)
 );
 
-
-comment on table system.br_validation is 'In this table are defined the sets of rules that has to be executed.
-If for a rule there is not target moment specified, then the rule will not be part of the set.';
     
 --Table system.br_severity_type ----
 DROP TABLE IF EXISTS system.br_severity_type CASCADE;
@@ -7123,8 +6496,6 @@ CREATE TABLE system.br_severity_type(
     CONSTRAINT br_severity_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table system.br_severity_type is 'These are the types of severity of the business rules within the context of there use.';
     
  -- Data for the table system.br_severity_type -- 
 insert into system.br_severity_type(code, display_value, status) values('critical', 'Critical', 'c');
@@ -7147,8 +6518,6 @@ CREATE TABLE system.br_validation_target_type(
     CONSTRAINT br_validation_target_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table system.br_validation_target_type is 'The potential targets of the validation rules.';
     
  -- Data for the table system.br_validation_target_type -- 
 insert into system.br_validation_target_type(code, display_value, status, description) values('application', 'Application::::Pratica', 'c', 'The target of the validation is the application. It accepts one parameter {id} which is the application id.');
@@ -7176,8 +6545,6 @@ CREATE TABLE system.br_definition(
     CONSTRAINT br_definition_pkey PRIMARY KEY (br_id,active_from)
 );
 
-
-comment on table system.br_definition is '';
     
 --Table system.approle ----
 DROP TABLE IF EXISTS system.approle CASCADE;
@@ -7193,8 +6560,6 @@ CREATE TABLE system.approle(
     CONSTRAINT approle_pkey PRIMARY KEY (code)
 );
 
-
-comment on table system.approle is 'This table contains list of security roles, used to restrict access to the different parts of application, both on server and client side.';
     
  -- Data for the table system.approle -- 
 insert into system.approle(code, display_value, status, description) values('DashbrdViewAssign', 'View Assigned Applications', 'c', 'View Assigned Applications in Dashboard');
@@ -7291,8 +6656,6 @@ CREATE TABLE system.approle_appgroup(
     CONSTRAINT approle_appgroup_pkey PRIMARY KEY (approle_code,appgroup_id)
 );
 
-
-comment on table system.approle_appgroup is 'This many-to-many table contains groups, related to security roles. Allows to have multiple roles for one group.';
     
  -- Data for the table system.approle_appgroup -- 
 insert into system.approle_appgroup(approle_code, appgroup_id) values('DashbrdViewAssign', 'super-group-id');
@@ -7325,8 +6688,6 @@ CREATE TABLE system.appgroup(
     CONSTRAINT appgroup_pkey PRIMARY KEY (id)
 );
 
-
-comment on table system.appgroup is 'This table contains list of groups, which are used to group users with similar rights in the system.';
     
  -- Data for the table system.appgroup -- 
 insert into system.appgroup(id, name, description) values('super-group-id', 'Super group', 'This is a group of users that has right in anything. It is used in developement. In production must be removed.');
@@ -7344,8 +6705,6 @@ CREATE TABLE system.appuser_appgroup(
     CONSTRAINT appuser_appgroup_pkey PRIMARY KEY (appuser_id,appgroup_id)
 );
 
-
-comment on table system.appuser_appgroup is 'This many-to-many table contains users, related to groups. Allows to have multiple groups for one user.';
     
  -- Data for the table system.appuser_appgroup -- 
 insert into system.appuser_appgroup(appuser_id, appgroup_id) values('test-id', 'super-group-id');
@@ -7367,9 +6726,6 @@ CREATE TABLE system.query_field(
     CONSTRAINT query_field_pkey PRIMARY KEY (query_name,index_in_query)
 );
 
-
-comment on table system.query_field is 'It defines a field in the query. The field is returned by the select part.
-Not for all queries is needed to define the fields. It becomes important only for queries that will need to have fields that has to be localized.';
     
  -- Data for the table system.query_field -- 
 insert into system.query_field(query_name, index_in_query, name, display_value) values('dynamic.informationtool.get_parcel', 1, 'parcel_nr', 'Parcel number::::Numero Particella');
@@ -7418,8 +6774,6 @@ CREATE TABLE system.map_search_option(
     CONSTRAINT map_search_option_pkey PRIMARY KEY (code)
 );
 
-
-comment on table system.map_search_option is 'This table contains information about the options to search objects in the map. The list of options here will be used to configure the list of search by options in the Map Search Component.';
     
  -- Data for the table system.map_search_option -- 
 insert into system.map_search_option(code, title, query_name, active, min_search_str_len, zoom_in_buffer) values('NUMBER', 'Number', 'map_search.cadastre_object_by_number', true, 3, 50);
@@ -7442,12 +6796,6 @@ CREATE TABLE cadastre.land_use_type(
     CONSTRAINT land_use_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table cadastre.land_use_type is 'Reference Table / Code list for types of land use
-LADM Reference Object 
-ExtLandUse
-LADM Definition
-Not Defined';
     
  -- Data for the table cadastre.land_use_type -- 
 insert into cadastre.land_use_type(code, display_value, status) values('commercial', 'Commercial::::ITALIANO', 'c');
@@ -7466,10 +6814,10 @@ CREATE TABLE bulk_operation.spatial_unit_temporary(
     cadastre_object_type_code varchar(20),
     name_firstpart varchar(20),
     name_lastpart varchar(50),
-    geom GEOMETRY NOT NULL
-        CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
-        CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
-        CONSTRAINT enforce_valid_geom CHECK (st_isvalid(geom)),
+    geom GEOMETRY NOT NULL,
+    CONSTRAINT enforce_dims_geom CHECK (st_ndims(geom) = 2),
+    
+            CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 2193),
     official_area numeric(29, 2),
     label varchar(100),
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
@@ -7484,25 +6832,18 @@ CREATE TABLE bulk_operation.spatial_unit_temporary(
 );
 
 
-
--- Index spatial_unit_temporary_index_on_geom  --
-CREATE INDEX spatial_unit_temporary_index_on_geom ON bulk_operation.spatial_unit_temporary using gist(geom);
-    
--- Index spatial_unit_temporary_index_on_rowidentifier  --
 CREATE INDEX spatial_unit_temporary_index_on_rowidentifier ON bulk_operation.spatial_unit_temporary (rowidentifier);
-    
+CREATE INDEX spatial_unit_temporary_index_on_geom ON bulk_operation.spatial_unit_temporary USING gist (geom);
 
-comment on table bulk_operation.spatial_unit_temporary is 'This table is used as a temporary place where the cadastre objects coming from the bulk operations will be staying before they are pushed to the cadastre_object table.
-<br/> From within this table different checks will happen and name parts will be generated if necessary.';
     
 DROP TRIGGER IF EXISTS __track_changes ON bulk_operation.spatial_unit_temporary CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
    ON bulk_operation.spatial_unit_temporary FOR EACH ROW
    EXECUTE PROCEDURE f_for_trg_track_changes();
     
---Table administrative.lease_condition ----
-DROP TABLE IF EXISTS administrative.lease_condition CASCADE;
-CREATE TABLE administrative.lease_condition(
+--Table administrative.condition_type ----
+DROP TABLE IF EXISTS administrative.condition_type CASCADE;
+CREATE TABLE administrative.condition_type(
     code varchar(20) NOT NULL,
     display_value varchar(250) NOT NULL,
     description varchar(5000) NOT NULL,
@@ -7510,32 +6851,30 @@ CREATE TABLE administrative.lease_condition(
 
     -- Internal constraints
     
-    CONSTRAINT lease_condition_display_value_unique UNIQUE (display_value),
-    CONSTRAINT lease_condition_pkey PRIMARY KEY (code)
+    CONSTRAINT condition_type_display_value_unique UNIQUE (display_value),
+    CONSTRAINT condition_type_pkey PRIMARY KEY (code)
 );
 
-
-comment on table administrative.lease_condition is 'Reference Table / Code list for standard lease conditions
-LADM Definition
-Not Defined';
     
- -- Data for the table administrative.lease_condition -- 
-insert into administrative.lease_condition(code, display_value, description, status) values('c1', 'Condition 1', 'Unless the Minister directs otherwise the Lessee shall fence the boundaries of the land within 6 (six) months of the date of the grant and the Lessee shall maintain the fence to the satisfaction of the Commissioner.', 'c');
-insert into administrative.lease_condition(code, display_value, description, status) values('c2', 'Condition 2', 'Unless special written authority is given by the Commissioner, the Lessee shall commence development of the land within 5 years of the date of the granting of a lease. This shall also apply to further development of the land held under a lease during the term of the lease.', 'c');
-insert into administrative.lease_condition(code, display_value, description, status) values('c3', 'Condition 3', 'Within a period of the time to be fixed by the planning authority, the Lessee shall provide at his own expense main drainage or main sewerage connections from the building erected on the land as the planning authority may require.', 'c');
-insert into administrative.lease_condition(code, display_value, description, status) values('c4', 'Condtion 4', 'The Lessee shall use the land comprised in the lease only for the purpose specified in the lease or in any variation made to the original lease.', 'c');
-insert into administrative.lease_condition(code, display_value, description, status) values('c5', 'Condition 5', 'Save with the written authority of the planning authority, no electrical power or telephone pole or line or water, drainage or sewer pipe being upon or passing through, over or under the land and no replacement thereof, shall be moved or in any way be interfered with and reasonable access thereto shall be preserved to allow for inspection, maintenance, repair, renewal and replacement.', 'c');
-insert into administrative.lease_condition(code, display_value, description, status) values('c6', 'Condition 6', 'The interior and exterior of any building erected on the land and all building additions thereto and all other buildings at any time erected or standing on the land and walls, drains and other appurtenances, shall be kept by the Lessee in good repair and tenantable condition to the satisfaction of the planning authority.', 'c');
+ -- Data for the table administrative.condition_type -- 
+insert into administrative.condition_type(code, display_value, description, status) values('c1', 'Condition 1', 'Unless the Minister directs otherwise the Lessee shall fence the boundaries of the land within 6 (six) months of the date of the grant and the Lessee shall maintain the fence to the satisfaction of the Commissioner.', 'c');
+insert into administrative.condition_type(code, display_value, description, status) values('c2', 'Condition 2', 'Unless special written authority is given by the Commissioner, the Lessee shall commence development of the land within 5 years of the date of the granting of a lease. This shall also apply to further development of the land held under a lease during the term of the lease.', 'c');
+insert into administrative.condition_type(code, display_value, description, status) values('c3', 'Condition 3', 'Within a period of the time to be fixed by the planning authority, the Lessee shall provide at his own expense main drainage or main sewerage connections from the building erected on the land as the planning authority may require.', 'c');
+insert into administrative.condition_type(code, display_value, description, status) values('c4', 'Condtion 4', 'The Lessee shall use the land comprised in the lease only for the purpose specified in the lease or in any variation made to the original lease.', 'c');
+insert into administrative.condition_type(code, display_value, description, status) values('c5', 'Condition 5', 'Save with the written authority of the planning authority, no electrical power or telephone pole or line or water, drainage or sewer pipe being upon or passing through, over or under the land and no replacement thereof, shall be moved or in any way be interfered with and reasonable access thereto shall be preserved to allow for inspection, maintenance, repair, renewal and replacement.', 'c');
+insert into administrative.condition_type(code, display_value, description, status) values('c6', 'Condition 6', 'The interior and exterior of any building erected on the land and all building additions thereto and all other buildings at any time erected or standing on the land and walls, drains and other appurtenances, shall be kept by the Lessee in good repair and tenantable condition to the satisfaction of the planning authority.', 'c');
 
 
 
---Table administrative.lease_condition_for_rrr ----
-DROP TABLE IF EXISTS administrative.lease_condition_for_rrr CASCADE;
-CREATE TABLE administrative.lease_condition_for_rrr(
+--Table administrative.condition_for_rrr ----
+DROP TABLE IF EXISTS administrative.condition_for_rrr CASCADE;
+CREATE TABLE administrative.condition_for_rrr(
     id varchar(40) NOT NULL,
     rrr_id varchar(40) NOT NULL,
-    lease_condition_code varchar(20),
+    condition_code varchar(20),
     custom_condition_text varchar(500),
+    condition_quantity integer,
+    condition_unit varchar(15),
     rowidentifier varchar(40) NOT NULL DEFAULT (uuid_generate_v1()),
     rowversion integer NOT NULL DEFAULT (0),
     change_action char(1) NOT NULL DEFAULT ('i'),
@@ -7544,31 +6883,29 @@ CREATE TABLE administrative.lease_condition_for_rrr(
 
     -- Internal constraints
     
-    CONSTRAINT lease_condition_for_rrr_pkey PRIMARY KEY (id)
+    CONSTRAINT condition_for_rrr_pkey PRIMARY KEY (id)
 );
 
 
+CREATE INDEX condition_for_rrr_index_on_rowidentifier ON administrative.condition_for_rrr (rowidentifier);
 
--- Index lease_condition_for_rrr_index_on_rowidentifier  --
-CREATE INDEX lease_condition_for_rrr_index_on_rowidentifier ON administrative.lease_condition_for_rrr (rowidentifier);
     
-
-comment on table administrative.lease_condition_for_rrr is 'Lease conditions, related to RRR of lease type';
-    
-DROP TRIGGER IF EXISTS __track_changes ON administrative.lease_condition_for_rrr CASCADE;
+DROP TRIGGER IF EXISTS __track_changes ON administrative.condition_for_rrr CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
-   ON administrative.lease_condition_for_rrr FOR EACH ROW
+   ON administrative.condition_for_rrr FOR EACH ROW
    EXECUTE PROCEDURE f_for_trg_track_changes();
     
 
-----Table administrative.lease_condition_for_rrr_historic used for the history of data of table administrative.lease_condition_for_rrr ---
-DROP TABLE IF EXISTS administrative.lease_condition_for_rrr_historic CASCADE;
-CREATE TABLE administrative.lease_condition_for_rrr_historic
+----Table administrative.condition_for_rrr_historic used for the history of data of table administrative.condition_for_rrr ---
+DROP TABLE IF EXISTS administrative.condition_for_rrr_historic CASCADE;
+CREATE TABLE administrative.condition_for_rrr_historic
 (
     id varchar(40),
     rrr_id varchar(40),
-    lease_condition_code varchar(20),
+    condition_code varchar(20),
     custom_condition_text varchar(500),
+    condition_quantity integer,
+    condition_unit varchar(15),
     rowidentifier varchar(40),
     rowversion integer,
     change_action char(1),
@@ -7577,14 +6914,12 @@ CREATE TABLE administrative.lease_condition_for_rrr_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
+CREATE INDEX condition_for_rrr_historic_index_on_rowidentifier ON administrative.condition_for_rrr_historic (rowidentifier);
 
--- Index lease_condition_for_rrr_historic_index_on_rowidentifier  --
-CREATE INDEX lease_condition_for_rrr_historic_index_on_rowidentifier ON administrative.lease_condition_for_rrr_historic (rowidentifier);
-    
 
-DROP TRIGGER IF EXISTS __track_history ON administrative.lease_condition_for_rrr CASCADE;
+DROP TRIGGER IF EXISTS __track_history ON administrative.condition_for_rrr CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
-   ON administrative.lease_condition_for_rrr FOR EACH ROW
+   ON administrative.condition_for_rrr FOR EACH ROW
    EXECUTE PROCEDURE f_for_trg_track_history();
     
 --Table application.application_spatial_unit ----
@@ -7604,12 +6939,8 @@ CREATE TABLE application.application_spatial_unit(
 );
 
 
-
--- Index application_spatial_unit_index_on_rowidentifier  --
 CREATE INDEX application_spatial_unit_index_on_rowidentifier ON application.application_spatial_unit (rowidentifier);
-    
 
-comment on table application.application_spatial_unit is '';
     
 DROP TRIGGER IF EXISTS __track_changes ON application.application_spatial_unit CASCADE;
 CREATE TRIGGER __track_changes BEFORE UPDATE OR INSERT
@@ -7631,10 +6962,8 @@ CREATE TABLE application.application_spatial_unit_historic
     change_time_valid_until TIMESTAMP NOT NULL default NOW()
 );
 
-
--- Index application_spatial_unit_historic_index_on_rowidentifier  --
 CREATE INDEX application_spatial_unit_historic_index_on_rowidentifier ON application.application_spatial_unit_historic (rowidentifier);
-    
+
 
 DROP TRIGGER IF EXISTS __track_history ON application.application_spatial_unit CASCADE;
 CREATE TRIGGER __track_history AFTER UPDATE OR DELETE
@@ -7654,10 +6983,6 @@ CREATE TABLE system.crs(
     CONSTRAINT crs_pkey PRIMARY KEY (srid)
 );
 
-
-comment on table system.crs is 'In this table are given the coordinate reference systems (crs) that are applicable to the application.
-The one that is with the smallest item_order will be in the top of the list. Also the extent given in setting is within the context of this crs.
-from_long - to_long define the area in wgs84 that the crs is valid. This range can be used for different purposes like assigning/transforming a geometry before being stored in the database in the desired crs.';
     
  -- Data for the table system.crs -- 
 insert into system.crs(srid, from_long, to_long, item_order) values(2193, 0, 171805.085554442 , 1);
@@ -7678,8 +7003,6 @@ CREATE TABLE cadastre.hierarchy_level(
     CONSTRAINT hierarchy_level_pkey PRIMARY KEY (code)
 );
 
-
-comment on table cadastre.hierarchy_level is 'It maintains the list of hierarchies that is used together with spatial_unit_group.';
     
  -- Data for the table cadastre.hierarchy_level -- 
 insert into cadastre.hierarchy_level(code, display_value, status) values('0', 'Hierarchy 0', 'c');
@@ -8211,13 +7534,13 @@ ALTER TABLE cadastre.spatial_unit ADD CONSTRAINT spatial_unit_transaction_id_fk1
             FOREIGN KEY (transaction_id) REFERENCES transaction.transaction(id) ON UPDATE CASCADE ON DELETE Cascade;
 CREATE INDEX spatial_unit_transaction_id_fk129_ind ON cadastre.spatial_unit (transaction_id);
 
-ALTER TABLE administrative.lease_condition_for_rrr ADD CONSTRAINT lease_condition_for_rrr_lease_condition_code_fk130 
-            FOREIGN KEY (lease_condition_code) REFERENCES administrative.lease_condition(code) ON UPDATE CASCADE ON DELETE RESTRICT;
-CREATE INDEX lease_condition_for_rrr_lease_condition_code_fk130_ind ON administrative.lease_condition_for_rrr (lease_condition_code);
+ALTER TABLE administrative.condition_for_rrr ADD CONSTRAINT condition_for_rrr_condition_code_fk130 
+            FOREIGN KEY (condition_code) REFERENCES administrative.condition_type(code) ON UPDATE CASCADE ON DELETE RESTRICT;
+CREATE INDEX condition_for_rrr_condition_code_fk130_ind ON administrative.condition_for_rrr (condition_code);
 
-ALTER TABLE administrative.lease_condition_for_rrr ADD CONSTRAINT lease_condition_for_rrr_rrr_id_fk131 
+ALTER TABLE administrative.condition_for_rrr ADD CONSTRAINT condition_for_rrr_rrr_id_fk131 
             FOREIGN KEY (rrr_id) REFERENCES administrative.rrr(id) ON UPDATE CASCADE ON DELETE Cascade;
-CREATE INDEX lease_condition_for_rrr_rrr_id_fk131_ind ON administrative.lease_condition_for_rrr (rrr_id);
+CREATE INDEX condition_for_rrr_rrr_id_fk131_ind ON administrative.condition_for_rrr (rrr_id);
 
 ALTER TABLE application.application_spatial_unit ADD CONSTRAINT application_spatial_unit_spatial_unit_id_fk132 
             FOREIGN KEY (spatial_unit_id) REFERENCES cadastre.cadastre_object(id) ON UPDATE CASCADE ON DELETE CASCADE;
