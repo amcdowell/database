@@ -1,4 +1,4 @@
-set host=exlprcadreg3.ext.fao.org
+set host=localhost
 set psql_path=psql\
 set script_folder=
 set dbname=sola
