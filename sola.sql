@@ -284,14 +284,12 @@ LANGUAGE 'plpgsql';
 
 
 -- Function document.document_nr_seq -----
-CREATE OR REPLACE FUNCTION document.document_nr_seq(
-    )
-INCREMENT 1
-MINVALUE 1
-MAXVALUE 9999
-START 1
-CACHE 1
-CYCLE;
+CREATE OR REPLACE SEQUENCE document.document_nr_seq
+  INCREMENT 1
+  MINVALUE 500000
+  MAXVALUE 99999999
+  START 500001
+  CACHE 1;
 
 -- Function public.f_for_trg_track_changes -----
 CREATE OR REPLACE FUNCTION public.f_for_trg_track_changes(
