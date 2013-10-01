@@ -1,4 +1,4 @@
--- Script to extend sola.sql. It should be run immediately at the completion of sola.sql. 
+﻿-- Script to extend sola.sql. It should be run immediately at the completion of sola.sql. 
 
 -- #328 - Security Role Overhaul. Fixed the description for each security role, removed roles that were  
 -- not used and added some extra roles required for recent changes to the application.  
@@ -239,6 +239,12 @@ INSERT INTO system.approle (code, display_value, status, description)
 INSERT INTO system.approle (code, display_value, status, description)
    SELECT 'StartService', 'Service Action - Start', 'c', 'Allows any user to click the Start action. Note that the user must also have the appropraite Service role as well before they can successfully start the service. '
    WHERE NOT EXISTS (SELECT code FROM system.approle WHERE code = 'StartService');
+-- #338 - New Service for Mapping existing Parcel (existing Title)
+--  added a new role into the approle table
+INSERT INTO system.approle (code, display_value, status, description)
+   SELECT 'mapExistingParcel', 'Map Existing Parcel', 'c', 'Allows to map existing parcel as described on existing title. '
+   WHERE NOT EXISTS (SELECT code FROM system.approle WHERE code = 'mapExistingParcel');
+------------------------------------------------------------------------------------------------
 
 INSERT INTO system.approle_appgroup (approle_code, appgroup_id)
 SELECT code, 'super-group-id' 
@@ -246,6 +252,11 @@ FROM system.approle
 WHERE NOT EXISTS (SELECT approle_code FROM system.approle_appgroup
                   WHERE  approle_code = code
 				  AND    appgroup_id = 'super-group-id' ); 
+
+
+
+
+
 
 
 
@@ -783,4 +794,21 @@ CREATE INDEX application_historic_id_idx
   USING btree
   (id COLLATE pg_catalog."default");
 
-  
+
+
+
+-- #338 - New Service for Mapping existing Parcel (existing Title)
+--  added to the reference data new service and its required document 
+DELETE from application.request_type where code = 'mapExistingParcel';
+INSERT INTO application.request_type(
+            code, request_category_code, display_value, description, status, 
+            nr_days_to_complete, base_fee, area_base_fee, value_base_fee, 
+            nr_properties_required, notation_template)
+    VALUES ('mapExistingParcel','registrationServices', 'Map Existing Parcel', '', 'c', 30, 
+            0.00, 0.00, 0.00, 0, 
+            'Allows to make changes to the cadastre');
+DELETE FROM application.request_type_requires_source_type WHERE request_type_code = 'mapExistingParcel';
+insert into application.request_type_requires_source_type(source_type_code, request_type_code) values('cadastralSurvey', 'mapExistingParcel');
+DELETE FROM application.request_type_requires_source_type WHERE request_type_code = 'newDigitalTitle';
+INSERT INTO application.request_type_requires_source_type (request_type_code, source_type_code) VALUES('newDigitalTitle', 'title');
+
