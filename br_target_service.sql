@@ -82,7 +82,7 @@ values('mortgage-value-check', 'sql', 'For the Register Mortgage service, the ne
 
 insert into system.br_definition(br_id, active_from, active_until, body) 
 values('mortgage-value-check', now(), 'infinity', 
-'SELECT (ap.total_value < rrr.mortgage_amount) AS vl 
+'SELECT (ap.total_value < rrr.amount) AS vl 
   from application.service s inner join application.application_property ap on s.application_id = ap.application_id 
  INNER JOIN administrative.ba_unit ba ON (ap.name_firstpart, ap.name_lastpart) = (ba.name_firstpart, ba.name_lastpart)
  INNER JOIN administrative.rrr ON rrr.ba_unit_id = ba.id
@@ -270,7 +270,7 @@ FROM application.service sv
   LEFT JOIN application.application_uses_source aus ON (aus.application_id = sv.application_id)
   LEFT JOIN source.source sc ON ((sc.id = aus.source_id) AND (sc.type_code = ''idVerification''))
 WHERE sv.id= #{id}
-GROUP BY sv.id
+GROUP BY sv.application_id
 LIMIT 1');
 
 INSERT INTO system.br_validation(br_id, severity_code, target_service_moment, target_code, order_of_execution) 
