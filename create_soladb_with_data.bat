@@ -55,6 +55,11 @@ echo Loading Roles and Privileges... >> build.log 2>&1
 %psql_path% --host=%host% --port=%port% --username=%username% --dbname=%dbname% --file=%testDataPath%add_user_role_priv.sql >> build.log 2>&1
 
 
+echo Loading Applications...
+echo Loading Applications... >> build.log 2>&1
+%psql_path% --host=%host% --port=%port% --username=%username% --dbname=%dbname% --file=%testDataPath%sola_populate_waiheke_applications.sql >> build.log 2>&1
+
+
 echo Finished at %time% - Check build.log for errors!
 echo Finished at %time% >> build.log 2>&1
 pause
