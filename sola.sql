@@ -2335,6 +2335,19 @@ COMMENT ON FUNCTION cadastre.generate_spatial_unit_group_name(
   , label_v varchar
 ) IS 'It generates the name of a new spatial unit group.';
     
+-- Function cadastre.get_map_center_label --
+CREATE OR REPLACE FUNCTION cadastre.get_map_center_label(
+ center_point geometry
+) RETURNS varchar 
+AS $$
+begin
+  return 'center label';
+end;
+$$ LANGUAGE plpgsql;
+COMMENT ON FUNCTION cadastre.get_map_center_label(
+ center_point geometry
+) IS '';
+    
 -- Sequence application.application_nr_seq --
 DROP SEQUENCE IF EXISTS application.application_nr_seq;
 CREATE SEQUENCE application.application_nr_seq
@@ -2732,10 +2745,6 @@ begin
         first_part_counter = first_part_counter + 1;
       end if;
       geom_v = rec.geom;
-      --if st_geometrytype(geom_v) = 'ST_MultiPolygon' then
-        -- If the geom is of type multipolygon consider only the first polygon
-      --  geom_v = st_geometryn(geom_v, 1);
-      --end if;
       if st_isvalid(geom_v) and st_geometrytype(geom_v) = 'ST_Polygon' then
         if (select count(1) 
           from cadastre.cadastre_object 
