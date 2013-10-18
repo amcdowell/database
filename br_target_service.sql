@@ -164,7 +164,7 @@ VALUES('document-supporting-rrr-is-current', 'critical', 'complete', 'service', 
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES('documents-present', 'sql', 'Documents associated with a service must have a scanned image file (or other source file) attached::::Vi sono documenti allegati',
+VALUES('documents-present', 'sql', 'Documents attached to the objects, created or modified through the service, must have a scanned image file (or other source file)::::Vi sono documenti allegati',
  '#{id}(service_id) is requested');
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
