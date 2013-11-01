@@ -6973,11 +6973,7 @@ insert into system.config_map_layer(name, title, type_code, active, visible_in_s
 insert into system.config_map_layer(name, title, type_code, active, visible_in_start, item_order, url, wms_layers, wms_version, wms_format, use_in_public_display) values('orthophoto', 'Orthophoto', 'wms', true, false, 10, 'http://localhost:8085/geoserver/sola/wms', 'sola:nz_orthophoto', '1.1.1', 'image/jpeg', false);
 insert into system.config_map_layer(name, title, type_code, active, visible_in_start, item_order, style, pojo_structure, pojo_query_name, use_in_public_display) values('public-display-parcels', 'Public display parcels', 'pojo_public_display', true, true, 35, 'public_display_parcel.xml', 'theGeom:Polygon,label:""', 'public_display.parcels', true);
 insert into system.config_map_layer(name, title, type_code, active, visible_in_start, item_order, style, pojo_structure, pojo_query_name, use_in_public_display) values('public-display-parcels-next', 'Public display parcels next', 'pojo_public_display', true, true, 30, 'public_display_parcel_next.xml', 'theGeom:Polygon,label:""', 'public_display.parcels_next', true);
-insert into system.config_map_layer(name, title, type_code, active, visible_in_start, item_order, style, pojo_structure, pojo_query_name, use_in_public_display) values('sug_hierarchy-0', 'Hierarchy 0', 'pojo', true, false, 9, 'hierarchy-0.xml', 'theGeom:Polygon,label:""', 'SpatialResult.getHierarchy-0', true);
-insert into system.config_map_layer(name, title, type_code, active, visible_in_start, item_order, style, pojo_structure, pojo_query_name, use_in_public_display) values('sug_hierarchy-1', 'Hierarchy 1', 'pojo', true, false, 8, 'hierarchy-1.xml', 'theGeom:Polygon,label:""', 'SpatialResult.getHierarchy-1', true);
-insert into system.config_map_layer(name, title, type_code, active, visible_in_start, item_order, style, pojo_structure, pojo_query_name, use_in_public_display) values('sug_hierarchy-2', 'Hierarchy 2', 'pojo', true, false, 7, 'hierarchy-2.xml', 'theGeom:Polygon,label:""', 'SpatialResult.getHierarchy-2', true);
-insert into system.config_map_layer(name, title, type_code, active, visible_in_start, item_order, style, pojo_structure, pojo_query_name, use_in_public_display) values('sug_hierarchy-3', 'Hierarchy 3', 'pojo', true, false, 6, 'hierarchy-3.xml', 'theGeom:Polygon,label:""', 'SpatialResult.getHierarchy-3', true);
-insert into system.config_map_layer(name, title, type_code, active, visible_in_start, item_order, style, pojo_structure, pojo_query_name, use_in_public_display) values('sug_hierarchy-4', 'Hierarchy 4', 'pojo', true, false, 5, 'hierarchy-4.xml', 'theGeom:Polygon,label:""', 'SpatialResult.getHierarchy-4', true);
+insert into system.config_map_layer(name, title, type_code, active, visible_in_start, item_order, style, pojo_structure, pojo_query_name, use_in_public_display) values('sug_hierarchy', 'Hierarchy', 'pojo', true, false, 9, 'sug-hierarchy.xml', 'theGeom:Polygon,label:"",filter_category', 'SpatialResult.getHierarchy', true);
 
 
 
@@ -7047,11 +7043,7 @@ insert into system.query(name, sql, description) values('system_search.cadastre_
 insert into system.query(name, sql) values('SpatialResult.getParcelNodes', 'select distinct st_astext(st_transform(geom, #{srid})) as id, '''' as label, st_asewkb(st_transform(geom, #{srid})) as the_geom from (select (ST_DumpPoints(geom_polygon)).* from cadastre.cadastre_object co  where type_code= ''parcel'' and status_code= ''current''  and ST_Intersects(st_transform(co.geom_polygon, #{srid}), ST_SetSRID(ST_MakeBox3D(ST_Point(#{minx}, #{miny}),ST_Point(#{maxx}, #{maxy})), #{srid}))) tmp_table ');
 insert into system.query(name, sql, description) values('public_display.parcels', 'select co.id, co.name_firstpart as label,  st_asewkb(st_transform(co.geom_polygon, #{srid})) as the_geom from cadastre.cadastre_object co where type_code= ''parcel'' and status_code= ''current'' and name_lastpart = #{name_lastpart} and ST_Intersects(st_transform(co.geom_polygon, #{srid}), ST_SetSRID(ST_MakeBox3D(ST_Point(#{minx}, #{miny}),ST_Point(#{maxx}, #{maxy})), #{srid}))', 'Query is used from public display map. It retrieves parcels being of a certain area (name_lastpart).');
 insert into system.query(name, sql, description) values('public_display.parcels_next', 'SELECT co_next.id, co_next.name_firstpart as label,  st_asewkb(st_transform(co_next.geom_polygon, #{srid})) as the_geom  from cadastre.cadastre_object co_next, cadastre.cadastre_object co where co.type_code= ''parcel'' and co.status_code= ''current'' and co_next.type_code= ''parcel'' and co_next.status_code= ''current'' and co.name_lastpart = #{name_lastpart} and co_next.name_lastpart != #{name_lastpart} and st_dwithin(st_transform(co.geom_polygon, #{srid}), st_transform(co_next.geom_polygon, #{srid}), 5) and ST_Intersects(st_transform(co_next.geom_polygon, #{srid}), ST_SetSRID(ST_MakeBox3D(ST_Point(#{minx}, #{miny}),ST_Point(#{maxx}, #{maxy})), #{srid}))', ' Query is used from public display map. It retrieves parcels being near the parcels of the layer public-display-parcels.');
-insert into system.query(name, sql, description) values('SpatialResult.getHierarchy-0', 'select id, label, st_asewkb(geom) as the_geom from cadastre.hierarchy_0 where ST_Intersects(geom, ST_SetSRID(ST_MakeBox3D(ST_Point(#{minx}, #{miny}),ST_Point(#{maxx}, #{maxy})), #{srid})) and st_area(geom)> power(5 * #{pixel_res}, 2)', 'Query is used from Spatial Unit Group Editor to edit hierarchy 0 records');
-insert into system.query(name, sql, description) values('SpatialResult.getHierarchy-1', 'select id, label, st_asewkb(geom) as the_geom from cadastre.hierarchy_1 where ST_Intersects(geom, ST_SetSRID(ST_MakeBox3D(ST_Point(#{minx}, #{miny}),ST_Point(#{maxx}, #{maxy})), #{srid})) and st_area(geom)> power(5 * #{pixel_res}, 2)', 'Query is used from Spatial Unit Group Editor to edit hierarchy 1 records');
-insert into system.query(name, sql, description) values('SpatialResult.getHierarchy-2', 'select id, label, st_asewkb(geom) as the_geom from cadastre.hierarchy_2 where ST_Intersects(geom, ST_SetSRID(ST_MakeBox3D(ST_Point(#{minx}, #{miny}),ST_Point(#{maxx}, #{maxy})), #{srid})) and st_area(geom)> power(5 * #{pixel_res}, 2)', 'Query is used from Spatial Unit Group Editor to edit hierarchy 2 records');
-insert into system.query(name, sql, description) values('SpatialResult.getHierarchy-3', 'select id, label, st_asewkb(geom) as the_geom from cadastre.hierarchy_3 where ST_Intersects(geom, ST_SetSRID(ST_MakeBox3D(ST_Point(#{minx}, #{miny}),ST_Point(#{maxx}, #{maxy})), #{srid})) and st_area(geom)> power(5 * #{pixel_res}, 2)', 'Query is used from Spatial Unit Group Editor to edit hierarchy 3 records');
-insert into system.query(name, sql, description) values('SpatialResult.getHierarchy-4', 'select id, label, st_asewkb(geom) as the_geom from cadastre.hierarchy_4 where ST_Intersects(geom, ST_SetSRID(ST_MakeBox3D(ST_Point(#{minx}, #{miny}),ST_Point(#{maxx}, #{maxy})), #{srid})) and st_area(geom)> power(5 * #{pixel_res}, 2)', 'Query is used from Spatial Unit Group Editor to edit hierarchy 4 records');
+insert into system.query(name, sql, description) values('SpatialResult.getHierarchy', 'select id, label, st_asewkb(geom) as the_geom, filter_category  from cadastre.hierarchy where ST_Intersects(geom, ST_SetSRID(ST_MakeBox3D(ST_Point(#{minx}, #{miny}),ST_Point(#{maxx}, #{maxy})), #{srid})) and st_area(geom)> power(5 * #{pixel_res}, 2)', 'Query is used from Spatial Unit Group Editor to edit hierarchy records');
 
 
 
@@ -8571,35 +8563,9 @@ CREATE VIEW application.systematic_registration_certificates AS SELECT aa.nr, co
    AND aa.status_code::text = ast.code::text AND aa.status_code::text = 'approved'::text 
    AND COALESCE(ap.land_use_code, 'residential'::character varying)::text = lu.code::text ;
 
--------View cadastre.hierarchy_0 ---------
-DROP VIEW IF EXISTS cadastre.hierarchy_0 CASCADE;
-CREATE VIEW cadastre.hierarchy_0 AS  SELECT sug.id, sug.label, sug.geom
-   FROM cadastre.spatial_unit_group sug
-  WHERE sug.hierarchy_level = 0;;
-
--------View cadastre.hierarchy_1 ---------
-DROP VIEW IF EXISTS cadastre.hierarchy_1 CASCADE;
-CREATE VIEW cadastre.hierarchy_1 AS  SELECT sug.id, sug.label, sug.geom
-   FROM cadastre.spatial_unit_group sug
-  WHERE sug.hierarchy_level = 1;;
-
--------View cadastre.hierarchy_2 ---------
-DROP VIEW IF EXISTS cadastre.hierarchy_2 CASCADE;
-CREATE VIEW cadastre.hierarchy_2 AS  SELECT sug.id, sug.label, sug.geom
-   FROM cadastre.spatial_unit_group sug
-  WHERE sug.hierarchy_level = 2;;
-
--------View cadastre.hierarchy_3 ---------
-DROP VIEW IF EXISTS cadastre.hierarchy_3 CASCADE;
-CREATE VIEW cadastre.hierarchy_3 AS  SELECT sug.id, sug.label, sug.geom
-   FROM cadastre.spatial_unit_group sug
-  WHERE sug.hierarchy_level = 3;;
-
--------View cadastre.hierarchy_4 ---------
-DROP VIEW IF EXISTS cadastre.hierarchy_4 CASCADE;
-CREATE VIEW cadastre.hierarchy_4 AS  SELECT sug.id, sug.label, sug.geom
-   FROM cadastre.spatial_unit_group sug
-  WHERE sug.hierarchy_level = 4;;
+-------View cadastre.hierarchy ---------
+DROP VIEW IF EXISTS cadastre.hierarchy CASCADE;
+CREATE VIEW cadastre.hierarchy AS  SELECT sug.id, sug.label, sug.geom, sug.hierarchy_level::character varying AS filter_category  FROM cadastre.spatial_unit_group sug;;
 
 
 -- Scan tables and views for geometry columns                 and populate geometry_columns table
