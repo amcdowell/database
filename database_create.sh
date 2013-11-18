@@ -6,5 +6,5 @@ dbname="sola"
 nopass=""
 psql --host=$host --port=5432 --username=postgres $nopass --dbname=$dbname --file=$script_folder"sola.sql"
 psql --host=$host --port=5432 --username=postgres $nopass --dbname=$dbname --file=$script_folder"test_data.sql"
-psql --host=$host --port=5432 --username=postgres $nopass --dbname=$dbname --file=$script_folder"business_rules.sql"
+psql --host=$host --port=5432 --username=postgres $nopass --dbname=$dbname --file=$script_folder"business-rules/business_rules.sql"
 

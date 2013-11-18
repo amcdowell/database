@@ -1,4 +1,4 @@
-﻿
+
 insert into system.br(id, technical_type_code, feedback, technical_description) 
 values('spatial-unit-group-name-unique', 'sql', 'Spatial unit groups must be unique.',
  'There is no parameter required.');
