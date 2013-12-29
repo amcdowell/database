@@ -1,5 +1,5 @@
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('public-display-check-complete-status', 'sql', 'At least 90% of the parcels must have an associated Systematic Application with complete status.::::Almeno il 90% delle particelle devono avere una Pratica Sistematica con stato completato::::По крайней мере 90% участков должны иметь соответствующие заявления на системную регистрацию с завершенным статусом.', '#{lastPart}(name_lastpart) is requested');
+VALUES ('public-display-check-complete-status', 'sql', 'At least 90% of the parcels must have an associated Systematic Application with complete status.::::По крайней мере 90% участков должны иметь соответствующие заявления на системную регистрацию с завершенным статусом.', '#{lastPart}(name_lastpart) is requested');
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES ('public-display-check-complete-status', now(), 'infinity', 'select
@@ -33,13 +33,13 @@ from cadastre.cadastre_object co
 > 90 as vl
 ');
 
-INSERT INTO system.br_validation(br_id, target_code, target_application_moment, severity_code, order_of_execution) 
-VALUES ('public-display-check-complete-status', 'public_display', '', 'warning', 1);
+INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
+VALUES ('public-display-check-complete-status', 'public_display', NULL, NULL, NULL, NULL, NULL, 'warning', 1);
 
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('public-display-check-baunit-has-co', 'sql', 'All property must have an associated cadastre object.::::Tutte le proprieta devono avere un oggetto catastale associato::::Все объекты недвижимости должны иметь соответствующие кадастровые объекты.', '#{lastPart}(name_lastpart) is requested');
+VALUES ('public-display-check-baunit-has-co', 'sql', 'All property must have an associated cadastre object.::::Все объекты недвижимости должны иметь соответствующие кадастровые объекты.', '#{lastPart}(name_lastpart) is requested');
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES ('public-display-check-baunit-has-co', now(), 'infinity', 'SELECT count(bu.id) = 0 as vl
@@ -72,8 +72,8 @@ VALUES ('public-display-check-baunit-has-co', now(), 'infinity', 'SELECT count(b
    administrative.ba_unit_contains_spatial_unit su
    )');
 
-INSERT INTO system.br_validation(br_id, target_code, target_application_moment, severity_code, order_of_execution) 
-VALUES ('public-display-check-baunit-has-co', 'public_display', '', 'warning', 2);
+INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
+VALUES ('public-display-check-baunit-has-co', 'public_display', NULL, NULL, NULL, NULL, NULL, 'warning', 2);
 
 ----------------------------------------------------------------------------------------------------
 

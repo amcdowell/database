@@ -1,5 +1,5 @@
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('source-attach-in-transaction-allowed-type', 'sql', 'Document to be registered must have an allowable and current source type::::Documento deve essere di tipo consentito per la transazione::::Документы для регистрации должны иметь допустимый тип.', '#{id}(source.source.id) is requested. It checks if the source has a type which has the is_for_registration attribute true.');
+VALUES ('source-attach-in-transaction-allowed-type', 'sql', 'Document to be registered must have an allowable and current source type::::Документы для регистрации должны иметь допустимый тип.', '#{id}(source.source.id) is requested. It checks if the source has a type which has the is_for_registration attribute true.');
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES ('source-attach-in-transaction-allowed-type', now(), 'infinity', 'WITH checkServiceType	AS	(SELECT COUNT(*) AS cnt FROM application.service sv1
@@ -21,13 +21,13 @@ SELECT	CASE 	WHEN (SELECT (cnt = 0) FROM checkServiceType) THEN NULL
 		ELSE FALSE
 	END AS vl');
 
-INSERT INTO system.br_validation(br_id, target_code, target_application_moment, severity_code, order_of_execution) 
-VALUES ('source-attach-in-transaction-allowed-type', 'source', '', 'critical', 560);
+INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
+VALUES ('source-attach-in-transaction-allowed-type', 'source', NULL, NULL, 'pending', NULL, NULL, 'critical', 560);
 
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('source-attach-in-transaction-no-pendings', 'sql', 'Document (source file) must not be duplicated::::Documento non deve avere stato pendente::::Документ не должен дублироваться.', '#{id}(source.source.id) is requested. It checks if the source has already a record with the status pending.');
+VALUES ('source-attach-in-transaction-no-pendings', 'sql', 'Document (source file) must not be duplicated::::Документ не должен дублироваться.', '#{id}(source.source.id) is requested. It checks if the source has already a record with the status pending.');
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES ('source-attach-in-transaction-no-pendings', now(), 'infinity', 'WITH checkServiceType	AS	(SELECT COUNT(*) AS cnt FROM application.service sv1
@@ -44,8 +44,8 @@ SELECT	CASE 	WHEN (SELECT (cnt = 0) FROM checkServiceType) THEN NULL
 		ELSE FALSE
 	END AS vl');
 
-INSERT INTO system.br_validation(br_id, target_code, target_application_moment, severity_code, order_of_execution) 
-VALUES ('source-attach-in-transaction-no-pendings', 'source', '', 'critical', 220);
+INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
+VALUES ('source-attach-in-transaction-no-pendings', 'source', NULL, NULL, 'pending', NULL, NULL, 'critical', 220);
 
 ----------------------------------------------------------------------------------------------------
 

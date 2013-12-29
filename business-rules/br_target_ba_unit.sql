@@ -1,5 +1,5 @@
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('target-ba_unit-check-if-pending', 'sql', 'Pending registration actions (from other applications) affecting the title to be cancelled should be cancelled::::Non esistono modifiche pendenti per il titolo origine::::Все незавершенные действия из других заявлений по регистрации прав с данной недвижимостью, которая будет ликвидирована должны быть отменены.', '#{id}(baunit_id) is requested. It checks if there is no pending transaction for target ba_unit (a ba_unit flagged for cancellation).
+VALUES ('target-ba_unit-check-if-pending', 'sql', 'Pending registration actions (from other applications) affecting the title to be cancelled should be cancelled::::Все незавершенные действия из других заявлений по регистрации прав с данной недвижимостью, которая будет ликвидирована должны быть отменены.', '#{id}(baunit_id) is requested. It checks if there is no pending transaction for target ba_unit (a ba_unit flagged for cancellation).
  It checks if the administrative.ba_unit_target table has a record of this ba_unit which is different
  from the transaction that has flagged the ba_unit for cancellation, that this transaction record is not yet approved,
  that this ba_unit has an associated rrr record which is pending and that there are no other applications with intended or pending changes to this ba_unit.');
@@ -45,26 +45,26 @@ SELECT ((SELECT chkPend  FROM pendingRRR) AND (SELECT chkOther FROM otherCancel)
 FROM administrative.ba_unit_target tg
 WHERE tg.ba_unit_id  = #{id}');
 
-INSERT INTO system.br_validation(br_id, target_code, target_application_moment, severity_code, order_of_execution) 
-VALUES ('target-ba_unit-check-if-pending', 'ba_unit', '', 'critical', 280);
+INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
+VALUES ('target-ba_unit-check-if-pending', 'ba_unit', NULL, NULL, 'current', NULL, NULL, 'critical', 280);
 
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('ba_unit-has-cadastre-object', 'sql', 'Title must have an associated parcel (or cadastre object)::::Il titolo deve avere particelle (oggetti catastali) associati::::Недвижимость должна иметь земельный участок (или кадастровый объект).', '#{id}(administrative.ba_unit.id) is requested');
+VALUES ('ba_unit-has-cadastre-object', 'sql', 'Title must have an associated parcel (or cadastre object)::::Недвижимость должна иметь земельный участок (или кадастровый объект).', '#{id}(administrative.ba_unit.id) is requested');
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES ('ba_unit-has-cadastre-object', now(), 'infinity', 'SELECT count(*)>0 vl
 from administrative.ba_unit_contains_spatial_unit ba_s 
 WHERE ba_s.ba_unit_id = #{id}');
 
-INSERT INTO system.br_validation(br_id, target_code, target_application_moment, severity_code, order_of_execution) 
-VALUES ('ba_unit-has-cadastre-object', 'ba_unit', '', 'medium', 500);
+INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
+VALUES ('ba_unit-has-cadastre-object', 'ba_unit', NULL, NULL, 'current', NULL, NULL, 'medium', 500);
 
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('newtitle-br22-check-different-owners', 'sql', 'Owners of new titles should be the same as owners of underlying titles::::Gli aventi diritto delle nuove titoli non sono gli stessi delle proprieta/titoli sottostanti::::Владельцы новых объектов недвижимости должны быть такие же как в родительских объектах.', '#{id}(baunit_id) is requested.
+VALUES ('newtitle-br22-check-different-owners', 'sql', 'Owners of new titles should be the same as owners of underlying titles::::Владельцы новых объектов недвижимости должны быть такие же как в родительских объектах.', '#{id}(baunit_id) is requested.
 Check that new title owners are the same as underlying titles owners (Give WARNING if > 0)');
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
@@ -89,13 +89,13 @@ SELECT 	CASE 	WHEN (SELECT (COUNT(*) = 0) FROM prior_property_owner) THEN NULL
 ORDER BY vl
 LIMIT 1');
 
-INSERT INTO system.br_validation(br_id, target_code, target_application_moment, severity_code, order_of_execution) 
-VALUES ('newtitle-br22-check-different-owners', 'ba_unit', '', 'warning', 680);
+INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
+VALUES ('newtitle-br22-check-different-owners', 'ba_unit', NULL, NULL, 'current', NULL, NULL, 'warning', 680);
 
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('ba_unit-spatial_unit-area-comparison', 'sql', 'Title area should only differ from parcel area(s) by less than 1%::::Area indicata nel titolo differisce da quella delle particelle per piu del 1%::::Площадь недвижимости не должна отличаться от ее земельного участка более чем на 1%.', '#{id}(administrative.ba_unit.id) is requested');
+VALUES ('ba_unit-spatial_unit-area-comparison', 'sql', 'Title area should only differ from parcel area(s) by less than 1%::::Площадь недвижимости не должна отличаться от ее земельного участка более чем на 1%.', '#{id}(administrative.ba_unit.id) is requested');
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES ('ba_unit-spatial_unit-area-comparison', now(), 'infinity', 'SELECT (abs(coalesce(ba_a.size,0.001) - 
@@ -108,13 +108,13 @@ FROM administrative.ba_unit ba left join administrative.ba_unit_area ba_a
 WHERE ba.id = #{id}
 ');
 
-INSERT INTO system.br_validation(br_id, target_code, target_application_moment, severity_code, order_of_execution) 
-VALUES ('ba_unit-spatial_unit-area-comparison', 'ba_unit', '', 'medium', 490);
+INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
+VALUES ('ba_unit-spatial_unit-area-comparison', 'ba_unit', NULL, NULL, 'current', NULL, NULL, 'medium', 490);
 
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('ba_unit-has-compatible-cadastre-object', 'sql', 'Title should have compatible parcel (or cadastre object) description (appellation)::::Il titolo ha particelle (oggetti catastali) incompatibili::::Недвижимость должна иметь совместимый тип земельного участка.', '#{id}(administrative.ba_unit.id) is requested');
+VALUES ('ba_unit-has-compatible-cadastre-object', 'sql', 'Title should have compatible parcel (or cadastre object) description (appellation)::::Недвижимость должна иметь совместимый тип земельного участка.', '#{id}(administrative.ba_unit.id) is requested');
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES ('ba_unit-has-compatible-cadastre-object', now(), 'infinity', 'SELECT  co.type_code = ''parcel'' as vl
@@ -127,13 +127,13 @@ order by case when co.type_code = ''parcel'' then 0
 	end
 limit 1');
 
-INSERT INTO system.br_validation(br_id, target_code, target_application_moment, severity_code, order_of_execution) 
-VALUES ('ba_unit-has-compatible-cadastre-object', 'ba_unit', '', 'medium', 540);
+INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
+VALUES ('ba_unit-has-compatible-cadastre-object', 'ba_unit', NULL, NULL, 'current', NULL, NULL, 'medium', 540);
 
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('ba_unit-has-a-valid-primary-right', 'sql', 'A title must have a valid primary right::::Un titolo deve avere un diritto primario::::Недвижимость должна иметь первичное право собственности.', '#{id}(baunit_id) is requested.');
+VALUES ('ba_unit-has-a-valid-primary-right', 'sql', 'A title must have a valid primary right::::Недвижимость должна иметь первичное право собственности.', '#{id}(baunit_id) is requested.');
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES ('ba_unit-has-a-valid-primary-right', now(), 'infinity', 'SELECT (COUNT(*) = 1) AS vl FROM administrative.rrr rr1 
@@ -145,8 +145,8 @@ VALUES ('ba_unit-has-a-valid-primary-right', now(), 'infinity', 'SELECT (COUNT(*
  AND rr1.is_primary
  AND rr1.type_code IN (''ownership'', ''apartment'', ''stateOwnership'', ''lease'')');
 
-INSERT INTO system.br_validation(br_id, target_code, target_application_moment, severity_code, order_of_execution) 
-VALUES ('ba_unit-has-a-valid-primary-right', 'ba_unit', '', 'critical', 20);
+INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
+VALUES ('ba_unit-has-a-valid-primary-right', 'ba_unit', NULL, NULL, 'current', NULL, NULL, 'critical', 20);
 
 ----------------------------------------------------------------------------------------------------
 
