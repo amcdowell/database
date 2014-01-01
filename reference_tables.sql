@@ -7,13 +7,13 @@ VALUES ('rootTitle', 'Root of Title::::Корневая недвижимость
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO administrative.ba_unit_type (code, display_value, description, status) 
-VALUES ('administrativeUnit', 'Administrative Unit::::Административная единица::::وحدة ادارية', '...', 'x');
+VALUES ('administrativeUnit', 'Administrative Unit::::Административная единица::::وحدة ادارية', '...::::::::...', 'x');
 
 INSERT INTO administrative.ba_unit_type (code, display_value, description, status) 
-VALUES ('leasedUnit', 'Leased Unit::::Единица для Аренды::::وحدة  مؤجرة', '...', 'x');
+VALUES ('leasedUnit', 'Leased Unit::::Единица для Аренды::::وحدة  مؤجرة', '...::::::::...', 'x');
 
 INSERT INTO administrative.ba_unit_type (code, display_value, description, status) 
-VALUES ('propertyRightUnit', 'Property Right Unit::::Единица права недвижимости::::وحدة حقوق الملكية', '...', 'x');
+VALUES ('propertyRightUnit', 'Property Right Unit::::Единица права недвижимости::::وحدة حقوق الملكية', '...::::::::...', 'x');
 
 INSERT INTO administrative.ba_unit_type (code, display_value, description, status) 
 VALUES ('basicPropertyUnit', 'Basic Property Unit::::Базовая единица недвижимости::::وحدة ملكية اساسة', 'This is the basic property unit that is used by default::::Это базовая единица недвижимости используемая по умолчанию::::...', 'c');
@@ -21,138 +21,135 @@ VALUES ('basicPropertyUnit', 'Basic Property Unit::::Базовая единиц
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO administrative.condition_type (code, display_value, description, status) 
-VALUES ('c1', 'Condition 1::::Условие 1::::الشرط الاول', 'Unless the Minister directs otherwise the Lessee shall fence the boundaries of the land within 6 (six) months of the date of the grant and the Lessee shall maintain the fence to the satisfaction of the Commissioner.::::Unless the Minister directs otherwise the Lessee shall fence the boundaries of the land within 6 (six) months of the date of the grant and the Lessee shall maintain the fence to the satisfaction of the Commissioner.::::Unless the Minister directs otherwise the Lessee shall fence the boundaries of the land within 6 (six) months of the date of the grant and the Lessee shall maintain the fence to the satisfaction of the Commissioner.', 'c');
+VALUES ('c1', 'Condition 1::::Условие 1::::الشرط الاول', 'Unless the Minister directs otherwise the Lessee shall fence the boundaries of the land within 6 (six) months of the date of the grant and the Lessee shall maintain the fence to the satisfaction of the Commissioner.::::Unless the Minister directs otherwise the Lessee shall fence the boundaries of the land within 6 (six) months of the date of the grant and the Lessee shall maintain the fence to the satisfaction of the Commissioner.::::ما لم يقرر الوزير غير ذلك  على المستأجر تسسيج حدود الارض بمدة لا تزيد عن 6 شهورمن تاريخ السماح ويجب على المستاجر المحافظة على سلامة السياج لصالح المفوض', 'c');
 
 INSERT INTO administrative.condition_type (code, display_value, description, status) 
-VALUES ('c2', 'Condition 2::::Условие 2::::الشرط الثاني', 'Unless special written authority is given by the Commissioner, the Lessee shall commence development of the land within 5 years of the date of the granting of a lease. This shall also apply to further development of the land held under a lease during the term of the lease.::::Unless special written authority is given by the Commissioner, the Lessee shall commence development of the land within 5 years of the date of the granting of a lease. This shall also apply to further development of the land held under a lease during the term of the lease.::::Unless special written authority is given by the Commissioner, the Lessee shall commence development of the land within 5 years of the date of the granting of a lease. This shall also apply to further development of the land held under a lease during the term of the lease.', 'c');
+VALUES ('c4', 'Condtion 4::::Условие 4::::الشرط الرابع', 'The Lessee shall use the land comprised in the lease only for the purpose specified in the lease or in any variation made to the original lease.::::The Lessee shall use the land comprised in the lease only for the purpose specified in the lease or in any variation made to the original lease.::::على المستاجر استخدام الارض فقط للاغراض المنصوص عليها في عقد الايجار او أي تغييرات مرفقة مع عقد الايجار', 'c');
 
 INSERT INTO administrative.condition_type (code, display_value, description, status) 
-VALUES ('c3', 'Condition 3::::Условие 3::::الشرط الثالث', 'Within a period of the time to be fixed by the planning authority, the Lessee shall provide at his own expense main drainage or main sewerage connections from the building erected on the land as the planning authority may require.::::Within a period of the time to be fixed by the planning authority, the Lessee shall provide at his own expense main drainage or main sewerage connections from the building erected on the land as the planning authority may require.::::Within a period of the time to be fixed by the planning authority, the Lessee shall provide at his own expense main drainage or main sewerage connections from the building erected on the land as the planning authority may require.', 'c');
+VALUES ('c6', 'Condition 6::::Условие 6::::الشرط السادس', 'The interior and exterior of any building erected on the land and all building additions thereto and all other buildings at any time erected or standing on the land and walls, drains and other appurtenances, shall be kept by the Lessee in good repair and tenantable condition to the satisfaction of the planning authority.::::The interior and exterior of any building erected on the land and all building additions thereto and all other buildings at any time erected or standing on the land and walls, drains and other appurtenances, shall be kept by the Lessee in good repair and tenantable condition to the satisfaction of the planning authority.::::جميع مداخل ومخارج البنايات المرفوعة على الارض وجميع البنايات المرفوعة على الارض في أي وقت والجدران والمصارف والتوابع , يجب الحفاظ عليها بصورة جيدة وتصليحها بما يحقق متطلبات سلطة التخطيط', 'c');
 
 INSERT INTO administrative.condition_type (code, display_value, description, status) 
-VALUES ('c4', 'Condtion 4::::Условие 4::::الشرط الرابع', 'The Lessee shall use the land comprised in the lease only for the purpose specified in the lease or in any variation made to the original lease.::::The Lessee shall use the land comprised in the lease only for the purpose specified in the lease or in any variation made to the original lease.::::The Lessee shall use the land comprised in the lease only for the purpose specified in the lease or in any variation made to the original lease.', 'c');
+VALUES ('c5', 'Condition 5::::Условие 5::::الشرط الخامس', 'Save with the written authority of the planning authority, no electrical power or telephone pole or line or water, drainage or sewer pipe being upon or passing through, over or under the land and no replacement thereof, shall be moved or in any way be interfered with and reasonable access thereto shall be preserved to allow for inspection, maintenance, repair, renewal and replacement.::::Save with the written authority of the planning authority, no electrical power or telephone pole or line or water, drainage or sewer pipe being upon or passing through, over or under the land and no replacement thereof, shall be moved or in any way be interfered with and reasonable access thereto shall be preserved to allow for inspection, maintenance, repair, renewal and replacement.::::محفوظة بشكل خطي عند سلطة التخطيط , جميع خطوط الطاقة الكهربائية أو قطب الهاتف أو خط المياه والصرف الصحي أو أنابيب المجاري التي تجري على الارض او و تمر، فوق أو تحت الأرض لا يجب استبدال أي منها، او نقلها في أي حال من الأحوال ويجب الحفاظ عليها وضمان صول معقول للسماح للتفتيش والصيانة والإصلاح والتجديد والاستبدال', 'c');
 
 INSERT INTO administrative.condition_type (code, display_value, description, status) 
-VALUES ('c5', 'Condition 5::::Условие 5::::الشرط الخامس', 'Save with the written authority of the planning authority, no electrical power or telephone pole or line or water, drainage or sewer pipe being upon or passing through, over or under the land and no replacement thereof, shall be moved or in any way be interfered with and reasonable access thereto shall be preserved to allow for inspection, maintenance, repair, renewal and replacement.::::Save with the written authority of the planning authority, no electrical power or telephone pole or line or water, drainage or sewer pipe being upon or passing through, over or under the land and no replacement thereof, shall be moved or in any way be interfered with and reasonable access thereto shall be preserved to allow for inspection, maintenance, repair, renewal and replacement.::::Save with the written authority of the planning authority, no electrical power or telephone pole or line or water, drainage or sewer pipe being upon or passing through, over or under the land and no replacement thereof, shall be moved or in any way be interfered with and reasonable access thereto shall be preserved to allow for inspection, maintenance, repair, renewal and replacement.', 'c');
+VALUES ('c3', 'Condition 3::::Условие 3::::الشرط الثالث', 'Within a period of the time to be fixed by the planning authority, the Lessee shall provide at his own expense main drainage or main sewerage connections from the building erected on the land as the planning authority may require.::::Within a period of the time to be fixed by the planning authority, the Lessee shall provide at his own expense main drainage or main sewerage connections from the building erected on the land as the planning authority may require.::::ضمن المدة المحددة من سلطة التخطيط, على المستأجر التمديد على حسابه وصلات الصرف الصحي وصرف المياه من البناية المرفوعة على الارض بما يتوافق مع متطلبات سلطة التخطيط', 'c');
 
 INSERT INTO administrative.condition_type (code, display_value, description, status) 
-VALUES ('c6', 'Condition 6::::Условие 6::::الشرط السادس', 'The interior and exterior of any building erected on the land and all building additions thereto and all other buildings at any time erected or standing on the land and walls, drains and other appurtenances, shall be kept by the Lessee in good repair and tenantable condition to the satisfaction of the planning authority.::::The interior and exterior of any building erected on the land and all building additions thereto and all other buildings at any time erected or standing on the land and walls, drains and other appurtenances, shall be kept by the Lessee in good repair and tenantable condition to the satisfaction of the planning authority.::::The interior and exterior of any building erected on the land and all building additions thereto and all other buildings at any time erected or standing on the land and walls, drains and other appurtenances, shall be kept by the Lessee in good repair and tenantable condition to the satisfaction of the planning authority.', 'c');
+VALUES ('c2', 'Condition 2::::Условие 2::::الشرط الثاني', 'Unless special written authority is given by the Commissioner, the Lessee shall commence development of the land within 5 years of the date of the granting of a lease. This shall also apply to further development of the land held under a lease during the term of the lease.::::Unless special written authority is given by the Commissioner, the Lessee shall commence development of the land within 5 years of the date of the granting of a lease. This shall also apply to further development of the land held under a lease during the term of the lease.::::ما لم يصدر مرسوم رسمي عن المفوض , على المستأجر البدء يتطوير الارض خلال 5 سنوات من تاريخ  الاستئجار. كما ينطبق ذلك على التطوير الاضافي للارض الواقعى ضمن بنود الاستئجار', 'c');
 
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO administrative.mortgage_type (code, display_value, description, status) 
-VALUES ('levelPayment', 'Level Payment::::Многоуровневый платеж::::دفعات متدرجة', '...', 'c');
+VALUES ('levelPayment', 'Level Payment::::Многоуровневый платеж::::دفعات متدرجة', '...::::::::...', 'c');
 
 INSERT INTO administrative.mortgage_type (code, display_value, description, status) 
-VALUES ('linear', 'Linear::::Линейный::::خطي', '...', 'c');
+VALUES ('linear', 'Linear::::Линейный::::خطي', '...::::::::...', 'c');
 
 INSERT INTO administrative.mortgage_type (code, display_value, description, status) 
-VALUES ('microCredit', 'Micro Credit::::Микро кредит::::القروض الصغيرة', '...', 'c');
+VALUES ('microCredit', 'Micro Credit::::Микро кредит::::القروض الصغيرة', '...::::::::...', 'c');
 
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO administrative.rrr_group_type (code, display_value, description, status) 
-VALUES ('responsibilities', 'Responsibilities::::Ответственность::::المسؤوليات', '...', 'x');
+VALUES ('responsibilities', 'Responsibilities::::Ответственность::::المسؤوليات', '...::::::::...', 'x');
 
 INSERT INTO administrative.rrr_group_type (code, display_value, description, status) 
-VALUES ('restrictions', 'Restrictions::::Ограничения::::القيود', '...', 'c');
+VALUES ('restrictions', 'Restrictions::::Ограничения::::القيود', '...::::::::...', 'c');
 
 INSERT INTO administrative.rrr_group_type (code, display_value, description, status) 
-VALUES ('rights', 'Rights::::Права::::الحقوق', '...', 'c');
+VALUES ('rights', 'Rights::::Права::::الحقوق', '...::::::::...', 'c');
 
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
-VALUES ('adminPublicServitude', 'restrictions', 'Administrative Public Servitude::::Административный публичный сервитут::::حق الاستخدام العام', 'f', 't', 't', '...', 'x');
-
-INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
-VALUES ('agriActivity', 'rights', 'Agriculture Activity::::Сельскохозяйственная деятельность::::نشاط زراعي', 'f', 't', 't', '...', 'x');
-
-INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
-VALUES ('apartment', 'rights', 'Apartment Ownership::::Право собственности на квартиру::::مالك الشقة', 't', 't', 't', 'Extension to LADM::::Расширение LADM::::...', 'c');
-
-INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
-VALUES ('noBuilding', 'restrictions', 'Building Restriction::::Ограничение на здание::::قيود على بناية', 'f', 'f', 'f', '...', 'c');
+VALUES ('monument', 'restrictions', 'Monument::::Памятник::::النصب', 'f', 't', 't', '...::::::::...', 'x');
 
 INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
 VALUES ('caveat', 'restrictions', 'Caveat::::Арест::::القيود', 'f', 't', 't', 'Extension to LADM::::Расширение LADM::::...', 'c');
 
 INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
-VALUES ('commonOwnership', 'rights', 'Common Ownership::::Общая собственность::::الملكية العامة', 'f', 't', 't', '...', 'x');
+VALUES ('commonOwnership', 'rights', 'Common Ownership::::Общая собственность::::الملكية العامة', 'f', 't', 't', '...::::::::...', 'x');
 
 INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
-VALUES ('customaryType', 'rights', 'Customary Right::::Традиционное право::::الحق العرفي', 'f', 't', 't', '...', 'x');
+VALUES ('mortgage', 'restrictions', 'Mortgage::::Ипотека::::الرهن', 'f', 't', 't', '...::::::::...', 'c');
 
 INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
-VALUES ('firewood', 'rights', 'Firewood Collection::::Сбор древисины::::...', 'f', 't', 't', '...', 'x');
+VALUES ('waterrights', 'rights', 'Water Right::::Право на водные ресурсы::::حق في المياه', 'f', 't', 't', '...::::::::...', 'c');
 
 INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
-VALUES ('informalOccupation', 'rights', 'Informal Occupation::::Неформальная оккупация::::الاستعمال الغير رسمي', 'f', 'f', 'f', '...', 'x');
+VALUES ('occupation', 'rights', 'Occupation::::Оккупация::::الاستعمال', 'f', 't', 't', '...::::::::...', 'c');
 
 INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
-VALUES ('lease', 'rights', 'Lease::::Аренда::::الايجار', 'f', 't', 't', '...', 'c');
+VALUES ('ownershipAssumed', 'rights', 'Ownership Assumed::::Принятое право собственности::::افتراض الملكية', 't', 't', 't', '...::::::::...', 'x');
 
 INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
-VALUES ('lifeEstate', 'rights', 'Life Estate::::Пожизненное право собственности::::عقار مدى الحياة', 't', 't', 't', 'Extension to LADM::::Расширение LADM::::...', 'x');
+VALUES ('waterwayMaintenance', 'responsibilities', 'Waterway Maintenance::::Обслуживания каналов ирригации::::صيانة الممر المائي', 'f', 'f', 'f', '...::::::::...', 'x');
 
 INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
-VALUES ('limitedAccess', 'restrictions', 'Limited Access (to Road)::::Ограниченный доступ к дороге::::استعمال محدود للطريق', 'f', 'f', 'f', 'Extension to LADM::::Расширение LADM::::...', 'c');
+VALUES ('ownership', 'rights', 'Ownership::::Право собственности::::الملكية', 't', 't', 't', '...::::::::...', 'c');
 
 INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
-VALUES ('monument', 'restrictions', 'Monument::::Памятник::::النصب', 'f', 't', 't', '...', 'x');
+VALUES ('servitude', 'restrictions', 'Servitude::::Сервитут::::حق الاستعمال', 'f', 'f', 'f', '...::::::::...', 'c');
 
 INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
-VALUES ('mortgage', 'restrictions', 'Mortgage::::Ипотека::::الرهن', 'f', 't', 't', '...', 'c');
+VALUES ('fishing', 'rights', 'Fishing Right::::Рыболовное право::::حق الصيد', 'f', 't', 't', '...::::::::...', 'x');
 
 INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
-VALUES ('occupation', 'rights', 'Occupation::::Оккупация::::الاستعمال', 'f', 't', 't', '...', 'c');
-
-INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
-VALUES ('ownershipAssumed', 'rights', 'Ownership Assumed::::Принятое право собственности::::افتراض الملكية', 't', 't', 't', '...', 'x');
-
-INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
-VALUES ('ownership', 'rights', 'Ownership::::Право собственности::::الملكية', 't', 't', 't', '...', 'c');
-
-INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
-VALUES ('servitude', 'restrictions', 'Servitude::::Сервитут::::حق الاستعمال', 'f', 'f', 'f', '...', 'c');
-
-INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
-VALUES ('stateOwnership', 'rights', 'State Ownership::::Государственное право собственности::::ملكية عقار.', 't', 'f', 'f', 'Extension to LADM::::Расширение LADM::::...', 'c');
-
-INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
-VALUES ('superficies', 'rights', 'Superficies::::Superficies::::بناء متعدي', 'f', 't', 't', '...', 'x');
-
-INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
-VALUES ('tenancy', 'rights', 'Tenancy::::Арендаторство::::استئجار عقار', 't', 't', 't', '...', 'x');
-
-INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
-VALUES ('usufruct', 'rights', 'Usufruct::::Право использования для сбора урожая::::حق الانتفاع', 'f', 't', 't', '...', 'c');
-
-INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
-VALUES ('waterrights', 'rights', 'Water Right::::Право на водные ресурсы::::حق في المياه', 'f', 't', 't', '...', 'c');
-
-INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
-VALUES ('waterwayMaintenance', 'responsibilities', 'Waterway Maintenance::::Обслуживания каналов ирригации::::صيانة الممر المائي', 'f', 'f', 'f', '...', 'x');
-
-INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
-VALUES ('fishing', 'rights', 'Fishing Right::::Рыболовное право::::حق الصيد', 'f', 't', 't', '...', 'x');
-
-INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
-VALUES ('grazing', 'rights', 'Grazing Right::::Право выпаса::::حق الرعي', 'f', 't', 't', '...', 'x');
+VALUES ('grazing', 'rights', 'Grazing Right::::Право выпаса::::حق الرعي', 'f', 't', 't', '...::::::::...', 'x');
 
 INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
 VALUES ('historicPreservation', 'restrictions', 'Historic Preservation::::Историческая резервация::::الحفظ التاريخي', 'f', 'f', 'f', 'Extension to LADM::::Расширение LADM::::...', 'c');
 
 INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
-VALUES ('monumentMaintenance', 'responsibilities', 'Monument Maintenance::::Обслуживание памятника::::صيانة النصب', 'f', 'f', 'f', '...', 'x');
+VALUES ('monumentMaintenance', 'responsibilities', 'Monument Maintenance::::Обслуживание памятника::::صيانة النصب', 'f', 'f', 'f', '...::::::::...', 'x');
+
+INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
+VALUES ('adminPublicServitude', 'restrictions', 'Administrative Public Servitude::::Административный публичный сервитут::::حق الاستخدام العام', 'f', 't', 't', '...::::::::...', 'x');
+
+INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
+VALUES ('customaryType', 'rights', 'Customary Right::::Традиционное право::::الحق العرفي', 'f', 't', 't', '...::::::::...', 'x');
+
+INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
+VALUES ('agriActivity', 'rights', 'Agriculture Activity::::Сельскохозяйственная деятельность::::نشاط زراعي', 'f', 't', 't', '...::::::::...', 'x');
+
+INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
+VALUES ('stateOwnership', 'rights', 'State Ownership::::Государственное право собственности::::ملكية عقار.', 't', 'f', 'f', 'Extension to LADM::::Расширение LADM::::...', 'c');
+
+INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
+VALUES ('apartment', 'rights', 'Apartment Ownership::::Право собственности на квартиру::::مالك الشقة', 't', 't', 't', 'Extension to LADM::::Расширение LADM::::...', 'c');
+
+INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
+VALUES ('firewood', 'rights', 'Firewood Collection::::Сбор древисины::::...', 'f', 't', 't', '...::::::::...', 'x');
+
+INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
+VALUES ('noBuilding', 'restrictions', 'Building Restriction::::Ограничение на здание::::قيود على بناية', 'f', 'f', 'f', '...::::::::...', 'c');
+
+INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
+VALUES ('informalOccupation', 'rights', 'Informal Occupation::::Неформальная оккупация::::الاستعمال الغير رسمي', 'f', 'f', 'f', '...::::::::...', 'x');
+
+INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
+VALUES ('superficies', 'rights', 'Superficies::::Superficies::::بناء متعدي', 'f', 't', 't', '...::::::::...', 'x');
+
+INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
+VALUES ('lease', 'rights', 'Lease::::Аренда::::الايجار', 'f', 't', 't', '...::::::::...', 'c');
+
+INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
+VALUES ('lifeEstate', 'rights', 'Life Estate::::Пожизненное право собственности::::عقار مدى الحياة', 't', 't', 't', 'Extension to LADM::::Расширение LADM::::...', 'x');
+
+INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
+VALUES ('tenancy', 'rights', 'Tenancy::::Арендаторство::::استئجار عقار', 't', 't', 't', '...::::::::...', 'x');
+
+INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
+VALUES ('limitedAccess', 'restrictions', 'Limited Access (to Road)::::Ограниченный доступ к дороге::::استعمال محدود للطريق', 'f', 'f', 'f', 'Extension to LADM::::Расширение LADM::::...', 'c');
+
+INSERT INTO administrative.rrr_type (code, rrr_group_type_code, display_value, is_primary, share_check, party_required, description, status) 
+VALUES ('usufruct', 'rights', 'Usufruct::::Право использования для сбора урожая::::حق الانتفاع', 'f', 't', 't', '...::::::::...', 'c');
 
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO application.application_status_type (code, display_value, status, description) 
 VALUES ('annulled', 'Annulled::::Аннулировано::::ملغى', 'c', '');
-
-INSERT INTO application.application_status_type (code, display_value, status, description) 
-VALUES ('approved', 'Approved::::Одобрено::::Approved', 'c', '');
 
 INSERT INTO application.application_status_type (code, display_value, status, description) 
 VALUES ('completed', 'Completed::::Завершено::::مكتمل', 'c', '');
@@ -162,6 +159,9 @@ VALUES ('lodged', 'Lodged::::Подано::::مودع', 'c', 'Application has be
 
 INSERT INTO application.application_status_type (code, display_value, status, description) 
 VALUES ('requisitioned', 'Requisitioned::::Запрошена доп. информация::::يحتاج بيانات', 'c', '');
+
+INSERT INTO application.application_status_type (code, display_value, status, description) 
+VALUES ('approved', 'Approved::::Одобрено::::موافق عليه', 'c', '');
 
 ----------------------------------------------------------------------------------------------------
 
@@ -208,25 +208,13 @@ VALUES ('vary', 'Vary::::Изменить::::تعديل', '...::::...::::...', '
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO application.application_action_type (code, display_value, status_to_set, status, description) 
-VALUES ('addDocument', 'Add document::::Добавлен документ::::Add document', null, 'c', 'Scanned Documents linked to Application (action is automatically logged when a new document is saved)::::Добавление документа к заявлению::::Scanned Documents linked to Application (action is automatically logged when a new document is saved)');
-
-INSERT INTO application.application_action_type (code, display_value, status_to_set, status, description) 
-VALUES ('approve', 'Approve::::Одобрено::::الموافقة', 'approved', 'c', 'Application is approved (automatically logged when application is approved successively)::::Заявление одобрено::::Application is approved (automatically logged when application is approved successively)');
-
-INSERT INTO application.application_action_type (code, display_value, status_to_set, status, description) 
 VALUES ('archive', 'Archive::::Помещено в архив::::ارشفة', 'completed', 'c', 'Paper application records are archived (action is manually logged)::::Отправление в архив бумажной копии заявления::::Paper application records are archived (action is manually logged)');
 
 INSERT INTO application.application_action_type (code, display_value, status_to_set, status, description) 
-VALUES ('assign', 'Assign::::Назначено::::تعيين', null, 'c', '');
-
-INSERT INTO application.application_action_type (code, display_value, status_to_set, status, description) 
-VALUES ('cancel', 'Cancel application::::Отменено::::الغاء طلب', 'annulled', 'c', 'Application cancelled by Land Office (action is automatically logged when application is cancelled)::::Отмена исполнения заявления::::Application cancelled by Land Office (action is automatically logged when application is cancelled)');
-
-INSERT INTO application.application_action_type (code, display_value, status_to_set, status, description) 
-VALUES ('dispatch', 'Dispatch::::Отослано::::توزيع', null, 'c', 'Application documents and new land office products are sent or collected by applicant (action is manually logged)::::Документы заявления отсылаются заявителю или он забирает их сам::::Application documents and new land office products are sent or collected by applicant (action is manually logged)');
-
-INSERT INTO application.application_action_type (code, display_value, status_to_set, status, description) 
 VALUES ('lapse', 'Lapse::::Помечено как устарешее::::مضى عليه زمن', 'annulled', 'c', '');
+
+INSERT INTO application.application_action_type (code, display_value, status_to_set, status, description) 
+VALUES ('resubmit', 'Resubmit::::Подано заново::::اعادة تقديم', 'lodged', 'c', '');
 
 INSERT INTO application.application_action_type (code, display_value, status_to_set, status, description) 
 VALUES ('lodge', 'Lodgement Notice Prepared::::Подготовлено уведомление об оплате::::تم تحضير ملاحظة الايداع', 'lodged', 'c', 'Lodgement notice is prepared (action is automatically logged when application details are saved for the first time::::Подготовлено уведомление об оплате::::Lodgement notice is prepared (action is automatically logged when application details are saved for the first time');
@@ -235,22 +223,34 @@ INSERT INTO application.application_action_type (code, display_value, status_to_
 VALUES ('requisition', 'Requisition:::Ulteriori Informazioni domandate dal richiedente::::Запрошена доп. информацию::::Requisition:::Ulteriori Informazioni domandate dal richiedente', 'requisitioned', 'c', 'Further information requested from applicant (action is manually logged)::::Дальнейшая информация запрошена у заявителя::::Further information requested from applicant (action is manually logged)');
 
 INSERT INTO application.application_action_type (code, display_value, status_to_set, status, description) 
-VALUES ('resubmit', 'Resubmit::::Подано заново::::اعادة تقديم', 'lodged', 'c', '');
+VALUES ('unAssign', 'Unassign::::Освобождено::::الغاء تعيين', null, 'c', '');
 
 INSERT INTO application.application_action_type (code, display_value, status_to_set, status, description) 
-VALUES ('unAssign', 'Unassign::::Освобождено::::الغاء تعيين', null, 'c', '');
+VALUES ('withdraw', 'Withdraw application::::Забрано::::اسحب الطلب', 'annulled', 'c', 'Application withdrawn by Applicant (action is manually logged)::::Заявление было забрано заявителем::::Application withdrawn by Applicant (action is manually logged)');
 
 INSERT INTO application.application_action_type (code, display_value, status_to_set, status, description) 
 VALUES ('validate', 'Validate::::Проверено::::التحقق من صحة البيانات', null, 'c', 'The action validate does not leave a mark, because validateFailed and validateSucceded will be used instead when the validate is completed.::::The action validate does not leave a mark, because validateFailed and validateSucceded will be used instead when the validate is completed.::::The action validate does not leave a mark, because validateFailed and validateSucceded will be used instead when the validate is completed.');
 
 INSERT INTO application.application_action_type (code, display_value, status_to_set, status, description) 
+VALUES ('addDocument', 'Add document::::Добавлен документ::::اضافة وثيقة', null, 'c', 'Scanned Documents linked to Application (action is automatically logged when a new document is saved)::::Добавление документа к заявлению::::Scanned Documents linked to Application (action is automatically logged when a new document is saved)');
+
+INSERT INTO application.application_action_type (code, display_value, status_to_set, status, description) 
+VALUES ('assign', 'Assign::::Назначено::::تعيين', null, 'c', '');
+
+INSERT INTO application.application_action_type (code, display_value, status_to_set, status, description) 
+VALUES ('approve', 'Approve::::Одобрено::::الموافقة', 'approved', 'c', 'Application is approved (automatically logged when application is approved successively)::::Заявление одобрено::::Application is approved (automatically logged when application is approved successively)');
+
+INSERT INTO application.application_action_type (code, display_value, status_to_set, status, description) 
+VALUES ('validatePassed', 'Quality Check Passes::::Успешная проверка качества::::عملية التحقق تمت بنجاح', null, 'c', 'Quality check passes (automatically logged when business rules are run without any critical failures)::::Успешная проверка качества::::Quality check passes (automatically logged when business rules are run without any critical failures)');
+
+INSERT INTO application.application_action_type (code, display_value, status_to_set, status, description) 
+VALUES ('cancel', 'Cancel application::::Отменено::::الغاء طلب', 'annulled', 'c', 'Application cancelled by Land Office (action is automatically logged when application is cancelled)::::Отмена исполнения заявления::::Application cancelled by Land Office (action is automatically logged when application is cancelled)');
+
+INSERT INTO application.application_action_type (code, display_value, status_to_set, status, description) 
 VALUES ('validateFailed', 'Quality Check Fails::::Проверка качества вернула ошибки::::فشلت عملية التحقق', null, 'c', 'Quality check fails (automatically logged when a critical business rule failure occurs)::::Ошибки при проверки качества будут автоматически записаны в лог системы::::Quality check fails (automatically logged when a critical business rule failure occurs)');
 
 INSERT INTO application.application_action_type (code, display_value, status_to_set, status, description) 
-VALUES ('validatePassed', 'Quality Check Passes::::Успешная проверка качества::::Quality Check Passes', null, 'c', 'Quality check passes (automatically logged when business rules are run without any critical failures)::::Успешная проверка качества::::Quality check passes (automatically logged when business rules are run without any critical failures)');
-
-INSERT INTO application.application_action_type (code, display_value, status_to_set, status, description) 
-VALUES ('withdraw', 'Withdraw application::::Забрано::::اسحب الطلب', 'annulled', 'c', 'Application withdrawn by Applicant (action is manually logged)::::Заявление было забрано заявителем::::Application withdrawn by Applicant (action is manually logged)');
+VALUES ('dispatch', 'Dispatch::::Отослано::::توزيع', null, 'c', 'Application documents and new land office products are sent or collected by applicant (action is manually logged)::::Документы заявления отсылаются заявителю или он забирает их сам::::Application documents and new land office products are sent or collected by applicant (action is manually logged)');
 
 ----------------------------------------------------------------------------------------------------
 
@@ -329,7 +329,7 @@ INSERT INTO application.request_type (code, request_category_code, display_value
 VALUES ('varyMortgage', 'registrationServices', 'Vary Mortgage::::Изменить ипотеку::::تعديل الرهن.', '...::::...::::...', 'c', 1, 5.00, 0.00, 0.00, 1, 'Change on the mortgage', 'mortgage', 'vary');
 
 INSERT INTO application.request_type (code, request_category_code, display_value, description, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) 
-VALUES ('cadastreExport', 'informationServices', 'Cadastre Export::::Экспорт кадастра еще текст::::تصدير المساحة', '...', 'x', 1, 0.00, 0.10, 0.00, 0, null, null, null);
+VALUES ('cadastreExport', 'informationServices', 'Cadastre Export::::Экспорт кадастра еще текст::::تصدير المساحة', '...::::::::...', 'x', 1, 0.00, 0.10, 0.00, 0, null, null, null);
 
 INSERT INTO application.request_type (code, request_category_code, display_value, description, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) 
 VALUES ('regnOnTitle', 'registrationServices', 'Registration on Title::::Регистрация права собственности::::...', '...::::...::::...', 'c', 5, 5.00, 0.00, 0.01, 1, null, null, null);
@@ -359,13 +359,25 @@ INSERT INTO application.request_type (code, request_category_code, display_value
 VALUES ('newOwnership', 'registrationServices', 'Change of Ownership::::Смена владельца::::تغيير الملكية', '...::::...::::...', 'c', 5, 5.00, 0.00, 0.02, 1, 'Transfer to <name>', 'ownership', 'vary');
 
 INSERT INTO application.request_type (code, request_category_code, display_value, description, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) 
+VALUES ('cadastreBulk', 'informationServices', 'Cadastre Bulk Export::::Массовая загрузка кадастровых данных::::تصدير  رزمة مساحة', '...::::...::::...', 'x', 5, 5.00, 0.10, 0.00, 0, null, null, null);
+
+INSERT INTO application.request_type (code, request_category_code, display_value, description, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) 
 VALUES ('lifeEstate', 'registrationServices', 'Establish Life Estate::::Регистрация пожизненного права пользования::::انشاء تمليك عقار مدى الحياة.', '...::::...::::...', 'x', 5, 5.00, 0.00, 0.02, 1, 'Life Estate for <name1> with Remainder Estate in <name2, name3>', 'lifeEstate', 'new');
 
 INSERT INTO application.request_type (code, request_category_code, display_value, description, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) 
-VALUES ('mapExistingParcel', 'registrationServices', 'Map Existing Parcel::::::::رسم خارطة القطعة', '...', 'c', 30, 0.00, 0.00, 0.00, 0, 'Allows to make changes to the cadastre', null, null);
+VALUES ('systematicRegn', 'registrationServices', 'Systematic Registration Claim::::Запрос на системную регистрацию::::المطالبة بتسجيل منتظم', '...::::...::::...', 'c', 90, 50.00, 0.00, 0.00, 0, 'Title issued at completion of systematic registration', 'ownership', 'new');
+
+INSERT INTO application.request_type (code, request_category_code, display_value, description, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) 
+VALUES ('historicOrder', 'registrationServices', 'Register Historic Preservation Order::::Регистрация недвижимости исторического назначения::::تسجيل امر حفظ تاريخي', '...::::...::::...', 'c', 5, 5.00, 0.00, 0.00, 1, 'Historic Preservation Order', 'noBuilding', 'new');
+
+INSERT INTO application.request_type (code, request_category_code, display_value, description, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) 
+VALUES ('mapExistingParcel', 'registrationServices', 'Map Existing Parcel::::::::رسم خارطة القطعة', '...::::::::...', 'c', 30, 0.00, 0.00, 0.00, 0, 'Allows to make changes to the cadastre', null, null);
 
 INSERT INTO application.request_type (code, request_category_code, display_value, description, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) 
 VALUES ('newApartment', 'registrationServices', 'New Apartment Title::::Новое право на квартиру::::سند ملكية . لشقة جديدة', '...::::...::::...', 'c', 5, 5.00, 0.00, 0.02, 1, 'Apartment Estate', 'apartment', 'new');
+
+INSERT INTO application.request_type (code, request_category_code, display_value, description, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) 
+VALUES ('cnclStandardDocument', 'registrationServices', 'Withdraw Standard Document::::Удалить типовой документ::::سحب الوثيقة المرجعية', 'To withdraw from use any standard document (such as standard mortgage or standard lease)::::...::::...', 'c', 1, 5.00, 0.00, 0.00, 0, null, null, null);
 
 INSERT INTO application.request_type (code, request_category_code, display_value, description, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) 
 VALUES ('buildingRestriction', 'registrationServices', 'Register Building Restriction::::Регистрация ограничения на строение::::تسجيل قيود بناية', '...::::...::::...', 'c', 5, 5.00, 0.00, 0.00, 1, 'Building Restriction', 'noBuilding', 'new');
@@ -379,22 +391,7 @@ VALUES ('varyLease', 'registrationServices', 'Vary Lease::::Изменить п�
 INSERT INTO application.request_type (code, request_category_code, display_value, description, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) 
 VALUES ('titleSearch', 'informationServices', 'Title Search::::Поиск недвижимости::::البحث عن سند ملكية.', '...::::...::::...', 'c', 1, 5.00, 0.00, 0.00, 1, null, null, null);
 
-INSERT INTO application.request_type (code, request_category_code, display_value, description, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) 
-VALUES ('cadastreBulk', 'informationServices', 'Cadastre Bulk Export::::Массовая загрузка кадастровых данных::::تصدير  رزمة مساحة', '...::::...::::...', 'x', 5, 5.00, 0.10, 0.00, 0, null, null, null);
-
-INSERT INTO application.request_type (code, request_category_code, display_value, description, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) 
-VALUES ('systematicRegn', 'registrationServices', 'Systematic Registration Claim::::Запрос на системную регистрацию::::المطالبة بتسجيل منتظم', '...::::...::::...', 'c', 90, 50.00, 0.00, 0.00, 0, 'Title issued at completion of systematic registration', 'ownership', 'new');
-
-INSERT INTO application.request_type (code, request_category_code, display_value, description, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) 
-VALUES ('historicOrder', 'registrationServices', 'Register Historic Preservation Order::::Регистрация недвижимости исторического назначения::::تسجيل امر حفظ تاريخي', '...::::...::::...', 'c', 5, 5.00, 0.00, 0.00, 1, 'Historic Preservation Order', 'noBuilding', 'new');
-
-INSERT INTO application.request_type (code, request_category_code, display_value, description, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) 
-VALUES ('cnclStandardDocument', 'registrationServices', 'Withdraw Standard Document::::Удалить типовой документ::::سحب الوثيقة المرجعية', 'To withdraw from use any standard document (such as standard mortgage or standard lease)::::...::::...', 'c', 1, 5.00, 0.00, 0.00, 0, null, null, null);
-
 ----------------------------------------------------------------------------------------------------
-
-INSERT INTO cadastre.area_type (code, display_value, description, status) 
-VALUES ('calculatedArea', 'Calculated Area::::Вычисленная Площадь::::Calculated Area', '', 'c');
 
 INSERT INTO cadastre.area_type (code, display_value, description, status) 
 VALUES ('nonOfficialArea', 'Non-official Area::::Неофициальная Площадь::::Non-official Area', '', 'c');
@@ -404,6 +401,9 @@ VALUES ('officialArea', 'Official Area::::Официальная Площадь:
 
 INSERT INTO cadastre.area_type (code, display_value, description, status) 
 VALUES ('surveyedArea', 'Surveyed Area::::Площадь по Съемке::::المساحة الممسوحة', '', 'c');
+
+INSERT INTO cadastre.area_type (code, display_value, description, status) 
+VALUES ('calculatedArea', 'Calculated Area::::Вычисленная Площадь::::المساحة المحسوبة', '', 'c');
 
 ----------------------------------------------------------------------------------------------------
 
@@ -433,19 +433,19 @@ VALUES ('liminal', 'Liminal::::Liminal::::Liminal', '', 'x');
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO cadastre.hierarchy_level (code, display_value, description, status) 
-VALUES ('0', 'Hierarchy 0::::Hierarchy 0::::Hierarchy 0', '', 'c');
+VALUES ('0', 'Hierarchy 0::::Hierarchy 0::::تسلسل هرمي 0', '', 'c');
 
 INSERT INTO cadastre.hierarchy_level (code, display_value, description, status) 
-VALUES ('1', 'Hierarchy 1::::Hierarchy 1::::Hierarchy 1', '', 'c');
+VALUES ('1', 'Hierarchy 1::::Hierarchy 1::::تسلسل هرمي 1', '', 'c');
 
 INSERT INTO cadastre.hierarchy_level (code, display_value, description, status) 
-VALUES ('2', 'Hierarchy 2::::Hierarchy 2::::Hierarchy 2', '', 'c');
+VALUES ('2', 'Hierarchy 2::::Hierarchy 2::::تسلسل هرمي 2', '', 'c');
 
 INSERT INTO cadastre.hierarchy_level (code, display_value, description, status) 
-VALUES ('3', 'Hierarchy 3::::Hierarchy 3::::Hierarchy 3', '', 'c');
+VALUES ('3', 'Hierarchy 3::::Hierarchy 3::::تسلسل هرمي 3', '', 'c');
 
 INSERT INTO cadastre.hierarchy_level (code, display_value, description, status) 
-VALUES ('4', 'Hierarchy 4::::Hierarchy 4::::Hierarchy 4', '', 'c');
+VALUES ('4', 'Hierarchy 4::::Hierarchy 4::::تسلسل هرمي 4', '', 'c');
 
 ----------------------------------------------------------------------------------------------------
 
@@ -516,19 +516,19 @@ INSERT INTO cadastre.structure_type (code, display_value, description, status)
 VALUES ('point', 'Point::::Точка::::Point', '', 'c');
 
 INSERT INTO cadastre.structure_type (code, display_value, description, status) 
-VALUES ('polygon', 'Polygon::::Полигон::::Polygon', '', 'c');
+VALUES ('polygon', 'Polygon::::Полигон::::مضلع', '', 'c');
 
 INSERT INTO cadastre.structure_type (code, display_value, description, status) 
-VALUES ('sketch', 'Sketch::::Схема::::Sketch', '', 'c');
+VALUES ('sketch', 'Sketch::::Схема::::رسم تخطيطي', '', 'c');
 
 INSERT INTO cadastre.structure_type (code, display_value, description, status) 
-VALUES ('text', 'Text::::Текс::::Text', '', 'c');
+VALUES ('text', 'Text::::Текс::::نص', '', 'c');
 
 INSERT INTO cadastre.structure_type (code, display_value, description, status) 
-VALUES ('topological', 'Topological::::Топологический::::Topological', '', 'c');
+VALUES ('topological', 'Topological::::Топологический::::طبوغرافي', '', 'c');
 
 INSERT INTO cadastre.structure_type (code, display_value, description, status) 
-VALUES ('unStructuredLine', 'UnstructuredLine::::Неструктурированная линия::::UnstructuredLine', '', 'c');
+VALUES ('unStructuredLine', 'UnstructuredLine::::Неструктурированная линия::::خط غير منتظم', '', 'c');
 
 ----------------------------------------------------------------------------------------------------
 
@@ -592,27 +592,27 @@ VALUES ('utilityNetwork', 'Utility Network::::Инфраструктурная �
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO party.communication_type (code, display_value, status, description) 
-VALUES ('eMail', 'e-Mail::::Эл. почта::::بريد الكتروني', 'c', '...');
+VALUES ('eMail', 'e-Mail::::Эл. почта::::بريد الكتروني', 'c', '...::::::::...');
 
 INSERT INTO party.communication_type (code, display_value, status, description) 
-VALUES ('fax', 'Fax::::Факс::::فاكس', 'c', '...');
+VALUES ('fax', 'Fax::::Факс::::فاكس', 'c', '...::::::::...');
 
 INSERT INTO party.communication_type (code, display_value, status, description) 
-VALUES ('phone', 'Phone::::Телефон::::تلفون', 'c', '...');
+VALUES ('phone', 'Phone::::Телефон::::تلفون', 'c', '...::::::::...');
 
 INSERT INTO party.communication_type (code, display_value, status, description) 
-VALUES ('post', 'Post::::Почта::::بريد', 'c', '...');
+VALUES ('post', 'Post::::Почта::::بريد', 'c', '...::::::::...');
 
 INSERT INTO party.communication_type (code, display_value, status, description) 
-VALUES ('courier', 'Courier::::Курьер::::ساعي بريد', 'c', '...');
+VALUES ('courier', 'Courier::::Курьер::::ساعي بريد', 'c', '...::::::::...');
 
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO party.gender_type (code, display_value, status, description) 
-VALUES ('female', 'Female::::Женский::::أنثى', 'c', '...');
+VALUES ('female', 'Female::::Женский::::أنثى', 'c', '...::::::::...');
 
 INSERT INTO party.gender_type (code, display_value, status, description) 
-VALUES ('male', 'Male::::Мужской::::ذكر', 'c', '...');
+VALUES ('male', 'Male::::Мужской::::ذكر', 'c', '...::::::::...');
 
 ----------------------------------------------------------------------------------------------------
 
@@ -642,60 +642,60 @@ VALUES ('otherPassport', 'Other Passport::::Другой паспорт::::جو�
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO party.party_type (code, display_value, status, description) 
-VALUES ('baunit', 'Basic Administrative Unit::::Базовая Административная Единица::::الطابو', 'c', '...');
+VALUES ('baunit', 'Basic Administrative Unit::::Базовая Административная Единица::::الطابو', 'c', '...::::::::...');
 
 INSERT INTO party.party_type (code, display_value, status, description) 
-VALUES ('group', 'Group::::Группа::::مجموعة', 't', '...');
+VALUES ('group', 'Group::::Группа::::مجموعة', 't', '...::::::::...');
 
 INSERT INTO party.party_type (code, display_value, status, description) 
-VALUES ('naturalPerson', 'Natural Person::::Физическое лицо::::شخص طبيعي', 'c', '...');
+VALUES ('naturalPerson', 'Natural Person::::Физическое лицо::::شخص طبيعي', 'c', '...::::::::...');
 
 INSERT INTO party.party_type (code, display_value, status, description) 
-VALUES ('nonNaturalPerson', 'Non-natural Person::::Организация::::شخص اعتباري', 'c', '...');
+VALUES ('nonNaturalPerson', 'Non-natural Person::::Организация::::شخص اعتباري', 'c', '...::::::::...');
 
 ----------------------------------------------------------------------------------------------------
-
-INSERT INTO party.party_role_type (code, display_value, status, description) 
-VALUES ('applicant', 'Applicant::::Заявитель::::مقدم الطلب', 'c', 'Extension to LADM::::Расширение LADM::::...');
-
-INSERT INTO party.party_role_type (code, display_value, status, description) 
-VALUES ('bank', 'Bank::::Банк::::البنك', 'c', '...');
-
-INSERT INTO party.party_role_type (code, display_value, status, description) 
-VALUES ('citizen', 'Citizen::::Гражданин::::المواطن', 'c', '...');
-
-INSERT INTO party.party_role_type (code, display_value, status, description) 
-VALUES ('conveyor', 'Conveyor::::Перевозчик::::الموصل', 'x', '...');
-
-INSERT INTO party.party_role_type (code, display_value, status, description) 
-VALUES ('employee', 'Employee::::Служащий::::الموظف', 'x', '...');
-
-INSERT INTO party.party_role_type (code, display_value, status, description) 
-VALUES ('farmer', 'Farmer::::Фермер::::مزارع', 'x', '...');
 
 INSERT INTO party.party_role_type (code, display_value, status, description) 
 VALUES ('landOfficer', 'Land Officer::::Землеустроитель::::موظف دائرة الاراضي', 'c', 'Extension to LADM::::Расширение LADM::::...');
 
 INSERT INTO party.party_role_type (code, display_value, status, description) 
-VALUES ('certifiedSurveyor', 'Licenced Surveyor::::Лицензированный Геодезист::::مساح مرخص', 'c', '...');
+VALUES ('certifiedSurveyor', 'Licenced Surveyor::::Лицензированный Геодезист::::مساح مرخص', 'c', '...::::::::...');
 
 INSERT INTO party.party_role_type (code, display_value, status, description) 
 VALUES ('lodgingAgent', 'Lodging Agent::::Агент по подачи заявлений::::وكيل تسجيل', 'c', 'Extension to LADM::::Расширение LADM::::...');
 
 INSERT INTO party.party_role_type (code, display_value, status, description) 
-VALUES ('moneyProvider', 'Money Provider::::Заемщик денег::::ممول', 'c', '...');
+VALUES ('moneyProvider', 'Money Provider::::Заемщик денег::::ممول', 'c', '...::::::::...');
 
 INSERT INTO party.party_role_type (code, display_value, status, description) 
-VALUES ('notary', 'Notary::::Нотариус::::كاتب عدل', 'c', '...');
+VALUES ('applicant', 'Applicant::::Заявитель::::مقدم الطلب', 'c', 'Extension to LADM::::Расширение LADM::::...');
+
+INSERT INTO party.party_role_type (code, display_value, status, description) 
+VALUES ('notary', 'Notary::::Нотариус::::كاتب عدل', 'c', '...::::::::...');
+
+INSERT INTO party.party_role_type (code, display_value, status, description) 
+VALUES ('bank', 'Bank::::Банк::::البنك', 'c', '...::::::::...');
+
+INSERT INTO party.party_role_type (code, display_value, status, description) 
+VALUES ('citizen', 'Citizen::::Гражданин::::المواطن', 'c', '...::::::::...');
 
 INSERT INTO party.party_role_type (code, display_value, status, description) 
 VALUES ('powerOfAttorney', 'Power of Attorney::::Адвокат (поверенный)::::وكيل', 'c', 'Extension to LADM::::Расширение LADM::::...');
 
 INSERT INTO party.party_role_type (code, display_value, status, description) 
-VALUES ('stateAdministrator', 'Registrar / Approving Surveyor::::Регистратор / Утверждающий Геодезист::::مساح معتمد', 'c', '...');
+VALUES ('conveyor', 'Conveyor::::Перевозчик::::الموصل', 'x', '...::::::::...');
 
 INSERT INTO party.party_role_type (code, display_value, status, description) 
-VALUES ('surveyor', 'Surveyor::::Геодезист::::مساح', 'x', '...');
+VALUES ('employee', 'Employee::::Служащий::::الموظف', 'x', '...::::::::...');
+
+INSERT INTO party.party_role_type (code, display_value, status, description) 
+VALUES ('stateAdministrator', 'Registrar / Approving Surveyor::::Регистратор / Утверждающий Геодезист::::مساح معتمد', 'c', '...::::::::...');
+
+INSERT INTO party.party_role_type (code, display_value, status, description) 
+VALUES ('farmer', 'Farmer::::Фермер::::مزارع', 'x', '...::::::::...');
+
+INSERT INTO party.party_role_type (code, display_value, status, description) 
+VALUES ('surveyor', 'Surveyor::::Геодезист::::مساح', 'x', '...::::::::...');
 
 INSERT INTO party.party_role_type (code, display_value, status, description) 
 VALUES ('transferee', 'Transferee (to)::::Получатель::::منقول له', 'c', 'Extension to LADM::::Расширение LADM::::...');
@@ -704,51 +704,24 @@ INSERT INTO party.party_role_type (code, display_value, status, description)
 VALUES ('transferor', 'Transferor (from)::::Цедент::::منقول منه', 'c', 'Extension to LADM::::Расширение LADM::::...');
 
 INSERT INTO party.party_role_type (code, display_value, status, description) 
-VALUES ('writer', 'Writer::::Оформитель документов::::كاتب', 'x', '...');
+VALUES ('writer', 'Writer::::Оформитель документов::::كاتب', 'x', '...::::::::...');
 
 ----------------------------------------------------------------------------------------------------
-
-INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
-VALUES ('agreement', 'Agreement::::Соглашение::::اتفاقية', 'c', 'Extension to LADM::::Расширение LADM::::...', 'f');
-
-INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
-VALUES ('agriNotaryStatement', 'Agricultural Notary Statement::::Нотариальное Сельскохозяйственное Заявление::::بيان كاتب العدل الزراعية', 'x', '...', 'f');
-
-INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
-VALUES ('cadastralMap', 'Cadastral Map::::Кадастровая Карта::::خارطة المساحة', 'c', 'Extension to LADM::::Расширение LADM::::...', 'f');
 
 INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
 VALUES ('cadastralSurvey', 'Cadastral Survey::::Кадастровая Съемка::::مسح الاراضي', 'c', 'Extension to LADM::::Расширение LADM::::...', 'f');
 
 INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
+VALUES ('pdf', 'Pdf Scanned Document::::Отсканированный Документ PDF::::وثيقة Pdf ممسوحة', 'x', '...::::::::...', 'f');
+
+INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
 VALUES ('contractForSale', 'Contract for Sale::::Договор о Продаже::::عقد بيع', 'c', 'Extension to LADM::::Расширение LADM::::...', 'f');
 
 INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
-VALUES ('courtOrder', 'Court Order::::Судебное Решение::::امر محكمة', 'c', 'Extension to LADM::::Расширение LADM::::...', 'f');
-
-INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
-VALUES ('deed', 'Deed::::Сделка::::عمل', 'c', '...', 'f');
-
-INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
-VALUES ('idVerification', 'Form of Identification including Personal ID::::Форма удостоверения включая персональный ID::::نموذج تعريف شخصي', 'c', 'Extension to LADM::::Расширение LADM::::...', 'f');
-
-INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
-VALUES ('jpg', 'Jpg Scanned Document::::Отсканированный Документ JPEG::::وثيقة Jpg ممسوحة', 'x', '...', 'f');
-
-INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
-VALUES ('lease', 'Lease::::Договор Аренды::::تأجير', 'c', '...', 'f');
-
-INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
-VALUES ('mortgage', 'Mortgage::::Ипотека::::رهن', 'c', '...', 'f');
-
-INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
-VALUES ('objection', 'Objection  document::::Документ Обжалования::::وثيقة اعتراض', 'c', 'Extension to LADM::::Расширение LADM::::...', 'f');
-
-INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
-VALUES ('pdf', 'Pdf Scanned Document::::Отсканированный Документ PDF::::وثيقة Pdf ممسوحة', 'x', '...', 'f');
-
-INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
 VALUES ('powerOfAttorney', 'Power of Attorney::::Доверенность::::وكالة', 'c', 'Extension to LADM::::Расширение LADM::::...', 't');
+
+INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
+VALUES ('will', 'Will::::Завещание::::وصية', 'c', 'Extension to LADM::::Расширение LADM::::...', 'f');
 
 INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
 VALUES ('proclamation', 'Proclamation::::Прокламация::::إعلان', 'c', 'Extension to LADM::::Расширение LADM::::...', 'f');
@@ -757,22 +730,13 @@ INSERT INTO source.administrative_source_type (code, display_value, status, desc
 VALUES ('standardDocument', 'Standard Document::::Стандартный Документ::::وثيقة مرجعية', 'c', 'Extension to LADM::::Расширение LADM::::...', 't');
 
 INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
-VALUES ('tif', 'Tif Scanned Document::::Отсканированный Документ TIF::::وثيقة Tif  ممسوحة.', 'x', '...', 'f');
+VALUES ('agriConsent', 'Agricultural Consent::::Сельскохозяйственное Разрешение::::الموافقة الزراعية', 'x', '...::::::::...', 'f');
+
+INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
+VALUES ('tif', 'Tif Scanned Document::::Отсканированный Документ TIF::::وثيقة Tif  ممسوحة.', 'x', '...::::::::...', 'f');
 
 INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
 VALUES ('systematicRegn', 'Systematic Registration Application::::Заявление на Системную Регистрацию::::طلب تسجيل منتظم', 'c', 'Extension to LADM::::Расширение LADM::::...', 'f');
-
-INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
-VALUES ('title', 'Title::::Право Собственности::::سند ملكية', 'c', '...', 'f');
-
-INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
-VALUES ('waiver', 'Waiver to Caveat or other requirement::::Ходатайство о приостановке судебного разбирательства::::تنازل  عن قيد  أو شرط آخر', 'c', 'Extension to LADM::::Расширение LADM::::...', 'f');
-
-INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
-VALUES ('will', 'Will::::Завещание::::وصية', 'c', 'Extension to LADM::::Расширение LADM::::...', 'f');
-
-INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
-VALUES ('agriConsent', 'Agricultural Consent::::Сельскохозяйственное Разрешение::::الموافقة الزراعية', 'x', '...', 'f');
 
 INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
 VALUES ('agriLease', 'Agricultural Lease::::Сельскохозяйственная Аренда::::اجارة زراعية', 'x', '', 'f');
@@ -785,6 +749,42 @@ VALUES ('publicNotification', 'Public Notification for Systematic Registration::
 
 INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
 VALUES ('tiff', 'Tiff Scanned Document::::Отсканированный Документ TIFF::::وثيقة ممسوحة (Tiff)', 'x', '', 'f');
+
+INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
+VALUES ('courtOrder', 'Court Order::::Судебное Решение::::امر محكمة', 'c', 'Extension to LADM::::Расширение LADM::::...', 'f');
+
+INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
+VALUES ('agreement', 'Agreement::::Соглашение::::اتفاقية', 'c', 'Extension to LADM::::Расширение LADM::::...', 'f');
+
+INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
+VALUES ('agriNotaryStatement', 'Agricultural Notary Statement::::Нотариальное Сельскохозяйственное Заявление::::بيان كاتب العدل الزراعية', 'x', '...::::::::...', 'f');
+
+INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
+VALUES ('deed', 'Deed::::Сделка::::عمل', 'c', '...::::::::...', 'f');
+
+INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
+VALUES ('cadastralMap', 'Cadastral Map::::Кадастровая Карта::::خارطة المساحة', 'c', 'Extension to LADM::::Расширение LADM::::...', 'f');
+
+INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
+VALUES ('title', 'Title::::Право Собственности::::سند ملكية', 'c', '...::::::::...', 'f');
+
+INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
+VALUES ('idVerification', 'Form of Identification including Personal ID::::Форма удостоверения включая персональный ID::::نموذج تعريف شخصي', 'c', 'Extension to LADM::::Расширение LADM::::...', 'f');
+
+INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
+VALUES ('waiver', 'Waiver to Caveat or other requirement::::Ходатайство о приостановке судебного разбирательства::::تنازل  عن قيد  أو شرط آخر', 'c', 'Extension to LADM::::Расширение LADM::::...', 'f');
+
+INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
+VALUES ('jpg', 'Jpg Scanned Document::::Отсканированный Документ JPEG::::وثيقة Jpg ممسوحة', 'x', '...::::::::...', 'f');
+
+INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
+VALUES ('lease', 'Lease::::Договор Аренды::::تأجير', 'c', '...::::::::...', 'f');
+
+INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
+VALUES ('mortgage', 'Mortgage::::Ипотека::::رهن', 'c', '...::::::::...', 'f');
+
+INSERT INTO source.administrative_source_type (code, display_value, status, description, is_for_registration) 
+VALUES ('objection', 'Objection  document::::Документ Обжалования::::وثيقة اعتراض', 'c', 'Extension to LADM::::Расширение LADM::::...', 'f');
 
 ----------------------------------------------------------------------------------------------------
 
@@ -804,6 +804,18 @@ INSERT INTO source.availability_status_type (code, display_value, status, descri
 VALUES ('incomplete', 'Incomplete::::Незаконченный::::غير مكتملة', 'c', '');
 
 ----------------------------------------------------------------------------------------------------
+
+INSERT INTO source.presentation_form_type (code, display_value, status, description) 
+VALUES ('tableDigital', 'Digital Table::::Цифровая Таблица::::جدول رقمي', 'c', '');
+
+INSERT INTO source.presentation_form_type (code, display_value, status, description) 
+VALUES ('tableHardcopy', 'Hardcopy Table::::Бумажная Таблица::::جدول ورقي', 'c', '');
+
+INSERT INTO source.presentation_form_type (code, display_value, status, description) 
+VALUES ('videoDigital', 'Digital Video::::Цифровое Видео::::شريط فيديو رقمي', 'c', '');
+
+INSERT INTO source.presentation_form_type (code, display_value, status, description) 
+VALUES ('videoHardcopy', 'Hardcopy Video::::Видео на носителе::::شريط فيديو', 'c', '');
 
 INSERT INTO source.presentation_form_type (code, display_value, status, description) 
 VALUES ('documentDigital', 'Digital Document::::Цифровой Документ::::وثيقة رقمية', 'c', '');
@@ -835,18 +847,6 @@ VALUES ('profileDigital', 'Digital Profile::::Цифровое Дело::::مل�
 INSERT INTO source.presentation_form_type (code, display_value, status, description) 
 VALUES ('profileHardcopy', 'Hardcopy Profile::::Бумажное Дело::::ملف شخصي ورقي', 'c', '');
 
-INSERT INTO source.presentation_form_type (code, display_value, status, description) 
-VALUES ('tableDigital', 'Digital Table::::Цифровая Таблица::::جدول رقمي', 'c', '');
-
-INSERT INTO source.presentation_form_type (code, display_value, status, description) 
-VALUES ('tableHardcopy', 'Hardcopy Table::::Бумажная Таблица::::جدول ورقي', 'c', '');
-
-INSERT INTO source.presentation_form_type (code, display_value, status, description) 
-VALUES ('videoDigital', 'Digital Video::::Цифровое Видео::::شريط فيديو رقمي', 'c', '');
-
-INSERT INTO source.presentation_form_type (code, display_value, status, description) 
-VALUES ('videoHardcopy', 'Hardcopy Video::::Видео на носителе::::شريط فيديو', 'c', '');
-
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO source.spatial_source_type (code, display_value, status, description) 
@@ -876,19 +876,22 @@ VALUES ('video', 'Video::::Видео::::شريط فيديو', 'c', '');
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO system.approle (code, display_value, status, description) 
-VALUES ('ApplnAssignSelf', 'Application - Assign to Self::::Application - Assign to Self::::تعيين ذاتي', 'c', 'Allows a user to assign an application to themselves.::::Allows a user to assign an application to themselves.::::Allows a user to assign an application to themselves.');
-
-INSERT INTO system.approle (code, display_value, status, description) 
 VALUES ('ApplnUnassignOthers', 'Application - Unassign from Others::::Application - Unassign from Others::::طلب-الغاء التعيين', 'c', 'Allows the user to unassign an application from any user. ::::Allows the user to unassign an application from any user.::::Allows the user to unassign an application from any user.');
 
 INSERT INTO system.approle (code, display_value, status, description) 
-VALUES ('ApplnView', 'Application - Search & View::::Application - Search & View::::الطلب-البحث والعرض', 'c', 'Allows users to search and view application details.::::Allows users to search and view application details.::::Allows users to search and view application details.');
+VALUES ('ApplnAssignSelf', 'Application - Assign to Self::::Application - Assign to Self::::تعيين ذاتي', 'c', 'Allows a user to assign an application to themselves.::::Allows a user to assign an application to themselves.::::Allows a user to assign an application to themselves.');
+
+INSERT INTO system.approle (code, display_value, status, description) 
+VALUES ('BulkApplication', 'Bulk Operations - Login ::::Bulk Operations - Login::::عمليات الحزمة- تسجيل الدخول', 'c', 'Allows the user to login and use the Bulk Operations application. ::::Allows the user to login and use the Bulk Operations application.::::Allows the user to login and use the Bulk Operations application.');
 
 INSERT INTO system.approle (code, display_value, status, description) 
 VALUES ('BaunitSave', 'Property - Edit & Save::::Property - Edit & Save::::الملكية-تعديل وحفظ', 'c', 'Allows property details to be edited and saved.::::Allows property details to be edited and saved.::::Allows property details to be edited and saved.');
 
 INSERT INTO system.approle (code, display_value, status, description) 
-VALUES ('BulkApplication', 'Bulk Operations - Login ::::Bulk Operations - Login::::عمليات الحزمة- تسجيل الدخول', 'c', 'Allows the user to login and use the Bulk Operations application. ::::Allows the user to login and use the Bulk Operations application.::::Allows the user to login and use the Bulk Operations application.');
+VALUES ('ApplnView', 'Application - Search & View::::Application - Search & View::::الطلب-البحث والعرض', 'c', 'Allows users to search and view application details.::::Allows users to search and view application details.::::Allows users to search and view application details.');
+
+INSERT INTO system.approle (code, display_value, status, description) 
+VALUES ('DashbrdViewAssign', 'Dashboard - View Assigned::::Dashboard - View Assigned::::لوحة المراقبة-مشاهدة الطلبات المعينة', 'c', 'Allows the user to view applications assigned to them in the Dashboard. To hide the Dashboard from the user, remove both this role and the Dashboard - View Unassigned role. ::::Allows the user to view applications assigned to them in the Dashboard. To hide the Dashboard from the user, remove both this role and the Dashboard - View Unassigned role.::::Allows the user to view applications assigned to them in the Dashboard. To hide the Dashboard from the user, remove both this role and the Dashboard - View Unassigned role.');
 
 INSERT INTO system.approle (code, display_value, status, description) 
 VALUES ('documentCopy', 'Service - Document Copy::::Service - Document Copy::::الحدمة-نسخ وثيقة', 'c', 'Supporting Service. Allows the Document Copy service to be started.::::Supporting Service. Allows the Document Copy service to be started.::::Supporting Service. Allows the Document Copy service to be started.');
@@ -1047,19 +1050,10 @@ INSERT INTO system.approle (code, display_value, status, description)
 VALUES ('varyMortgage', 'Service - Vary Mortgage::::Service - Vary Mortgage::::الخدمة-تغيير رهن', 'c', 'Registration Service. Allows the Vary Mortgage service to be started.::::Registration Service. Allows the Vary Mortgage service to be started.::::Registration Service. Allows the Vary Mortgage service to be started.');
 
 INSERT INTO system.approle (code, display_value, status, description) 
-VALUES ('ApplnReject', 'Appln Action - Cancel::::Appln Action - Cancel::::Appln Action - Cancel:::', 'c', 'Required to perform the Cancel applicaiton action. The Cancel action transitions the application into the Annulled state.  ::::Required to perform the Cancel applicaiton action. The Cancel action transitions the application into the Annulled state.::::Required to perform the Cancel applicaiton action. The Cancel action transitions the application into the Annulled state.');
-
-INSERT INTO system.approle (code, display_value, status, description) 
 VALUES ('ApplnValidate', 'Appln Action - Validate::::Appln Action - Validate::::حركة طلب- التحقق من صحة البيانات', 'c', 'Required to perform the Validate applicaiton action. Allows the user to manually run the validation rules against the application. ::::Required to perform the Validate applicaiton action. Allows the user to manually run the validation rules against the application.::::Required to perform the Validate applicaiton action. Allows the user to manually run the validation rules against the application.');
 
 INSERT INTO system.approle (code, display_value, status, description) 
-VALUES ('BaunitCertificate', 'Property - Print Certificate::::Property - Print Certificate::::الملكية-طباعة الشهادة', 'c', 'Allows the user to generate a property certificate. ::::Allows the user to generate a property certificate.::::Allows the user to generate a property certificate.');
-
-INSERT INTO system.approle (code, display_value, status, description) 
 VALUES ('ChangePassword', 'Admin - Change Password::::Admin - Change Password::::ادارة-تغيير كلمة المرور', 'c', 'Allows a user to change their password and edit thier user name. This role should be included in every security group. ::::Allows a user to change their password and edit thier user name. This role should be included in every security group.::::Allows a user to change their password and edit thier user name. This role should be included in every security group.');
-
-INSERT INTO system.approle (code, display_value, status, description) 
-VALUES ('DashbrdViewAssign', 'Dashboard - View Assigned::::Dashboard - View Assigned::::لوحة المراقبة-مشاهدة الطلبات المعينة', 'c', 'Allows the user to view applications assigned to them in the Dashboard. To hide the Dashboard from the user, remove both this role and the Dashboard - View Unassigned role. ::::Allows the user to view applications assigned to them in the Dashboard. To hide the Dashboard from the user, remove both this role and the Dashboard - View Unassigned role.::::Allows the user to view applications assigned to them in the Dashboard. To hide the Dashboard from the user, remove both this role and the Dashboard - View Unassigned role.');
 
 INSERT INTO system.approle (code, display_value, status, description) 
 VALUES ('ManageSecurity', 'Admin - Users and Security::::Admin - Users and Security::::ادارة-المستخدمين وسرية النظام', 'c', 'Allows system administrators to manage (edit and save) users, groups and roles. Users with this role will be able to login to the SOLA Admin application. ::::Allows system administrators to manage (edit and save) users, groups and roles. Users with this role will be able to login to the SOLA Admin application.::::Allows system administrators to manage (edit and save) users, groups and roles. Users with this role will be able to login to the SOLA Admin application.');
@@ -1068,7 +1062,19 @@ INSERT INTO system.approle (code, display_value, status, description)
 VALUES ('ManageSettings', 'Admin - System Settings::::Admin - System Settings::::ادارة-اعدادات النظام', 'c', 'Allows system administrators to manage (edit and save) system setting details. Users with this role will be able to login to the SOLA Admin application. ::::Allows system administrators to manage (edit and save) system setting details. Users with this role will be able to login to the SOLA Admin application.::::Allows system administrators to manage (edit and save) system setting details. Users with this role will be able to login to the SOLA Admin application.');
 
 INSERT INTO system.approle (code, display_value, status, description) 
+VALUES ('ApplnApprove', 'Appln Action - Approval::::Appln Action - Approval::::حركة طلب - الموافقة', 'c', 'Required to perform the Approve applicaiton action. The Approve action transitions the application into the Approved state. 
+All services on the application must be completed before this action is available. ::::Required to perform the Approve applicaiton action. The Approve action transitions the application into the Approved state.
+All services on the application must be completed before this action is available.::::Required to perform the Approve applicaiton action. The Approve action transitions the application into the Approved state.
+All services on the application must be completed before this action is available.');
+
+INSERT INTO system.approle (code, display_value, status, description) 
 VALUES ('PrintMap', 'Map - Print::::Map - Print::::الخارطة-طباعة', 'c', 'Allows the user to create printouts from the Map::::Allows the user to create printouts from the Map::::Allows the user to create printouts from the Map');
+
+INSERT INTO system.approle (code, display_value, status, description) 
+VALUES ('ApplnReject', 'Appln Action - Cancel::::Appln Action - Cancel::::Appln Action - Cancel:::', 'c', 'Required to perform the Cancel applicaiton action. The Cancel action transitions the application into the Annulled state.  ::::Required to perform the Cancel applicaiton action. The Cancel action transitions the application into the Annulled state.::::Required to perform the Cancel applicaiton action. The Cancel action transitions the application into the Annulled state.');
+
+INSERT INTO system.approle (code, display_value, status, description) 
+VALUES ('BaunitCertificate', 'Property - Print Certificate::::Property - Print Certificate::::الملكية-طباعة الشهادة', 'c', 'Allows the user to generate a property certificate. ::::Allows the user to generate a property certificate.::::Allows the user to generate a property certificate.');
 
 INSERT INTO system.approle (code, display_value, status, description) 
 VALUES ('ReportGenerate', 'Reporting - Management Reports::::Reporting - Management Reports::::تقارير-ادارة التقارير', 'c', 'Allows users to generate and view management reports (e.g. Lodgement Report)::::Allows users to generate and view management reports (e.g. Lodgement Report)::::Allows users to generate and view management reports (e.g. Lodgement Report)');
@@ -1078,12 +1084,6 @@ VALUES ('titleSearch', 'Service - Title Search::::Service - Title Search::::ال
 
 INSERT INTO system.approle (code, display_value, status, description) 
 VALUES ('varyRight', 'Service - Vary Right (General)::::Service - Vary Right (General)::::الخدمة-تغيير حق (عام)', 'c', 'Registration Service. Allows the Vary Right (General) service to be started. ::::Registration Service. Allows the Vary Right (General) service to be started.::::Registration Service. Allows the Vary Right (General) service to be started.');
-
-INSERT INTO system.approle (code, display_value, status, description) 
-VALUES ('ApplnApprove', 'Appln Action - Approval::::Appln Action - Approval::::حركة طلب - الموافقة', 'c', 'Required to perform the Approve applicaiton action. The Approve action transitions the application into the Approved state. 
-All services on the application must be completed before this action is available. ::::Required to perform the Approve applicaiton action. The Approve action transitions the application into the Approved state.
-All services on the application must be completed before this action is available.::::Required to perform the Approve applicaiton action. The Approve action transitions the application into the Approved state.
-All services on the application must be completed before this action is available.');
 
 INSERT INTO system.approle (code, display_value, status, description) 
 VALUES ('ApplnRequisition', 'Appln Action - Requisition::::Appln Action - Requisition::::حركة طلب-طلب معلومات', 'c', 'Required to perform the Requisition applicaiton action. The Requisition action transitions the application into the Requisitioned state. ::::Required to perform the Requisition applicaiton action. The Requisition action transitions the application into the Requisitioned state.::::Required to perform the Requisition applicaiton action. The Requisition action transitions the application into the Requisitioned state.');
@@ -1098,13 +1098,13 @@ INSERT INTO system.approle (code, display_value, status, description)
 VALUES ('DashbrdViewUnassign', 'Dashboard - View Unassigned::::Dashboard - View Unassigned::::لوحة المراقبة-مشاهدة الطلبات الغير معينة', 'c', 'Allows the user to view all unassigned applications in the Dashboard. To hide the Dashboard from the user, remove both this role and the Dashboard - View Assigned role. ::::Allows the user to view all unassigned applications in the Dashboard. To hide the Dashboard from the user, remove both this role and the Dashboard - View Assigned role.::::Allows the user to view all unassigned applications in the Dashboard. To hide the Dashboard from the user, remove both this role and the Dashboard - View Assigned role.');
 
 INSERT INTO system.approle (code, display_value, status, description) 
+VALUES ('regnOnTitle', 'Service - Registration on Title::::Service - Registration on Title::::الخدمة-تسجيل سند ملكية', 'c', 'Registration Service. Allows the Registration on Title service to be started. ::::Registration Service. Allows the Registration on Title service to be started.::::Registration Service. Allows the Registration on Title service to be started.');
+
+INSERT INTO system.approle (code, display_value, status, description) 
 VALUES ('limtedRoadAccess', 'Service - Register Limited Road Access::::Service - Register Limited Road Access::::الخدمة-تسجيل حق طريق محدود', 'c', 'Registration Service. Allows the Register Limited Road Access service to be started. ::::Registration Service. Allows the Register Limited Road Access service to be started.::::Registration Service. Allows the Register Limited Road Access service to be started.');
 
 INSERT INTO system.approle (code, display_value, status, description) 
 VALUES ('NoPasswordExpiry', 'Admin - No Password Expiry::::Admin - No Password Expiry::::ادارة-صلاحية كلمة المرور', 'c', 'Users with this role will not be subject to a password expiry if one is in place. This role can be assigned to user accounts used by other systems to integrate with the SOLA web services. Note that password expiry can be configured using the pword-expiry-days system.setting::::Users with this role will not be subject to a password expiry if one is in place. This role can be assigned to user accounts used by other systems to integrate with the SOLA web services.::::Users with this role will not be subject to a password expiry if one is in place. This role can be assigned to user accounts used by other systems to integrate with the SOLA web services. Note that password expiry can be configured using the pword-expiry-days system.setting');
-
-INSERT INTO system.approle (code, display_value, status, description) 
-VALUES ('regnOnTitle', 'Service - Registration on Title::::Service - Registration on Title::::الخدمة-تسجيل سند ملكية', 'c', 'Registration Service. Allows the Registration on Title service to be started. ::::Registration Service. Allows the Registration on Title service to be started.::::Registration Service. Allows the Registration on Title service to be started.');
 
 INSERT INTO system.approle (code, display_value, status, description) 
 VALUES ('removeRight', 'Service - Remove Right (General)::::Service - Remove Right (General)::::الخدمة- ازالة حق عام', 'c', 'Registration Service. Allows the Remove Right (General) service to be started. ::::Registration Service. Allows the Remove Right (General) service to be started.::::Registration Service. Allows the Remove Right (General) service to be started.');
@@ -1118,13 +1118,13 @@ VALUES ('StartService', 'Service Action - Start::::Service Action - Start::::ح�
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO system.br_severity_type (code, display_value, status, description) 
-VALUES ('critical', 'Critical::::Критичное::::حرج', 'c', '...');
+VALUES ('critical', 'Critical::::Критичное::::حرج', 'c', '...::::::::...');
 
 INSERT INTO system.br_severity_type (code, display_value, status, description) 
-VALUES ('medium', 'Medium::::Среднее::::متوسط', 'c', '...');
+VALUES ('medium', 'Medium::::Среднее::::متوسط', 'c', '...::::::::...');
 
 INSERT INTO system.br_severity_type (code, display_value, status, description) 
-VALUES ('warning', 'Warning::::Предупреждение::::تحذير', 'c', '...');
+VALUES ('warning', 'Warning::::Предупреждение::::تحذير', 'c', '...::::::::...');
 
 ----------------------------------------------------------------------------------------------------
 
@@ -1137,7 +1137,22 @@ VALUES ('drools', 'Drools::::Drools::::Drools', 'c', 'The rule definition is bas
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO system.br_validation_target_type (code, display_value, status, description) 
+VALUES ('source', 'Source::::Документ::::المصدر', 'c', 'The target of the validation is the source. It accepts one parameter {id} which is the source id.::::Объектом проверки является документ. Имеется один входной параметр - {id} который является id документа.::::...');
+
+INSERT INTO system.br_validation_target_type (code, display_value, status, description) 
+VALUES ('public_display', 'Public display::::Публичный показ::::أظهار عام', 'c', 'The target of the validation is the set of cadastre objects/ba units that belong to a certain last part. It accepts one parameter {lastPart} which is the last part.::::Объектом проверки является комбинация кадастрового объекта и ед. недвижимости содержащих одинакокую последнюю часть идентификационного кода. Имеется один входной параметр - {lastPart} который является последней частью идентификационного кода.::::...');
+
+INSERT INTO system.br_validation_target_type (code, display_value, status, description) 
+VALUES ('rrr', 'Right or Restriction::::Право или Ограничение::::حق أو قيد', 'c', 'The target of the validation is the rrr. It accepts one parameter {id} which is the rrr id. ::::Объектом проверки является право. Имеется один входной параметр - {id} который является id права.::::...');
+
+INSERT INTO system.br_validation_target_type (code, display_value, status, description) 
+VALUES ('spatial_unit_group', 'Spatial unit group::::Пространственная группа::::مجموعة الوحدات المكانية', 'c', 'The target of the validation are the spatial unit groups::::Объектом проверки является пространственные группы::::...');
+
+INSERT INTO system.br_validation_target_type (code, display_value, status, description) 
 VALUES ('ba_unit', 'Administrative Unit::::Единица Недвижимости::::وحدة ادارية', 'c', 'The target of the validation is the ba_unit. It accepts one parameter {id} which is the ba_unit id.::::Объектом проверки является единица недвижимости. Имеется один входной параметр - {id} который является id недвижимости.::::...');
+
+INSERT INTO system.br_validation_target_type (code, display_value, status, description) 
+VALUES ('service', 'Service::::Услуга::::خدمة', 'c', 'The target of the validation is the service. It accepts one parameter {id} which is the service id.::::Объектом проверки является услуга. Имеется один входной параметр - {id} который является id услуги.::::...');
 
 INSERT INTO system.br_validation_target_type (code, display_value, status, description) 
 VALUES ('application', 'Application::::Заявление::::الطلب', 'c', 'The target of the validation is the application. It accepts one parameter {id} which is the application id.::::Объектом проверки является заявление. Имеется один входной параметр - {id} который является id заявления.::::...');
@@ -1148,22 +1163,10 @@ VALUES ('bulkOperationSpatial', 'BUlk operation::::Массовая Операц
 INSERT INTO system.br_validation_target_type (code, display_value, status, description) 
 VALUES ('cadastre_object', 'Cadastre Object::::Кадастровый Объект::::كائن مساحة', 'c', 'The target of the validation is the transaction related with the cadastre change. It accepts one parameter {id} which is the transaction id.::::Объектом проверки является кадастровый объект. Имеется один входной параметр - {id} который является id транзакции.::::هدف التحقق من صحة الحركة فحص التغيير على الكائن الممسوح');
 
-INSERT INTO system.br_validation_target_type (code, display_value, status, description) 
-VALUES ('public_display', 'Public display::::Публичный показ::::أظهار عام', 'c', 'The target of the validation is the set of cadastre objects/ba units that belong to a certain last part. It accepts one parameter {lastPart} which is the last part.::::Объектом проверки является комбинация кадастрового объекта и ед. недвижимости содержащих одинакокую последнюю часть идентификационного кода. Имеется один входной параметр - {lastPart} который является последней частью идентификационного кода.::::...');
-
-INSERT INTO system.br_validation_target_type (code, display_value, status, description) 
-VALUES ('rrr', 'Right or Restriction::::Право или Ограничение::::حق أو قيد', 'c', 'The target of the validation is the rrr. It accepts one parameter {id} which is the rrr id. ::::Объектом проверки является право. Имеется один входной параметр - {id} который является id права.::::...');
-
-INSERT INTO system.br_validation_target_type (code, display_value, status, description) 
-VALUES ('service', 'Service::::Услуга::::خدمة', 'c', 'The target of the validation is the service. It accepts one parameter {id} which is the service id.::::Объектом проверки является услуга. Имеется один входной параметр - {id} который является id услуги.::::...');
-
-INSERT INTO system.br_validation_target_type (code, display_value, status, description) 
-VALUES ('source', 'Source::::Документ::::المصدر', 'c', 'The target of the validation is the source. It accepts one parameter {id} which is the source id.::::Объектом проверки является документ. Имеется один входной параметр - {id} который является id документа.::::...');
-
-INSERT INTO system.br_validation_target_type (code, display_value, status, description) 
-VALUES ('spatial_unit_group', 'Spatial unit group::::Пространственная группа::::مجموعة الوحدات المكانية', 'c', 'The target of the validation are the spatial unit groups::::Объектом проверки является пространственные группы::::...');
-
 ----------------------------------------------------------------------------------------------------
+
+INSERT INTO system.language (code, display_value, active, is_default, item_order) 
+VALUES ('ru-RU', 'Russian::::Русский::::الروسية', 't', 'f', 2);
 
 INSERT INTO system.language (code, display_value, active, is_default, item_order) 
 VALUES ('en-US', 'English::::Английский::::أنجليزي', 't', 't', 1);
@@ -1171,22 +1174,19 @@ VALUES ('en-US', 'English::::Английский::::أنجليزي', 't', 't', 
 INSERT INTO system.language (code, display_value, active, is_default, item_order) 
 VALUES ('ar-JO', 'Arabic::::Арабский::::عربي', 't', 'f', 3);
 
-INSERT INTO system.language (code, display_value, active, is_default, item_order) 
-VALUES ('ru-RU', 'Russian::::Русский::::الروسية', 't', 'f', 2);
-
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO transaction.reg_status_type (code, display_value, description, status) 
-VALUES ('current', 'Current::::Текущий::::الحالي', '...', 'c');
+VALUES ('current', 'Current::::Текущий::::الحالي', '...::::::::...', 'c');
 
 INSERT INTO transaction.reg_status_type (code, display_value, description, status) 
-VALUES ('historic', 'Historic::::История::::تاريخي', '...', 'c');
+VALUES ('historic', 'Historic::::История::::تاريخي', '...::::::::...', 'c');
 
 INSERT INTO transaction.reg_status_type (code, display_value, description, status) 
-VALUES ('pending', 'Pending::::На исполнении::::قيد الانتظار', '...', 'c');
+VALUES ('pending', 'Pending::::На исполнении::::قيد الانتظار', '...::::::::...', 'c');
 
 INSERT INTO transaction.reg_status_type (code, display_value, description, status) 
-VALUES ('previous', 'Previous::::Предыдущий::::السابق', '...', 'c');
+VALUES ('previous', 'Previous::::Предыдущий::::السابق', '...::::::::...', 'c');
 
 ----------------------------------------------------------------------------------------------------
 

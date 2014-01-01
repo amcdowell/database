@@ -1,5 +1,5 @@
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('power-of-attorney-owner-check', 'sql', 'Name of person identified in Power of Attorney should match a (one of the) current owner(s)::::Имя лица указанного в доверенности должно совпадать с именем одного из владельцев.', '#{id}(application.service.id)');
+VALUES ('power-of-attorney-owner-check', 'sql', 'Name of person identified in Power of Attorney should match a (one of the) current owner(s)::::Имя лица указанного в доверенности должно совпадать с именем одного из владельцев.::::الاسم المحدد في الوكالة يجب ان يطابق احد اسماء المالكين', '#{id}(application.service.id)');
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES ('power-of-attorney-owner-check', now(), 'infinity', 'WITH poaQuery AS (SELECT person_name, py.name AS firstName, py.last_name AS lastName FROM transaction.transaction tn
@@ -25,7 +25,110 @@ VALUES ('power-of-attorney-owner-check', 'service', NULL, 'complete', NULL, NULL
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('required-sources-are-present', 'sql', 'All documents required for the service ''req_type'' are present.::::Должны присутствовать все документы необходимые для услуги ''req_type'' .', 'Checks that all required documents for any of the services in an application are recorded. Null value is returned if there are no required documents');
+VALUES ('service-has-person-verification', 'sql', 'Within the application for the service a personal identification verification should be attached.::::В заявлении должен присутствовать документ удостоверяющий личность.::::ضمن الطلب ولاجل الخدمة يجب  ارفاق وثيقة تعريف بالشخصية', '#{id}(application.service.id) is requested');
+
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES ('service-has-person-verification', now(), 'infinity', 'SELECT (CASE 	WHEN sv.application_id is  NULL THEN NULL
+		ELSE COUNT(1) > 0
+	 END) as vl
+FROM application.service sv
+  LEFT JOIN application.application_uses_source aus ON (aus.application_id = sv.application_id)
+  LEFT JOIN source.source sc ON ((sc.id = aus.source_id) AND (sc.type_code = ''idVerification''))
+WHERE sv.id= #{id}
+GROUP BY sv.application_id
+LIMIT 1');
+
+INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
+VALUES ('service-has-person-verification', 'service', NULL, 'complete', NULL, NULL, NULL, 'critical', 350);
+
+----------------------------------------------------------------------------------------------------
+
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES ('document-supporting-rrr-is-current', 'sql', 'Documents supporting rights (or restrictions) must have current status::::Документы использующиеся для регистрации прав или ограничений должны иметь текущий (активный) статус.::::الوثائق التي تدعم الحقوق او القيود يجب ان يكون لها الحالة الحالية', '#{id}(application.service.id)');
+
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES ('document-supporting-rrr-is-current', now(), 'infinity', 'WITH serviceDocs AS	(SELECT DISTINCT ON (sc.id) sv.id AS sv_id, sc.id AS sc_id, sc.status_code, sc.type_code FROM application.service sv
+				INNER JOIN transaction.transaction tn ON (sv.id = tn.from_service_id)
+				INNER JOIN administrative.rrr rr ON (tn.id = rr.transaction_id)
+				INNER JOIN administrative.source_describes_rrr sr ON (rr.id = sr.rrr_id)
+				INNER JOIN source.source sc ON (sr.source_id = sc.id)
+				WHERE sv.id = #{id}),
+    nullDocs AS		(SELECT sc_id, type_code FROM serviceDocs WHERE status_code IS NULL),
+    transDocs AS	(SELECT sc_id, type_code FROM serviceDocs WHERE status_code = ''current'' AND ((type_code = ''powerOfAttorney'') OR (type_code = ''standardDocument'')))
+SELECT ((SELECT COUNT(*) FROM serviceDocs) - (SELECT COUNT(*) FROM nullDocs) - (SELECT COUNT(*) FROM transDocs) = 0) AS vl
+ORDER BY 1
+LIMIT 1');
+
+INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
+VALUES ('document-supporting-rrr-is-current', 'service', NULL, 'complete', NULL, NULL, NULL, 'critical', 240);
+
+----------------------------------------------------------------------------------------------------
+
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES ('mortgage-value-check', 'sql', 'For the Register Mortgage service, the new mortgage is for less than the reported value of property (at time application was received)::::Сумма зарегистрированной ипотеки, меньше чем заявленная стоимость недвижимости (во время подачи заявления).::::في خدمة تسجيل رهن قيمة الرهن يجب ان تكون اقل قيمة الملكية  وقت استلام الطلب', '#{id}(application.service.id) is requested');
+
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES ('mortgage-value-check', now(), 'infinity', 'SELECT (ap.total_value < rrr.amount) AS vl 
+  from application.service s inner join application.application_property ap on s.application_id = ap.application_id 
+ INNER JOIN administrative.ba_unit ba ON (ap.name_firstpart, ap.name_lastpart) = (ba.name_firstpart, ba.name_lastpart)
+ INNER JOIN administrative.rrr ON rrr.ba_unit_id = ba.id
+WHERE s.id = #{id} and rrr.type_code= ''mortgage'' and rrr.status_code in (''pending'')
+order by 1
+limit 1');
+
+INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
+VALUES ('mortgage-value-check', 'service', NULL, 'complete', NULL, 'mortgage', NULL, 'warning', 700);
+
+INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
+VALUES ('mortgage-value-check', 'service', NULL, 'complete', NULL, 'varyMortgage', NULL, 'warning', 690);
+
+----------------------------------------------------------------------------------------------------
+
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES ('power-of-attorney-service-has-document', 'sql', 'Service ''req_type'' must have must have one associated Power of Attorney document::::Услуга ''req_type''  должна иметь одну доверенность.::::خدمة ''req_type'' يجب ان ترتبط بوكالة', '#{id}(application.service.id)');
+
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES ('power-of-attorney-service-has-document', now(), 'infinity', 'SELECT (SUM(1) = 1) AS vl, get_translation(rt.display_value, #{lng}) as req_type FROM application.service sv
+	 INNER JOIN transaction.transaction tn ON (sv.id = tn.from_service_id)
+	 INNER JOIN source.source sc ON (tn.id = sc.transaction_id)
+	 INNER JOIN application.request_type rt ON (sv.request_type_code = rt.code AND request_category_code = ''registrationServices'')
+WHERE sv.id =#{id}
+AND sc.type_code = ''powerOfAttorney''
+GROUP BY rt.code
+ORDER BY 1
+LIMIT 1');
+
+INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
+VALUES ('power-of-attorney-service-has-document', 'service', NULL, 'complete', NULL, 'regnPowerOfAttorney', NULL, 'critical', 340);
+
+----------------------------------------------------------------------------------------------------
+
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES ('service-title-terminated', 'sql', 'For the service ''req_type'' the title must be terminated (after all rights recorded on the title are transferred or cancelled).::::Для услуги ''req_type''  недвижимость должна быть ликвидирована (после того как все зарегистрированные права переданы или отменены).::::لخدمة من نوع     ''req_type'' , سند  الملكية يجب انهاؤه (بعد نقل الحقوق او الغاؤها (', '#{id}(application.service.id) is requested');
+
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES ('service-title-terminated', now(), 'infinity', 'WITH reqForSv AS 	(SELECT sv.id, get_translation(rt.display_value, #{lng}) AS req_type FROM application.service sv 
+				INNER JOIN application.request_type rt ON (sv.request_type_code = rt.code)
+			WHERE sv.id = #{id} 
+			AND sv.request_type_code = ''cancelProperty''),
+     checkTitle AS	(SELECT tg.ba_unit_id FROM application.service sv
+				INNER JOIN transaction.transaction tn ON (sv.id = tn.from_service_id)
+				INNER JOIN administrative.ba_unit_target tg ON (tn.id = tg.transaction_id)
+			WHERE sv.id = #{id})
+SELECT 	CASE 	WHEN (SELECT (COUNT(*) = 0) FROM reqForSv) THEN NULL
+		WHEN (SELECT (COUNT(*) > 0) FROM checkTitle) THEN TRUE
+		ELSE FALSE
+	END AS vl, req_type FROM reqForSv
+ORDER BY vl
+LIMIT 1');
+
+INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
+VALUES ('service-title-terminated', 'service', NULL, 'complete', NULL, NULL, NULL, 'critical', 190);
+
+----------------------------------------------------------------------------------------------------
+
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES ('required-sources-are-present', 'sql', 'All documents required for the service ''req_type'' are present.::::Должны присутствовать все документы необходимые для услуги ''req_type'' .::::جميع الوثائق المطلوبة لخدمة  ''req_type''  موجودة', 'Checks that all required documents for any of the services in an application are recorded. Null value is returned if there are no required documents');
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES ('required-sources-are-present', now(), 'infinity', 'WITH reqForSv AS 	(SELECT r_s.source_type_code AS typeCode
@@ -51,21 +154,7 @@ VALUES ('required-sources-are-present', 'service', NULL, 'complete', NULL, NULL,
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('service-on-complete-without-transaction', 'sql', 'Service ''req_type'' must have been started and some changes made in the system::::Услуга ''req_type''  должна быть запущена и сделаны какие-либо изменения.', '');
-
-INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
-VALUES ('service-on-complete-without-transaction', now(), 'infinity', 'select id in (select from_service_id from transaction.transaction where from_service_id is not null) as vl, 
-  get_translation(r.display_value, #{lng}) as req_type
-from application.service s inner join application.request_type r on s.request_type_code = r.code and request_category_code=''registrationServices''
-and s.id= #{id}');
-
-INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
-VALUES ('service-on-complete-without-transaction', 'service', NULL, 'complete', NULL, NULL, NULL, 'critical', 360);
-
-----------------------------------------------------------------------------------------------------
-
-INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('current-rrr-for-variation-or-cancellation-check', 'sql', 'For cancellation or variation of rights (or restrictions), there must be existing rights or restriction (in addition to the primary (ownership) right)::::Для изменения или отмены права или ограничения, должно существовать право или ограничение (в дополнении к основному праву собственности).', '#{id}(application.service.id)');
+VALUES ('current-rrr-for-variation-or-cancellation-check', 'sql', 'For cancellation or variation of rights (or restrictions), there must be existing rights or restriction (in addition to the primary (ownership) right)::::Для изменения или отмены права или ограничения, должно существовать право или ограничение (в дополнении к основному праву собственности).::::من اجل الغاء او تغيير الحقوق او القيود , يجب اولا وجود حقوق او قيود سابقة بالاضافة الى تعريف الحق الاساسي', '#{id}(application.service.id)');
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES ('current-rrr-for-variation-or-cancellation-check', now(), 'infinity', 'SELECT (SUM(1) > 0) AS vl FROM application.service sv 
@@ -87,66 +176,74 @@ VALUES ('current-rrr-for-variation-or-cancellation-check', 'service', NULL, 'com
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('service-has-person-verification', 'sql', 'Within the application for the service a personal identification verification should be attached.::::В заявлении должен присутствовать документ удостоверяющий личность.', '#{id}(application.service.id) is requested');
+VALUES ('service-on-complete-without-transaction', 'sql', 'Service ''req_type'' must have been started and some changes made in the system::::Услуга ''req_type''  должна быть запущена и сделаны какие-либо изменения.::::يجب ان تكون  اخدمة ''req_type'' قد بدأت وهناك تغييرات غلى النظام', '');
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
-VALUES ('service-has-person-verification', now(), 'infinity', 'SELECT (CASE 	WHEN sv.application_id is  NULL THEN NULL
-		ELSE COUNT(1) > 0
-	 END) as vl
-FROM application.service sv
-  LEFT JOIN application.application_uses_source aus ON (aus.application_id = sv.application_id)
-  LEFT JOIN source.source sc ON ((sc.id = aus.source_id) AND (sc.type_code = ''idVerification''))
-WHERE sv.id= #{id}
-GROUP BY sv.application_id
-LIMIT 1');
+VALUES ('service-on-complete-without-transaction', now(), 'infinity', 'select id in (select from_service_id from transaction.transaction where from_service_id is not null) as vl, 
+  get_translation(r.display_value, #{lng}) as req_type
+from application.service s inner join application.request_type r on s.request_type_code = r.code and request_category_code=''registrationServices''
+and s.id= #{id}');
 
 INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
-VALUES ('service-has-person-verification', 'service', NULL, 'complete', NULL, NULL, NULL, 'critical', 350);
+VALUES ('service-on-complete-without-transaction', 'service', NULL, 'complete', NULL, NULL, NULL, 'critical', 360);
 
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('power-of-attorney-service-has-document', 'sql', 'Service ''req_type'' must have must have one associated Power of Attorney document::::Услуга ''req_type''  должна иметь одну доверенность.', '#{id}(application.service.id)');
+VALUES ('application-baunit-check-area', 'sql', 'Title has the same area as the combined area of its associated parcels::::Недвижимость должна иметь такую же площадь как все ее земельные участки.::::المساحة المعرفة في سند الملكية تساوي مجموع مساحات القطع لهذه المنطقة', '#{id}(ba_unit_id) is requested');
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
-VALUES ('power-of-attorney-service-has-document', now(), 'infinity', 'SELECT (SUM(1) = 1) AS vl, get_translation(rt.display_value, #{lng}) as req_type FROM application.service sv
-	 INNER JOIN transaction.transaction tn ON (sv.id = tn.from_service_id)
-	 INNER JOIN source.source sc ON (tn.id = sc.transaction_id)
-	 INNER JOIN application.request_type rt ON (sv.request_type_code = rt.code AND request_category_code = ''registrationServices'')
-WHERE sv.id =#{id}
-AND sc.type_code = ''powerOfAttorney''
-GROUP BY rt.code
+VALUES ('application-baunit-check-area', now(), 'infinity', 'select
+       ( 
+         select coalesce(cast(sum(a.size)as float),0)
+	 from administrative.ba_unit_area a
+         inner join administrative.ba_unit ba
+         on a.ba_unit_id = ba.id
+         where ba.transaction_id = #{id}
+         and a.type_code =  ''officialArea''
+       ) 
+   = 
+
+       (
+         select coalesce(cast(sum(a.size)as float),0)
+	 from cadastre.spatial_value_area a
+	 where  a.type_code = ''officialArea''
+	 and a.spatial_unit_id in
+           (  select b.spatial_unit_id
+              from administrative.ba_unit_contains_spatial_unit b
+              inner join administrative.ba_unit ba
+	      on b.ba_unit_id = ba.id
+	      where ba.transaction_id = #{id}
+           )
+
+        ) as vl');
+
+INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
+VALUES ('application-baunit-check-area', 'service', NULL, NULL, NULL, 'cadastreChange', NULL, 'warning', 520);
+
+----------------------------------------------------------------------------------------------------
+
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES ('baunit-has-multiple-mortgages', 'sql', 'For the Register Mortgage service the identified title has no existing mortgages::::Для регистрации ипотеки указанная недвижимость не должна иметь существующих записей об ипотеки.::::في خدمة  تسجيل  رهن  السند المحدد لا يجب ان يكون عليه رهونات اخرى', '#{id}(administrative.ba_unit.id) is requested');
+
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES ('baunit-has-multiple-mortgages', now(), 'infinity', 'SELECT	(SELECT (COUNT(*) = 0) FROM application.service sv2
+		 INNER JOIN transaction.transaction tn ON (sv2.id = tn.from_service_id)
+		 INNER JOIN administrative.rrr rr ON (tn.id = rr.transaction_id)
+		 INNER JOIN administrative.rrr rr2 ON ((rr.ba_unit_id = rr2.ba_unit_id) AND (rr2.type_code = ''mortgage'') AND (rr2.status_code =''current'') ) 
+	WHERE sv.id = #{id}) AS vl FROM application.service sv
+WHERE sv.id = #{id}
+AND sv.request_type_code = ''mortgage''
 ORDER BY 1
 LIMIT 1');
 
 INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
-VALUES ('power-of-attorney-service-has-document', 'service', NULL, 'complete', NULL, 'regnPowerOfAttorney', NULL, 'critical', 340);
+VALUES ('baunit-has-multiple-mortgages', 'service', NULL, 'complete', NULL, 'mortgage', NULL, 'warning', 670);
 
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('document-supporting-rrr-is-current', 'sql', 'Documents supporting rights (or restrictions) must have current status::::Документы использующиеся для регистрации прав или ограничений должны иметь текущий (активный) статус.', '#{id}(application.service.id)');
-
-INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
-VALUES ('document-supporting-rrr-is-current', now(), 'infinity', 'WITH serviceDocs AS	(SELECT DISTINCT ON (sc.id) sv.id AS sv_id, sc.id AS sc_id, sc.status_code, sc.type_code FROM application.service sv
-				INNER JOIN transaction.transaction tn ON (sv.id = tn.from_service_id)
-				INNER JOIN administrative.rrr rr ON (tn.id = rr.transaction_id)
-				INNER JOIN administrative.source_describes_rrr sr ON (rr.id = sr.rrr_id)
-				INNER JOIN source.source sc ON (sr.source_id = sc.id)
-				WHERE sv.id = #{id}),
-    nullDocs AS		(SELECT sc_id, type_code FROM serviceDocs WHERE status_code IS NULL),
-    transDocs AS	(SELECT sc_id, type_code FROM serviceDocs WHERE status_code = ''current'' AND ((type_code = ''powerOfAttorney'') OR (type_code = ''standardDocument'')))
-SELECT ((SELECT COUNT(*) FROM serviceDocs) - (SELECT COUNT(*) FROM nullDocs) - (SELECT COUNT(*) FROM transDocs) = 0) AS vl
-ORDER BY 1
-LIMIT 1');
-
-INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
-VALUES ('document-supporting-rrr-is-current', 'service', NULL, 'complete', NULL, NULL, NULL, 'critical', 240);
-
-----------------------------------------------------------------------------------------------------
-
-INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('documents-present', 'sql', 'Documents attached to the objects, created or modified through the service, must have a scanned image file (or other source file)::::Документы прикреплённые к объектам, созданные или измененные через услуги, должны иметь прикрепленную отсканированную копию.', '#{id}(service_id) is requested');
+VALUES ('documents-present', 'sql', 'Documents attached to the objects, created or modified through the service, must have a scanned image file (or other source file)::::Документы прикреплённые к объектам, созданные или измененные через услуги, должны иметь прикрепленную отсканированную копию.::::المستندات المرفقة للكائنات، التي تم إنشاؤها أو تعديلها من خلال هذه الخدمة، يجب أن يكون لديها ملف الصورة الممسوحة ضوئيا (أو ملف مصدر آخر', '#{id}(service_id) is requested');
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES ('documents-present', now(), 'infinity', 'WITH cadastreDocs AS 	(SELECT DISTINCT ON (id) ss.id, ext_archive_id FROM source.source ss
@@ -181,31 +278,24 @@ VALUES ('documents-present', 'service', NULL, 'complete', NULL, NULL, NULL, 'cri
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('service-title-terminated', 'sql', 'For the service ''req_type'' the title must be terminated (after all rights recorded on the title are transferred or cancelled).::::Для услуги ''req_type''  недвижимость должна быть ликвидирована (после того как все зарегистрированные права переданы или отменены).', '#{id}(application.service.id) is requested');
+VALUES ('service-check-no-previous-digital-title-service', 'sql', 'For the Convert Title service there must be no existing digital title record (including the recording of a primary (ownership) right) for the identified title::::Для услуги конвертации недвижимости не должно быть существующих записей этой недвижим.::::في خدمة تحويل الى سند  ملكية رقمي يجب ان لا يوجد  سجل رقمي للملكية بما فيه  تسجيل الحق الاساسي', '#{id}(application.service.id) is requested where service is for newDigitalTitle or newDigitalProperty');
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
-VALUES ('service-title-terminated', now(), 'infinity', 'WITH reqForSv AS 	(SELECT sv.id, get_translation(rt.display_value, #{lng}) AS req_type FROM application.service sv 
-				INNER JOIN application.request_type rt ON (sv.request_type_code = rt.code)
-			WHERE sv.id = #{id} 
-			AND sv.request_type_code = ''cancelProperty''),
-     checkTitle AS	(SELECT tg.ba_unit_id FROM application.service sv
-				INNER JOIN transaction.transaction tn ON (sv.id = tn.from_service_id)
-				INNER JOIN administrative.ba_unit_target tg ON (tn.id = tg.transaction_id)
-			WHERE sv.id = #{id})
-SELECT 	CASE 	WHEN (SELECT (COUNT(*) = 0) FROM reqForSv) THEN NULL
-		WHEN (SELECT (COUNT(*) > 0) FROM checkTitle) THEN TRUE
-		ELSE FALSE
-	END AS vl, req_type FROM reqForSv
-ORDER BY vl
-LIMIT 1');
+VALUES ('service-check-no-previous-digital-title-service', now(), 'infinity', 'SELECT coalesce(not rrr.is_primary, true) as vl
+FROM application.service s inner join application.application_property ap on s.application_id = ap.application_id
+  INNER JOIN administrative.ba_unit ba ON (ap.name_firstpart, ap.name_lastpart) = (ba.name_firstpart, ba.name_lastpart)
+  LEFT JOIN administrative.rrr ON rrr.ba_unit_id = ba.id
+WHERE s.id = #{id} 
+order by 1 desc
+limit 1');
 
 INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
-VALUES ('service-title-terminated', 'service', NULL, 'complete', NULL, NULL, NULL, 'critical', 190);
+VALUES ('service-check-no-previous-digital-title-service', 'service', NULL, 'complete', NULL, 'newDigitalTitle', NULL, 'warning', 720);
 
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('application-baunit-has-parcels', 'sql', 'Title must have Parcels::::Недвижимость должна иметь участок', '#{id}(application.service.id) is requested');
+VALUES ('application-baunit-has-parcels', 'sql', 'Title must have Parcels::::Недвижимость должна иметь участок::::سند الملكية يجب ان يحتوي على قطع', '#{id}(application.service.id) is requested');
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES ('application-baunit-has-parcels', now(), 'infinity', 'select (select count(*)>0 from administrative.ba_unit_contains_spatial_unit ba_su 
@@ -223,96 +313,6 @@ VALUES ('application-baunit-has-parcels', 'service', NULL, 'complete', NULL, 'ca
 
 INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
 VALUES ('application-baunit-has-parcels', 'service', NULL, 'complete', NULL, 'redefineCadastre', NULL, 'critical', 140);
-
-----------------------------------------------------------------------------------------------------
-
-INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('service-check-no-previous-digital-title-service', 'sql', 'For the Convert Title service there must be no existing digital title record (including the recording of a primary (ownership) right) for the identified title::::Для услуги конвертации недвижимости не должно быть существующих записей этой недвижим.', '#{id}(application.service.id) is requested where service is for newDigitalTitle or newDigitalProperty');
-
-INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
-VALUES ('service-check-no-previous-digital-title-service', now(), 'infinity', 'SELECT coalesce(not rrr.is_primary, true) as vl
-FROM application.service s inner join application.application_property ap on s.application_id = ap.application_id
-  INNER JOIN administrative.ba_unit ba ON (ap.name_firstpart, ap.name_lastpart) = (ba.name_firstpart, ba.name_lastpart)
-  LEFT JOIN administrative.rrr ON rrr.ba_unit_id = ba.id
-WHERE s.id = #{id} 
-order by 1 desc
-limit 1');
-
-INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
-VALUES ('service-check-no-previous-digital-title-service', 'service', NULL, 'complete', NULL, 'newDigitalTitle', NULL, 'warning', 720);
-
-----------------------------------------------------------------------------------------------------
-
-INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('baunit-has-multiple-mortgages', 'sql', 'For the Register Mortgage service the identified title has no existing mortgages::::Для регистрации ипотеки указанная недвижимость не должна иметь существующих записей об ипотеки.', '#{id}(administrative.ba_unit.id) is requested');
-
-INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
-VALUES ('baunit-has-multiple-mortgages', now(), 'infinity', 'SELECT	(SELECT (COUNT(*) = 0) FROM application.service sv2
-		 INNER JOIN transaction.transaction tn ON (sv2.id = tn.from_service_id)
-		 INNER JOIN administrative.rrr rr ON (tn.id = rr.transaction_id)
-		 INNER JOIN administrative.rrr rr2 ON ((rr.ba_unit_id = rr2.ba_unit_id) AND (rr2.type_code = ''mortgage'') AND (rr2.status_code =''current'') ) 
-	WHERE sv.id = #{id}) AS vl FROM application.service sv
-WHERE sv.id = #{id}
-AND sv.request_type_code = ''mortgage''
-ORDER BY 1
-LIMIT 1');
-
-INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
-VALUES ('baunit-has-multiple-mortgages', 'service', NULL, 'complete', NULL, 'mortgage', NULL, 'warning', 670);
-
-----------------------------------------------------------------------------------------------------
-
-INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('mortgage-value-check', 'sql', 'For the Register Mortgage service, the new mortgage is for less than the reported value of property (at time application was received)::::Сумма зарегистрированной ипотеки, меньше чем заявленная стоимость недвижимости (во время подачи заявления).', '#{id}(application.service.id) is requested');
-
-INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
-VALUES ('mortgage-value-check', now(), 'infinity', 'SELECT (ap.total_value < rrr.amount) AS vl 
-  from application.service s inner join application.application_property ap on s.application_id = ap.application_id 
- INNER JOIN administrative.ba_unit ba ON (ap.name_firstpart, ap.name_lastpart) = (ba.name_firstpart, ba.name_lastpart)
- INNER JOIN administrative.rrr ON rrr.ba_unit_id = ba.id
-WHERE s.id = #{id} and rrr.type_code= ''mortgage'' and rrr.status_code in (''pending'')
-order by 1
-limit 1');
-
-INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
-VALUES ('mortgage-value-check', 'service', NULL, 'complete', NULL, 'mortgage', NULL, 'warning', 700);
-
-INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
-VALUES ('mortgage-value-check', 'service', NULL, 'complete', NULL, 'varyMortgage', NULL, 'warning', 690);
-
-----------------------------------------------------------------------------------------------------
-
-INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('application-baunit-check-area', 'sql', 'Title has the same area as the combined area of its associated parcels::::Недвижимость должна иметь такую же площадь как все ее земельные участки.', '#{id}(ba_unit_id) is requested');
-
-INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
-VALUES ('application-baunit-check-area', now(), 'infinity', 'select
-       ( 
-         select coalesce(cast(sum(a.size)as float),0)
-	 from administrative.ba_unit_area a
-         inner join administrative.ba_unit ba
-         on a.ba_unit_id = ba.id
-         where ba.transaction_id = #{id}
-         and a.type_code =  ''officialArea''
-       ) 
-   = 
-
-       (
-         select coalesce(cast(sum(a.size)as float),0)
-	 from cadastre.spatial_value_area a
-	 where  a.type_code = ''officialArea''
-	 and a.spatial_unit_id in
-           (  select b.spatial_unit_id
-              from administrative.ba_unit_contains_spatial_unit b
-              inner join administrative.ba_unit ba
-	      on b.ba_unit_id = ba.id
-	      where ba.transaction_id = #{id}
-           )
-
-        ) as vl');
-
-INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
-VALUES ('application-baunit-check-area', 'service', NULL, NULL, NULL, 'cadastreChange', NULL, 'warning', 520);
 
 ----------------------------------------------------------------------------------------------------
 
