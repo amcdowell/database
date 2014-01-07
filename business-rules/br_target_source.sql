@@ -1,5 +1,5 @@
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('source-attach-in-transaction-no-pendings', 'sql', 'Document (source file) must not be duplicated::::Документ не должен дублироваться.::::يجب عدم تكرار الوثيقة  (ملف المصدر)', '#{id}(source.source.id) is requested. It checks if the source has already a record with the status pending.');
+VALUES ('source-attach-in-transaction-no-pendings', 'sql', 'Document (source file) must not be duplicated::::Документ не должен дублироваться.::::يجب عدم تكرار الوثيقة  (ملف المصدر)::::Le document (fichier source) ne doit pas être dupliqué.', '#{id}(source.source.id) is requested. It checks if the source has already a record with the status pending.');
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES ('source-attach-in-transaction-no-pendings', now(), 'infinity', 'WITH checkServiceType	AS	(SELECT COUNT(*) AS cnt FROM application.service sv1
@@ -22,7 +22,7 @@ VALUES ('source-attach-in-transaction-no-pendings', 'source', NULL, NULL, 'pendi
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('source-attach-in-transaction-allowed-type', 'sql', 'Document to be registered must have an allowable and current source type::::Документы для регистрации должны иметь допустимый тип.::::الوثيقة المراد تسجيلها يجب ان يكون لها نوع مصدر حالي مسموح به', '#{id}(source.source.id) is requested. It checks if the source has a type which has the is_for_registration attribute true.');
+VALUES ('source-attach-in-transaction-allowed-type', 'sql', 'Document to be registered must have an allowable and current source type::::Документы для регистрации должны иметь допустимый тип.::::الوثيقة المراد تسجيلها يجب ان يكون لها نوع مصدر حالي مسموح به::::Le document à enregistrer doit avoir un type de source courant et disponible.', '#{id}(source.source.id) is requested. It checks if the source has a type which has the is_for_registration attribute true.');
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
 VALUES ('source-attach-in-transaction-allowed-type', now(), 'infinity', 'WITH checkServiceType	AS	(SELECT COUNT(*) AS cnt FROM application.service sv1
