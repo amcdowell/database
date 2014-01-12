@@ -391,6 +391,9 @@ VALUES ('cadastreBulk', 'informationServices', 'Cadastre Bulk Export::::Масс
 INSERT INTO application.request_type (code, request_category_code, display_value, description, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) 
 VALUES ('newDigitalProperty', 'registrationServices', 'New Digital Property::::Регистрация существующего права собственности::::أنشاء سند الكتروني جديد::::Nouvelle Propriété Numérique', '...::::...::::...::::...', 'x', 5, 0.00, 0.00, 0.00, 1, null, null, null);
 
+INSERT INTO application.request_type (code, request_category_code, display_value, description, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) 
+VALUES ('recordTransfer', 'registrationServices', 'Record transfer::::Record transfer in russian::::Record transfer in arabic::::Record transfer in french', '...::::...::::...::::...', 'c', 1, 0.00, 0.00, 0.00, 0, null, null, null);
+
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO cadastre.area_type (code, display_value, description, status) 
@@ -1115,6 +1118,14 @@ All services on the application must be completed before this action is availabl
 All services on the application must be completed before this action is available.::::Required to perform the Approve applicaiton action. The Approve action transitions the application into the Approved state.
 All services on the application must be completed before this action is available.::::Requis pour pouvoir effectuer l''action d''approbation de la demande. L''action d''approbation transforme le statut de la demande en "Approuvé". Tous les services de l''application doivent être exécuté avant que cette action soit possible.');
 
+INSERT INTO system.approle (code, display_value, status, description) 
+VALUES ('consolidationExt', 'Admin - Consolidation Extract::::Admin - Consolidation Extract::::Admin - Consolidation Extract::::Admin - Consolidation Extract', 'c', 
+'Allows system administrators to start the extraction or records for consolidating in another system.::::Allows system administrators to start the extraction or records for consolidating in another system.::::Allows system administrators to start the extraction or records for consolidating in another system.::::Allows system administrators to start the extraction or records for consolidating in another system.');
+
+INSERT INTO system.approle (code, display_value, status, description) 
+VALUES ('consolidationCons', 'Admin - Consolidation Consolidate::::Admin - Consolidation Consolidate::::Admin - Consolidation Consolidate::::Admin - Consolidation Consolidate', 'c', 
+'Allows system administrators to consolidate records coming from another system.::::Allows system administrators to start the extraction or records for consolidating in another system.::::Allows system administrators to start the extraction or records for consolidating in another system.::::Allows system administrators to start the extraction or records for consolidating in another system.');
+
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO system.br_severity_type (code, display_value, status, description) 
@@ -1162,6 +1173,9 @@ VALUES ('rrr', 'Right or Restriction::::Право или Ограничение
 
 INSERT INTO system.br_validation_target_type (code, display_value, status, description) 
 VALUES ('spatial_unit_group', 'Spatial unit group::::Пространственная группа::::مجموعة الوحدات المكانية::::Groupe d''Unité Spatiale', 'c', 'The target of the validation are the spatial unit groups::::Объектом проверки является пространственные группы::::...::::La cible de la validation sont les groupes d''unité spatiale');
+
+INSERT INTO system.br_validation_target_type (code, display_value, status, description) 
+VALUES ('consolidation', 'Consolidation::::Consolidation::::Consolidation::::Consolidation', 'c', 'The target of the validation are the records to be consolidated::::The target of the validation are the records to be consolidated::::...::::The target of the validation are the records to be consolidated');
 
 ----------------------------------------------------------------------------------------------------
 
