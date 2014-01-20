@@ -681,6 +681,8 @@ CREATE OR REPLACE VIEW administrative.sys_reg_state_land AS
 
 ALTER TABLE administrative.sys_reg_state_land OWNER TO postgres;
 
+
+---#383 Public Display and Related Issues (issues on certificates) 
 ---------- VIEW application.systematic_registration_certificates -----------
 CREATE OR REPLACE VIEW application.systematic_registration_certificates AS 
  SELECT aa.nr, co.name_firstpart, co.name_lastpart, su.ba_unit_id
@@ -701,8 +703,7 @@ CREATE OR REPLACE VIEW application.systematic_registration_certificates AS
 
 ALTER TABLE application.systematic_registration_certificates OWNER TO postgres;
 
-
----------- FUNCTION administrative.getsysregprogress -------------------------
+-- #384 Systematic Registration Report Issues.
 CREATE OR REPLACE FUNCTION administrative.getsysregprogress(fromdate character varying, todate character varying, namelastpart character varying)
   RETURNS SETOF record AS
 $BODY$
@@ -755,7 +756,7 @@ BEGIN
    sqlSt:= '';
     
   
- sqlSt:= 'select   co.name_lastpart   as area
+ sqlSt:= 'select  distinct (co.name_lastpart)   as area
                    FROM   application.application aa,     
 			  application.service s,
 			  cadastre.cadastre_object co,
@@ -774,7 +775,9 @@ BEGIN
     ';
     
     if namelastpart != '' then
-          sqlSt:= sqlSt|| ' AND compare_strings('''||namelastpart||''', co.name_lastpart) ';
+         -- sqlSt:= sqlSt|| ' AND compare_strings('''||namelastpart||''', co.name_lastpart) ';
+          sqlSt:= sqlSt|| ' AND  co.name_lastpart =  '''||namelastpart||'''';  --1. block
+   
     end if;
     --raise exception '%',sqlSt;
        workFound = false;
@@ -802,7 +805,8 @@ BEGIN
 			    AND   t.from_service_id = s.id
 			    AND   s.request_type_code::text = 'systematicRegn'::text
 			    AND   aa.action_code='lodge'
-		            AND compare_strings(''|| rec.area ||'', co.name_lastpart)
+		            --AND compare_strings(''|| rec.area ||'', co.name_lastpart)
+		            AND  co.name_lastpart = ''|| rec.area ||''
                             AND  (
 		          (aa.lodging_datetime  between to_date(''|| fromDate || '','yyyy-mm-dd')  and to_date(''|| toDate || '','yyyy-mm-dd'))
 		           or
@@ -826,8 +830,9 @@ BEGIN
 			    AND   t.from_service_id = s.id
 			    AND   aa.action_code='lodge'
 			    AND   s.request_type_code::text = 'systematicRegn'::text
-		            AND compare_strings(''|| rec.area ||'', co.name_lastpart)
-                    	    AND  (
+		            --AND compare_strings(''|| rec.area ||'', co.name_lastpart)
+		            AND  co.name_lastpart = ''|| rec.area ||''
+                            AND  (
 		          (aa.lodging_datetime  between to_date(''|| fromDate || '','yyyy-mm-dd')  and to_date(''|| toDate || '','yyyy-mm-dd'))
 		           or
 		          (aa.change_time  between to_date(''|| fromDate ||'','yyyy-mm-dd')  and to_date(''|| toDate ||'','yyyy-mm-dd'))
@@ -840,8 +845,7 @@ BEGIN
 	   
 	   (
 	    SELECT count (DISTINCT co.id)
-	    FROM cadastre.land_use_type lu, 
-		 cadastre.cadastre_object co, 
+	    FROM cadastre.cadastre_object co, 
 		 cadastre.spatial_value_area sa, 
 		 administrative.ba_unit_contains_spatial_unit su,
 		 application.application aa, 
@@ -856,16 +860,19 @@ BEGIN
 			    AND   bu.transaction_id = t.id
 			    AND   t.from_service_id = s.id
 			    AND   s.request_type_code::text = 'systematicRegn'::text
-		            AND compare_strings(''|| rec.area ||'', co.name_lastpart)
-	    AND sa.spatial_unit_id::text = co.id::text AND sa.type_code::text = 'officialArea'::text 
+		            --AND compare_strings(''|| rec.area ||'', co.name_lastpart)
+		            AND  co.name_lastpart = ''|| rec.area ||''
+            AND sa.spatial_unit_id::text = co.id::text AND sa.type_code::text = 'officialArea'::text 
 	    AND su.spatial_unit_id::text = sa.spatial_unit_id::text 
-	    AND s.status_code::text = 'completed'::text AND COALESCE(co.land_use_code, 'residential'::character varying)::text = lu.code::text AND bu.id::text = su.ba_unit_id::text
+	    AND s.status_code::text = 'completed'::text 
+	    AND bu.id::text = su.ba_unit_id::text
 	    )
             ||'/'||
 	    (SELECT count (*)
 	            FROM cadastre.cadastre_object co
 			    WHERE co.type_code='parcel'
-			    AND compare_strings(''|| rec.area ||'', co.name_lastpart)
+			    AND  co.name_lastpart = ''|| rec.area ||''
+                            --AND compare_strings(''|| rec.area ||'', co.name_lastpart)
                     	    
 	     )
 
@@ -889,7 +896,8 @@ BEGIN
 			    AND   su.ba_unit_id = bu.id
 			    AND   bu.transaction_id = t.id
 			    AND   t.from_service_id = s.id
-			   AND compare_strings(''|| rec.area ||'', co.name_lastpart) 
+			  -- AND compare_strings(''|| rec.area ||'', co.name_lastpart) 
+                          AND  co.name_lastpart = ''|| rec.area ||'' 
 			   AND s.application_id::text in (select s.application_id 
 						 FROM application.service s
 						 where s.request_type_code::text = 'systematicRegn'::text
@@ -916,7 +924,8 @@ BEGIN
 			    AND   su.ba_unit_id = bu.id
 			    AND   bu.transaction_id = t.id
 			    AND   t.from_service_id = s.id
-			   AND compare_strings(''|| rec.area ||'', co.name_lastpart) 
+			   --AND compare_strings(''|| rec.area ||'', co.name_lastpart) 
+                           AND  co.name_lastpart = ''|| rec.area ||'' 
 			   AND s.application_id::text in (select s.application_id 
 						 FROM application.service s
 						 where s.request_type_code::text = 'systematicRegn'::text
@@ -947,7 +956,8 @@ BEGIN
 			    AND   su.ba_unit_id = bu.id
 			    AND   bu.transaction_id = t.id
 			    AND   t.from_service_id = s.id
-			    AND compare_strings(''|| rec.area ||'', co.name_lastpart) 
+			    --AND compare_strings(''|| rec.area ||'', co.name_lastpart) 
+			    AND  co.name_lastpart = ''|| rec.area ||''
 		            AND s.application_id::text in (select s.application_id 
 						 FROM application.service s
 						 where s.request_type_code::text = 'systematicRegn'::text
@@ -977,7 +987,8 @@ BEGIN
 			    AND   su.ba_unit_id = bu.id
 			    AND   bu.transaction_id = t.id
 			    AND   t.from_service_id = s.id
-			    AND compare_strings(''|| rec.area ||'', co.name_lastpart) 
+			    --AND compare_strings(''|| rec.area ||'', co.name_lastpart) 
+			    AND  co.name_lastpart = ''|| rec.area ||''
 			    AND   s.request_type_code::text = 'systematicRegn'::text
 			    AND co.name_lastpart in (
 						      select ss.reference_nr 
@@ -1003,7 +1014,8 @@ BEGIN
 			    AND   su.ba_unit_id = bu.id
 			    AND   bu.transaction_id = t.id
 			    AND   t.from_service_id = s.id
-			    AND compare_strings(''|| rec.area ||'', co.name_lastpart) 
+			    --AND compare_strings(''|| rec.area ||'', co.name_lastpart)
+			    AND  co.name_lastpart = ''|| rec.area ||'' 
 			    AND s.request_type_code::text = 'systematicRegn'::text
 		            AND co.name_lastpart in (
 						      select ss.reference_nr 
@@ -1020,7 +1032,7 @@ BEGIN
                  ),  ---TotCertificatesPrepared
                  (select count (distinct(s.id))
                    FROM 
-                       application.service s   --,
+                   application.service s   --,
 		   WHERE s.request_type_code::text = 'documentCopy'::text
 		   AND s.lodging_datetime between to_date(''|| fromDate ||'','yyyy-mm-dd')  and to_date(''|| toDate ||'','yyyy-mm-dd')
                    AND s.action_notes = ''|| rec.area ||'')  --TotCertificatesIssued
@@ -1301,7 +1313,9 @@ $BODY$
 ALTER FUNCTION administrative.getsysregprogress(character varying, character varying, character varying) OWNER TO postgres;
 
 
------------------------ FUNCTION administrative.getsysregstatus --------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION administrative.getsysregstatus(fromdate character varying, todate character varying, namelastpart character varying)
   RETURNS SETOF record AS
 $BODY$
@@ -1352,7 +1366,7 @@ BEGIN
     sqlSt:= '';
     
   
- sqlSt:= 'select   co.name_lastpart   as area
+ sqlSt:= 'select   distinct (co.name_lastpart)   as area
                    FROM   application.application aa,     
 			  application.service s,
 			  cadastre.cadastre_object co,
@@ -1371,7 +1385,9 @@ BEGIN
     ';
     
     if namelastpart != '' then
-          sqlSt:= sqlSt|| ' AND compare_strings('''||namelastpart||''', co.name_lastpart) ';
+          --sqlSt:= sqlSt|| ' AND compare_strings('''||namelastpart||''', co.name_lastpart) ';
+          sqlSt:= sqlSt|| ' AND  co.name_lastpart =  '''||namelastpart||'''';  --1. block
+    
     end if;
 
     --raise exception '%',sqlSt;
@@ -1398,7 +1414,8 @@ BEGIN
 			    AND   bu.transaction_id = t.id
 			    AND   t.from_service_id = s.id
 			    AND   s.request_type_code::text = 'systematicRegn'::text
-			    AND compare_strings(''|| rec.area ||'', co.name_lastpart)
+			    --AND compare_strings(''|| rec.area ||'', co.name_lastpart)
+			    AND  co.name_lastpart =  ''|| rec.area ||''
 			    AND  (
 		          (aa.lodging_datetime  between to_date(''|| fromDate || '','yyyy-mm-dd')  and to_date(''|| toDate || '','yyyy-mm-dd'))
 		           or
@@ -1421,7 +1438,8 @@ BEGIN
 			    AND   bu.transaction_id = t.id
 			    AND   t.from_service_id = s.id
 			    AND   s.request_type_code::text = 'systematicRegn'::text
-			    AND compare_strings(''|| rec.area ||'', co.name_lastpart)
+			    --AND compare_strings(''|| rec.area ||'', co.name_lastpart)
+			    AND  co.name_lastpart =  ''|| rec.area ||''
 			 AND  (
 		          (aa.lodging_datetime  between to_date(''|| fromDate || '','yyyy-mm-dd')  and to_date(''|| toDate || '','yyyy-mm-dd'))
 		           or
@@ -1432,7 +1450,8 @@ BEGIN
 	            FROM cadastre.cadastre_object co
 			    WHERE co.type_code='parcel'
 			    AND   co.id not in (SELECT su.spatial_unit_id FROM administrative.ba_unit_contains_spatial_unit su)
-			    AND compare_strings(''|| rec.area ||'', co.name_lastpart)
+			    --AND compare_strings(''|| rec.area ||'', co.name_lastpart)
+			    AND  co.name_lastpart =  ''|| rec.area ||''
 	          ),
 
                  (
@@ -1456,7 +1475,8 @@ BEGIN
 						 ) 
 		  AND s.request_type_code::text = 'lodgeObjection'::text
 		  AND s.status_code::text != 'cancelled'::text
-		  AND compare_strings(''|| rec.area ||'', co.name_lastpart)
+		  --AND compare_strings(''|| rec.area ||'', co.name_lastpart)
+		  AND  co.name_lastpart =  ''|| rec.area ||''
 		  AND  (
 		          (aa.lodging_datetime  between to_date(''|| fromDate || '','yyyy-mm-dd')  and to_date(''|| toDate || '','yyyy-mm-dd'))
 		           or
@@ -1481,8 +1501,9 @@ BEGIN
 			    AND   bu.transaction_id = t.id
 			    AND   t.from_service_id = s.id
 			    AND   s.request_type_code::text = 'systematicRegn'::text
-			    AND compare_strings(''|| rec.area ||'', co.name_lastpart)
-			   AND  (
+			    --AND compare_strings(''|| rec.area ||'', co.name_lastpart)
+			    AND  co.name_lastpart =  ''|| rec.area ||''
+			  AND  (
 		          (aa.lodging_datetime  between to_date(''|| fromDate || '','yyyy-mm-dd')  and to_date(''|| toDate || '','yyyy-mm-dd'))
 		           or
 		          (aa.change_time  between to_date(''|| fromDate ||'','yyyy-mm-dd')  and to_date(''|| toDate ||'','yyyy-mm-dd'))
@@ -1523,8 +1544,9 @@ BEGIN
 			    AND   bu.transaction_id = t.id
 			    AND   t.from_service_id = s.id
 			    AND   s.request_type_code::text = 'systematicRegn'::text
-			    AND compare_strings(''|| rec.area ||'', co.name_lastpart)
-		            AND co.name_lastpart in ( 
+			    --AND compare_strings(''|| rec.area ||'', co.name_lastpart)
+			    AND  co.name_lastpart =  ''|| rec.area ||''
+			    AND co.name_lastpart in ( 
 		                             select ss.reference_nr from   source.source ss 
 					     where ss.type_code='publicNotification'
 					     and ss.recordation  between to_date(''|| fromDate ||'','yyyy-mm-dd')  and to_date(''|| toDate ||'','yyyy-mm-dd')
@@ -1549,8 +1571,9 @@ BEGIN
 			    AND   bu.transaction_id = t.id
 			    AND   t.from_service_id = s.id
 			    AND   s.request_type_code::text = 'systematicRegn'::text
-			    AND compare_strings(''|| rec.area ||'', co.name_lastpart)
-		            AND co.name_lastpart in ( 
+			    --AND compare_strings(''|| rec.area ||'', co.name_lastpart)
+			    AND  co.name_lastpart =  ''|| rec.area ||''
+			    AND co.name_lastpart in ( 
 						      select ss.reference_nr 
 						       from   source.source ss 
 						       where ss.type_code='publicNotification'
@@ -1579,7 +1602,8 @@ BEGIN
 			    AND   bu.transaction_id = t.id
 			    AND   t.from_service_id = s.id
 			    AND   s.request_type_code::text = 'systematicRegn'::text
-			    AND compare_strings(''|| rec.area ||'', co.name_lastpart)
+			    --AND compare_strings(''|| rec.area ||'', co.name_lastpart)
+			    AND  co.name_lastpart =  ''|| rec.area ||''
 			    AND co.name_lastpart in ( 
 						      select ss.reference_nr 
 						      from   source.source ss 
@@ -1611,7 +1635,8 @@ BEGIN
 			    AND   bu.transaction_id = t.id
 			    AND   t.from_service_id = s.id
 			    AND   s.request_type_code::text = 'systematicRegn'::text
-			    AND compare_strings(''|| rec.area ||'', co.name_lastpart)
+			    --AND compare_strings(''|| rec.area ||'', co.name_lastpart)
+			    AND  co.name_lastpart =  ''|| rec.area ||''
 			    AND sa.spatial_unit_id::text = co.id::text AND COALESCE(co.land_use_code, 'residential'::character varying)::text = lu.code::text 
 			    AND sa.type_code::text = 'officialArea'::text 
 			    AND su.spatial_unit_id::text = sa.spatial_unit_id::text 
@@ -1648,7 +1673,8 @@ BEGIN
 			    AND   bu.transaction_id = t.id
 			    AND   t.from_service_id = s.id
 			    AND   s.request_type_code::text = 'systematicRegn'::text
-			    AND   compare_strings(''|| rec.area ||'', co.name_lastpart)
+			    --AND compare_strings(''|| rec.area ||'', co.name_lastpart)
+			    AND  co.name_lastpart =  ''|| rec.area ||''
 			    AND   sa.spatial_unit_id::text = co.id::text AND COALESCE(co.land_use_code, 'residential'::character varying)::text = lu.code::text 
 			    AND sa.type_code::text = 'officialArea'::text AND su.spatial_unit_id::text = sa.spatial_unit_id::text 
 			    AND s.status_code::text = 'completed'::text AND pp.id::text = pr.party_id::text AND pr.rrr_id::text = rrr.id::text 
@@ -1662,7 +1688,8 @@ BEGIN
                  (SELECT count (*)
 	            FROM cadastre.cadastre_object co
 			    WHERE co.type_code='parcel'
-			    AND   compare_strings(''|| rec.area ||'', co.name_lastpart)
+		    --AND compare_strings(''|| rec.area ||'', co.name_lastpart)
+			    AND  co.name_lastpart =  ''|| rec.area ||''
 	         )    
               INTO       TotApp,
                          appLodgedSP,
@@ -1690,7 +1717,9 @@ BEGIN
 			    AND   bu.transaction_id = t.id
 			    AND   t.from_service_id = s.id
 			    AND   s.request_type_code::text = 'systematicRegn'::text
-			    AND   compare_strings(''|| rec.area ||'', co.name_lastpart)
+			    --AND compare_strings(''|| rec.area ||'', co.name_lastpart)
+			    AND  co.name_lastpart =  ''|| rec.area ||''
+			  
 	  ;        
 
                 block = rec.area;
@@ -1760,7 +1789,6 @@ $BODY$
   COST 100
   ROWS 1000;
 ALTER FUNCTION administrative.getsysregstatus(character varying, character varying, character varying) OWNER TO postgres;
-
 
 
 -- #389 Consolidation functionality.
