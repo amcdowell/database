@@ -2,7 +2,7 @@ INSERT INTO system.br(id, technical_type_code, feedback, technical_description)
 VALUES ('generate-notation-reference-nr', 'sql', '', '');
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
-VALUES ('generate-notation-reference-nr', now(), 'infinity', 'SELECT to_char(now(), ''yymmdd'') || ''-'' || trim(to_char(nextval(''administrative.rrr_nr_seq''), ''0000'')) AS vl');
+VALUES ('generate-notation-reference-nr', now(), 'infinity', 'SELECT coalesce(system.get_setting(''system-id''), '''') || to_char(now(), ''yymmdd'') || ''-'' || trim(to_char(nextval(''administrative.rrr_nr_seq''), ''0000'')) AS vl');
 
 ----------------------------------------------------------------------------------------------------
 
@@ -10,7 +10,7 @@ INSERT INTO system.br(id, technical_type_code, feedback, technical_description)
 VALUES ('generate-rrr-nr', 'sql', '', '');
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
-VALUES ('generate-rrr-nr', now(), 'infinity', 'SELECT to_char(now(), ''yymmdd'') || ''-'' || trim(to_char(nextval(''administrative.rrr_nr_seq''), ''0000'')) AS vl');
+VALUES ('generate-rrr-nr', now(), 'infinity', 'SELECT coalesce(system.get_setting(''system-id''), '''') || to_char(now(), ''yymmdd'') || ''-'' || trim(to_char(nextval(''administrative.rrr_nr_seq''), ''0000'')) AS vl');
 
 ----------------------------------------------------------------------------------------------------
 
@@ -18,7 +18,7 @@ INSERT INTO system.br(id, technical_type_code, feedback, technical_description)
 VALUES ('generate-source-nr', 'sql', '', '');
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
-VALUES ('generate-source-nr', now(), 'infinity', 'SELECT to_char(now(), ''yymmdd'') || ''-'' || trim(to_char(nextval(''source.source_la_nr_seq''), ''000000000'')) AS vl');
+VALUES ('generate-source-nr', now(), 'infinity', 'SELECT coalesce(system.get_setting(''system-id''), '''') || to_char(now(), ''yymmdd'') || ''-'' || trim(to_char(nextval(''source.source_la_nr_seq''), ''000000000'')) AS vl');
 
 ----------------------------------------------------------------------------------------------------
 
@@ -26,7 +26,7 @@ INSERT INTO system.br(id, technical_type_code, feedback, technical_description)
 VALUES ('generate-baunit-nr', 'sql', '', '');
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
-VALUES ('generate-baunit-nr', now(), 'infinity', 'SELECT to_char(now(), ''yymm'') || trim(to_char(nextval(''administrative.ba_unit_first_name_part_seq''), ''0000''))
+VALUES ('generate-baunit-nr', now(), 'infinity', 'SELECT coalesce(system.get_setting(''system-id''), '''') || to_char(now(), ''yymm'') || trim(to_char(nextval(''administrative.ba_unit_first_name_part_seq''), ''0000''))
 || ''/'' || trim(to_char(nextval(''administrative.ba_unit_last_name_part_seq''), ''0000'')) AS vl');
 
 ----------------------------------------------------------------------------------------------------
@@ -63,7 +63,7 @@ INSERT INTO system.br(id, technical_type_code, feedback, technical_description)
 VALUES ('generate-application-nr', 'sql', '...::::::::...', '');
 
 INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
-VALUES ('generate-application-nr', now(), 'infinity', 'SELECT to_char(now(), ''yymm'') || trim(to_char(nextval(''application.application_nr_seq''), ''0000'')) AS vl');
+VALUES ('generate-application-nr', now(), 'infinity', 'SELECT coalesce(system.get_setting(''system-id''), '''') || to_char(now(), ''yymm'') || trim(to_char(nextval(''application.application_nr_seq''), ''0000'')) AS vl');
 
 ----------------------------------------------------------------------------------------------------
 

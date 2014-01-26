@@ -1793,6 +1793,12 @@ ALTER FUNCTION administrative.getsysregstatus(character varying, character varyi
 
 -- #389 Consolidation functionality.
 
+-- Insert a new setting called system-id. This must be a unique number that identifies the installed system.
+insert into system.setting(name, vl, active, description) values('system-id', '', true, 'A unique number that identifies the installed SOLA system. This unique number is used in the br that generate unique identifiers.');
+
+-- Insert a new setting called zip-pass. This holds a password that is used only in server side.
+insert into system.setting(name, vl, active, description) values('zip-pass', 'wownow3nnZv3r', true, 'A password that is used during the consolidation process. It is used only in server side.');
+
 DROP TABLE IF EXISTS system.consolidation_config;
 
 CREATE TABLE system.consolidation_config
@@ -2103,40 +2109,63 @@ DECLARE
   table_rec record;
   consolidation_schema varchar;
   cols varchar;
+  log varchar;
+  new_line varchar;
+  
 BEGIN
+  
+  new_line = '
+';
+  log = '-------------------------------------------------------------------------------------------';
   -- It is presumed that the consolidation schema is already present.
 
   -- Set constants.
   consolidation_schema = 'consolidation';
 
+  log = log || new_line || 'making users inactive...';
   -- Make sola not accessible from all other users except the user running the consolidation.
   update system.appuser set active = false where id != admin_user;
+  log = log || 'done.' || new_line;
 
   -- Disable triggers.
+  log = log || new_line || 'disabling all triggers...';
   perform fn_triggerall(false);
+  log = log || 'done.' || new_line;
 
   -- For each table that is extracted and that has rows, insert the records into the main tables.
   for table_rec in select * from consolidation.config order by order_of_execution loop
 
+    log = log || new_line || 'loading records from table "' || table_rec.source_table_name || '" to table "' || table_rec.target_table_name || '"... ' ;
     if table_rec.remove_before_insert then
+      log = log || new_line || '    deleting matching records in target table ...';
       execute 'delete from ' || table_rec.target_table_name ||
       ' where rowidentifier in (select rowidentifier from ' || table_rec.source_table_name || ')';
+      log = log || 'done.' || new_line;
     end if;
     cols = (select string_agg(column_name, ',')
       from information_schema.columns
       where table_schema || '.' || table_name = table_rec.target_table_name);
 
+    log = log || new_line || '    inserting records to target table ...';
     execute 'insert into ' || table_rec.target_table_name || '(' || cols || ') select ' || cols || ' from ' || table_rec.source_table_name;
+    log = log || 'done.' || new_line;
+    log = log || 'table loaded.'  || new_line;
     
   end loop;
   
   -- Enable triggers.
+  log = log || new_line || 'enabling all triggers...';
   perform fn_triggerall(true);
+  log = log || 'done.' || new_line;
 
   -- Make sola accessible for all users.
+  log = log || new_line || 'making users active...';
   update system.appuser set active = true where id != admin_user;
+  log = log || 'done.' || new_line;
+  log = log || 'Finished with success!';
+  log = log || new_line || '-------------------------------------------------------------------------------------------';
 
-  return 't';
+  return log;
 END;
 $BODY$
   LANGUAGE plpgsql;
