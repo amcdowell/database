@@ -53,4 +53,8 @@ psql --host=$host --port=$port --username=$username --dbname=$dbname --file=$tes
 echo Loading Applications
 psql --host=$host --port=$port --username=$username --dbname=$dbname --file=$testDataPath"sola_populate_waiheke_applications.sql"
 
+#Install Keka and manually unzip the 7z file before running this script - see http://www.kekaosx.com/en/index.php
+psql --host=$host --port=$port --username=$username --dbname=$dbname --file=$testDataPath"sola_populate_waiheke_rrr.sql"
+psql --host=$host --port=$port --username=$username --dbname=$dbname --file=$testDataPath"data-fixes.sql"
+
 echo Finished at %time% - Check build.log for errors!

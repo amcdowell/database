@@ -5,6 +5,7 @@ logs/
 Thumbs.db
 thumbs.db
 *.log
+sola_populate_waiheke_rrr.sql
 
 #Ingore temporary vpp files
 *.vpp~*

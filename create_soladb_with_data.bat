@@ -11,6 +11,7 @@ set username=postgres
 set createDB=NO
 
 set testDataPath=test-data\waiheke\
+set utilitiesPath=utilities\
 
 set /p host= Host name [%host%] :
 
@@ -20,9 +21,13 @@ set /p dbname= Database name [%dbname%] :
 
 set /p username= Username [%username%] :
 
+echo
+echo
+echo Starting Build at %time%
+echo Starting Build at %time% > build.log 2>&1
 
 echo Creating database...
-echo Creating database... > build.log 2>&1
+echo Creating database... >> build.log 2>&1
 %psql_path% --host=%host% --port=%port% --username=%username% --dbname=%dbname% --file=sola.sql >> build.log 2>&1
 %psql_path% --host=%host% --port=%port% --username=%username% --dbname=%dbname% --file=reference_tables.sql >> build.log 2>&1
 %psql_path% --host=%host% --port=%port% --username=%username% --dbname=%dbname% --file=post_scripts.sql >> build.log 2>&1
@@ -43,25 +48,33 @@ echo Loading SOLA business rules... >> build.log 2>&1
 %psql_path% --host=%host% --port=%port% --username=%username% --dbname=%dbname% --file=business-rules\br_target_spatial_unit_group.sql >> build.log 2>&1
 %psql_path% --host=%host% --port=%port% --username=%username% --dbname=%dbname% --file=business-rules\br_target_public_display.sql >> build.log 2>&1
 
-echo Loading Waiheke Shape Data - this can take up to 7 minutes...
+echo Loading Waiheke Shape Data...
 echo Loading Waiheke Shape Data... >> build.log 2>&1
-%psql_path% --host=%host% --port=%port% --username=%username% --dbname=%dbname% --file=%testDataPath%sola_populate_waiheke_shapefiles.sql >> build.log 2>&1
+%psql_path% --host=%host% --port=%port% --username=%username% --dbname=%dbname% --file=%testDataPath%sola_populate_waiheke_shapefiles.sql >NUL 2>>build.log
 
 
 echo Loading Waiheke Titles...
 echo Loading Waiheke Titles... >> build.log 2>&1
-%psql_path% --host=%host% --port=%port% --username=%username% --dbname=%dbname% --file=%testDataPath%sola_populate_waiheke_title.sql >> build.log 2>&1
+%psql_path% --host=%host% --port=%port% --username=%username% --dbname=%dbname% --file=%testDataPath%sola_populate_waiheke_title.sql >NUL 2>>build.log
 
 
 echo Loading Roles and Privileges...
 echo Loading Roles and Privileges... >> build.log 2>&1
-%psql_path% --host=%host% --port=%port% --username=%username% --dbname=%dbname% --file=%testDataPath%add_user_role_priv.sql >> build.log 2>&1
+%psql_path% --host=%host% --port=%port% --username=%username% --dbname=%dbname% --file=%testDataPath%add_user_role_priv.sql >NUL 2>>build.log
 
 
 echo Loading Applications...
 echo Loading Applications... >> build.log 2>&1
-%psql_path% --host=%host% --port=%port% --username=%username% --dbname=%dbname% --file=%testDataPath%sola_populate_waiheke_applications.sql >> build.log 2>&1
+%psql_path% --host=%host% --port=%port% --username=%username% --dbname=%dbname% --file=%testDataPath%sola_populate_waiheke_applications.sql >NUL 2>>build.log
 
+echo Extracting Waiheke RRR data...
+echo Extracting Waiheke RRR data... >> build.log 2>&1
+%utilitiesPath%\7z.exe e -y -o%testDataPath% %testDataPath%sola_populate_waiheke_rrr.7z >> build.log 2>&1
+
+echo Loading RRR Data...
+echo Loading RRR Data... >> build.log 2>&1
+%psql_path% --host=%host% --port=%port% --username=%username% --dbname=%dbname% --file=%testDataPath%sola_populate_waiheke_rrr.sql >NUL 2>>build.log
+%psql_path% --host=%host% --port=%port% --username=%username% --dbname=%dbname% --file=%testDataPath%data-fixes.sql >> build.log 2>&1
 
 echo Finished at %time% - Check build.log for errors!
 echo Finished at %time% >> build.log 2>&1
