@@ -1,3 +1,50 @@
+SET client_encoding = 'UTF8';
+
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES ('ba_unit-has-several-mortgages-with-same-rank', 'sql', 'The rank of a new mortgage must not be the same as an existing mortgage registered on the same title::::Рейтинг новой ипотеки не должен быть таким же как у существующей ипотеки для данной недвижимости.::::رتبة الرهن يجب ان لا تساوي نفس رتبة الرهن  الحالي::::Le rang de la nouvelle hypothèque ne doit pas être le même qu''une hypothèque existante enregistrée sur le même titre.', '#{id}(administrative.rrr.id) is requested.');
+
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES ('ba_unit-has-several-mortgages-with-same-rank', now(), 'infinity', 'WITH	simple	AS	(SELECT rr1.id, rr1.nr FROM administrative.rrr rr1
+				INNER JOIN administrative.ba_unit ba1 ON (rr1.ba_unit_id = ba1.id)
+				INNER JOIN administrative.rrr rr2 ON ((ba1.id = rr2.ba_unit_id) AND (rr1.mortgage_ranking = rr2.mortgage_ranking))
+			WHERE rr2.id = #{id}
+			AND rr1.type_code = ''mortgage''
+			AND rr1.status_code = ''current''
+			AND (rr1.mortgage_ranking = rr2.mortgage_ranking)),
+	complex	AS	(SELECT rr3.id, rr3.nr FROM administrative.rrr rr3
+				INNER JOIN administrative.ba_unit ba2 ON (rr3.ba_unit_id = ba2.id)
+				INNER JOIN administrative.rrr rr4 ON (ba2.id = rr4.ba_unit_id)
+			WHERE rr4.id = #{id}
+			AND rr3.type_code = ''mortgage''
+			AND rr3.status_code != ''current''
+			AND rr3.mortgage_ranking = rr4.mortgage_ranking
+			AND rr3.nr IN (SELECT nr FROM simple))
+
+SELECT CASE 	WHEN	((SELECT rr5.id FROM administrative.rrr rr5 WHERE rr5.id = #{id} AND rr5.type_code = ''mortgage'') IS NULL) THEN NULL
+		WHEN 	(SELECT (COUNT(*) = 0) FROM simple) THEN TRUE
+		WHEN 	(((SELECT COUNT(*) FROM simple) - (SELECT COUNT(*) FROM complex) = 0)) THEN TRUE
+		ELSE	FALSE
+	END AS vl');
+
+INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
+VALUES ('ba_unit-has-several-mortgages-with-same-rank', 'rrr', NULL, NULL, 'current', NULL, NULL, 'critical', 170);
+
+----------------------------------------------------------------------------------------------------
+
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES ('rrr-must-have-parties', 'sql', 'These rights (and restrictions) must have a recorded party (or parties)::::Данные права (или ограничения) должны иметь правообладателей.::::هذه الحقوق او القيود يجب ان يكون عليها اطراف معرفون::::Ces droits (et restrictions) doivent avoir une partie ou des parties enregistrées', '');
+
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES ('rrr-must-have-parties', now(), 'infinity', 'select count(*) = 0 as vl
+from administrative.rrr r
+where r.id= #{id} and type_code in (select code from administrative.rrr_type where party_required)
+and (select count(*) from administrative.party_for_rrr where rrr_id= r.id) = 0');
+
+INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
+VALUES ('rrr-must-have-parties', 'rrr', NULL, NULL, 'current', NULL, NULL, 'critical', 110);
+
+----------------------------------------------------------------------------------------------------
+
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
 VALUES ('rrr-has-pending', 'sql', 'There are no other pending actions on the rights and restrictions being changed or removed on this application::::Нет никаких изменений в правах и ограничениях, сделанных из текущего заявления::::لا يوجد حركات بحاجة لتنفيذ على الحقوق او القيود لهذا الطلب::::Il n''y a pas d''autre actions en attente sur les droits et restrictions en cours de changement ou supprimé de cette application.', '#{id}(administrative.rrr.id) is requested. It checks if for the target rrr there is already a pending edit or record.');
 
@@ -67,51 +114,6 @@ SELECT (SELECT	CASE 	WHEN (SELECT caveat FROM caveatRegn) THEN TRUE
 
 INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
 VALUES ('ba_unit-has-caveat', 'rrr', NULL, NULL, 'current', NULL, NULL, 'critical', 30);
-
-----------------------------------------------------------------------------------------------------
-
-INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('ba_unit-has-several-mortgages-with-same-rank', 'sql', 'The rank of a new mortgage must not be the same as an existing mortgage registered on the same title::::Рейтинг новой ипотеки не должен быть таким же как у существующей ипотеки для данной недвижимости.::::رتبة الرهن يجب ان لا تساوي نفس رتبة الرهن  الحالي::::Le rang de la nouvelle hypothèque ne doit pas être le même qu''une hypothèque existante enregistrée sur le même titre.', '#{id}(administrative.rrr.id) is requested.');
-
-INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
-VALUES ('ba_unit-has-several-mortgages-with-same-rank', now(), 'infinity', 'WITH	simple	AS	(SELECT rr1.id, rr1.nr FROM administrative.rrr rr1
-				INNER JOIN administrative.ba_unit ba1 ON (rr1.ba_unit_id = ba1.id)
-				INNER JOIN administrative.rrr rr2 ON ((ba1.id = rr2.ba_unit_id) AND (rr1.mortgage_ranking = rr2.mortgage_ranking))
-			WHERE rr2.id = #{id}
-			AND rr1.type_code = ''mortgage''
-			AND rr1.status_code = ''current''
-			AND (rr1.mortgage_ranking = rr2.mortgage_ranking)),
-	complex	AS	(SELECT rr3.id, rr3.nr FROM administrative.rrr rr3
-				INNER JOIN administrative.ba_unit ba2 ON (rr3.ba_unit_id = ba2.id)
-				INNER JOIN administrative.rrr rr4 ON (ba2.id = rr4.ba_unit_id)
-			WHERE rr4.id = #{id}
-			AND rr3.type_code = ''mortgage''
-			AND rr3.status_code != ''current''
-			AND rr3.mortgage_ranking = rr4.mortgage_ranking
-			AND rr3.nr IN (SELECT nr FROM simple))
-
-SELECT CASE 	WHEN	((SELECT rr5.id FROM administrative.rrr rr5 WHERE rr5.id = #{id} AND rr5.type_code = ''mortgage'') IS NULL) THEN NULL
-		WHEN 	(SELECT (COUNT(*) = 0) FROM simple) THEN TRUE
-		WHEN 	(((SELECT COUNT(*) FROM simple) - (SELECT COUNT(*) FROM complex) = 0)) THEN TRUE
-		ELSE	FALSE
-	END AS vl');
-
-INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
-VALUES ('ba_unit-has-several-mortgages-with-same-rank', 'rrr', NULL, NULL, 'current', NULL, NULL, 'critical', 170);
-
-----------------------------------------------------------------------------------------------------
-
-INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('rrr-must-have-parties', 'sql', 'These rights (and restrictions) must have a recorded party (or parties)::::Данные права (или ограничения) должны иметь правообладателей.::::هذه الحقوق او القيود يجب ان يكون عليها اطراف معرفون::::Ces droits (et restrictions) doivent avoir une partie ou des parties enregistrées', '');
-
-INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
-VALUES ('rrr-must-have-parties', now(), 'infinity', 'select count(*) = 0 as vl
-from administrative.rrr r
-where r.id= #{id} and type_code in (select code from administrative.rrr_type where party_required)
-and (select count(*) from administrative.party_for_rrr where rrr_id= r.id) = 0');
-
-INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
-VALUES ('rrr-must-have-parties', 'rrr', NULL, NULL, 'current', NULL, NULL, 'critical', 110);
 
 ----------------------------------------------------------------------------------------------------
 

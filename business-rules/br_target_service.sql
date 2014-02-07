@@ -1,3 +1,5 @@
+SET client_encoding = 'UTF8';
+
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
 VALUES ('documents-present', 'sql', 'Documents attached to the objects, created or modified through the service, must have a scanned image file (or other source file)::::Документы прикреплённые к объектам, созданные или измененные через услуги, должны иметь прикрепленную отсканированную копию.::::المستندات المرفقة للكائنات، التي تم إنشاؤها أو تعديلها من خلال هذه الخدمة، يجب أن يكون لديها ملف الصورة الممسوحة ضوئيا (أو ملف مصدر آخر::::Les documents attaché à des objets, créés ou modifiés à travers un service, doivent contenir un fichier d''image scannée (ou fichier d''une autre source).', '#{id}(service_id) is requested');
 
@@ -30,6 +32,28 @@ VALUES ('documents-present', now(), 'infinity', 'WITH cadastreDocs AS 	(SELECT D
 
 INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
 VALUES ('documents-present', 'service', NULL, 'complete', NULL, NULL, NULL, 'critical', 200);
+
+----------------------------------------------------------------------------------------------------
+
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES ('application-baunit-has-parcels', 'sql', 'Title must have Parcels::::Недвижимость должна иметь участок::::سند الملكية يجب ان يحتوي على قطع::::Un titre doit contenir au moins un numéro de parcelle', '#{id}(application.service.id) is requested');
+
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES ('application-baunit-has-parcels', now(), 'infinity', 'select (select count(*)>0 from administrative.ba_unit_contains_spatial_unit ba_su 
+		inner join cadastre.cadastre_object co on ba_su.spatial_unit_id= co.id
+	where co.status_code in (''current'') and co.geom_polygon is not null and ba_su.ba_unit_id= ba.id) as vl
+from application.service s 
+	inner join application.application_property ap on (s.application_id= ap.application_id)
+	INNER JOIN administrative.ba_unit ba ON (ap.name_firstpart, ap.name_lastpart) = (ba.name_firstpart, ba.name_lastpart)
+where s.id = #{id}
+order by 1
+limit 1');
+
+INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
+VALUES ('application-baunit-has-parcels', 'service', NULL, 'complete', NULL, 'cadastreChange', NULL, 'critical', 130);
+
+INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
+VALUES ('application-baunit-has-parcels', 'service', NULL, 'complete', NULL, 'redefineCadastre', NULL, 'critical', 140);
 
 ----------------------------------------------------------------------------------------------------
 
@@ -274,28 +298,6 @@ LIMIT 1');
 
 INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
 VALUES ('service-title-terminated', 'service', NULL, 'complete', NULL, NULL, NULL, 'critical', 190);
-
-----------------------------------------------------------------------------------------------------
-
-INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('application-baunit-has-parcels', 'sql', 'Title must have Parcels::::Недвижимость должна иметь участок::::سند الملكية يجب ان يحتوي على قطع::::Un titre doit contenir au moins un numéro de parcelle', '#{id}(application.service.id) is requested');
-
-INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
-VALUES ('application-baunit-has-parcels', now(), 'infinity', 'select (select count(*)>0 from administrative.ba_unit_contains_spatial_unit ba_su 
-		inner join cadastre.cadastre_object co on ba_su.spatial_unit_id= co.id
-	where co.status_code in (''current'') and co.geom_polygon is not null and ba_su.ba_unit_id= ba.id) as vl
-from application.service s 
-	inner join application.application_property ap on (s.application_id= ap.application_id)
-	INNER JOIN administrative.ba_unit ba ON (ap.name_firstpart, ap.name_lastpart) = (ba.name_firstpart, ba.name_lastpart)
-where s.id = #{id}
-order by 1
-limit 1');
-
-INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
-VALUES ('application-baunit-has-parcels', 'service', NULL, 'complete', NULL, 'cadastreChange', NULL, 'critical', 130);
-
-INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
-VALUES ('application-baunit-has-parcels', 'service', NULL, 'complete', NULL, 'redefineCadastre', NULL, 'critical', 140);
 
 ----------------------------------------------------------------------------------------------------
 

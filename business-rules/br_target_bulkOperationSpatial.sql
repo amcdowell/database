@@ -1,23 +1,4 @@
-INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('bulk-spatial-name-unique', 'sql', 'Cadastre objects with must have unique names.::::Кадастровые объекты должны иметь уникальные коды.', '#{id}(transaction_id) is requested');
-
-INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
-VALUES ('bulk-spatial-name-unique', now(), 'infinity', 'select (select count(1)=0
-  from bulk_operation.spatial_unit_temporary 
-  where transaction_id = t.id
-   and (name_firstpart, name_lastpart) in (select name_firstpart, name_lastpart 
-    from cadastre.cadastre_object)) as vl
-from transaction.transaction t
-where id = #{id}
-  and id in (select transaction_id 
-    from bulk_operation.spatial_unit_temporary 
-    where type_code = ''cadastre_object'')
-');
-
-INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
-VALUES ('bulk-spatial-name-unique', 'bulkOperationSpatial', NULL, NULL, 'pending', NULL, NULL, 'warning', 440);
-
-----------------------------------------------------------------------------------------------------
+SET client_encoding = 'UTF8';
 
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
 VALUES ('bulk-spatial-geom-overlaps-with-loading-geom', 'sql', 'New cadastre objects must not overlap with other new cadastre objects. ::::Новые кадастровые объекты не должны пересекаться с другими новыми объектами.', '#{id}(transaction_id) is requested');
@@ -77,6 +58,27 @@ where id = #{id}
 
 INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
 VALUES ('bulk-spatial-geom-not-valid', 'bulkOperationSpatial', NULL, NULL, 'pending', NULL, NULL, 'warning', 440);
+
+----------------------------------------------------------------------------------------------------
+
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES ('bulk-spatial-name-unique', 'sql', 'Cadastre objects with must have unique names.::::Кадастровые объекты должны иметь уникальные коды.', '#{id}(transaction_id) is requested');
+
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES ('bulk-spatial-name-unique', now(), 'infinity', 'select (select count(1)=0
+  from bulk_operation.spatial_unit_temporary 
+  where transaction_id = t.id
+   and (name_firstpart, name_lastpart) in (select name_firstpart, name_lastpart 
+    from cadastre.cadastre_object)) as vl
+from transaction.transaction t
+where id = #{id}
+  and id in (select transaction_id 
+    from bulk_operation.spatial_unit_temporary 
+    where type_code = ''cadastre_object'')
+');
+
+INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
+VALUES ('bulk-spatial-name-unique', 'bulkOperationSpatial', NULL, NULL, 'pending', NULL, NULL, 'warning', 440);
 
 ----------------------------------------------------------------------------------------------------
 

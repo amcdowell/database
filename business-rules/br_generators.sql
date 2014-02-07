@@ -1,3 +1,5 @@
+SET client_encoding = 'UTF8';
+
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
 VALUES ('generate-notation-reference-nr', 'sql', '', '');
 
