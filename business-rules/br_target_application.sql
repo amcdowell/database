@@ -513,4 +513,30 @@ VALUES ('app-current-caveat-and-no-remove-or-vary', 'application', 'validate', N
 
 ----------------------------------------------------------------------------------------------------
 
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES ('application-not-transferred', 'sql', 'An application should not be already transferred to another system.', 'It checks if the application has no service that is of type recordTransfer and that is completed.');
+
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES ('application-not-transferred', now(), 'infinity', 'select count(1) = 0 as vl 
+from application.service 
+where application_id = #{id} and request_type_code=''recordTransfer'' and status_code = ''completed''');
+
+INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
+VALUES ('application-not-transferred', 'application', 'assign', NULL, NULL, NULL, NULL, 'critical', 1);
+
+----------------------------------------------------------------------------------------------------
+
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES ('application-spatial-unit-not-transferred', 'sql', 'An application must not use a parcel already transferred.', 'It checks if the application has no spatial_unit that is already targeted by an application that has a service of type recordTransfer.');
+
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES ('application-spatial-unit-not-transferred', now(), 'infinity', 'select count(1) = 0 as vl
+from application.application_spatial_unit  
+where application_id = #{id} and spatial_unit_id in (select spatial_unit_id from application.application_spatial_unit where application_id in (select application_id from application.service where request_type_code=''recordTransfer'' and status_code = ''completed''))');
+
+INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
+VALUES ('application-spatial-unit-not-transferred', 'application', 'addSpatialUnit', NULL, NULL, NULL, NULL, 'critical', 300);
+
+----------------------------------------------------------------------------------------------------
+
 update system.br set display_name = id where display_name !=id;

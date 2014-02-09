@@ -252,6 +252,9 @@ VALUES ('withdraw', 'Withdraw application::::Забрано::::اسحب الطل
 INSERT INTO application.application_action_type (code, display_value, status_to_set, status, description) 
 VALUES ('resubmit', 'Resubmit::::Подано заново::::اعادة تقديم::::Resoumettre', 'lodged', 'c', '');
 
+INSERT INTO application.application_action_type (code, display_value, status_to_set, status, description) 
+VALUES ('addSpatialUnit', 'Add spatial unit::::Add spatial unit::::Add spatial unit::::Add spatial unit', null, 'c', '');
+
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO application.request_category_type (code, display_value, description, status) 
@@ -392,7 +395,7 @@ INSERT INTO application.request_type (code, request_category_code, display_value
 VALUES ('newDigitalProperty', 'registrationServices', 'New Digital Property::::Регистрация существующего права собственности::::أنشاء سند الكتروني جديد::::Nouvelle Propriété Numérique', '...::::...::::...::::...', 'x', 5, 0.00, 0.00, 0.00, 1, null, null, null);
 
 INSERT INTO application.request_type (code, request_category_code, display_value, description, status, nr_days_to_complete, base_fee, area_base_fee, value_base_fee, nr_properties_required, notation_template, rrr_type_code, type_action_code) 
-VALUES ('recordTransfer', 'registrationServices', 'Record transfer::::Record transfer in russian::::Record transfer in arabic::::Record transfer in french', '...::::...::::...::::...', 'c', 1, 0.00, 0.00, 0.00, 0, null, null, null);
+VALUES ('recordTransfer', 'informationServices', 'Record transfer::::Record transfer in russian::::Record transfer in arabic::::Record transfer in french', '...::::...::::...::::...', 'c', 1, 0.00, 0.00, 0.00, 0, null, null, null);
 
 ----------------------------------------------------------------------------------------------------
 

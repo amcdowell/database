@@ -1989,7 +1989,8 @@ $BODY$
 COMMENT ON FUNCTION system.get_text_from_schema(character varying) IS 'It generates from a schema a coded script. It is used for backing up a schema.';
 
 CREATE OR REPLACE FUNCTION system.consolidation_extract(
-  admin_user varchar -- The id of the user running the consolidation
+  admin_user varchar, -- The id of the user running the consolidation
+  everything boolean -- True: Everything that has not been transfeerred will be extracted
 )
   RETURNS text AS
 $BODY$
@@ -1999,6 +2000,18 @@ DECLARE
   sql_to_run varchar;
   order_of_exec int;
 BEGIN
+
+  -- If everything is true it means all applications that have not a service 'recordTransfer' will get one.
+  if everything then  
+    insert into application.service(id, application_id, request_type_code, expected_completion_date)
+    select uuid_generate_v1() as id, id as application_id, 'recordTransfer' as request_type_code, now()
+    from application.application
+    where id not in (
+      select a.id
+      from application.application a inner join application.service s on a.id = s.application_id
+      where s.request_type_code='recordTransfer');
+  
+  end if;
 
   -- Set constants.
   consolidation_schema = 'consolidation';
@@ -2051,6 +2064,10 @@ BEGIN
   -- Set the status of all services of type 'recordTransfer' to 'completed'
   update application.service set status_code = 'completed', change_user = admin_user 
   where id in (select id from consolidation.service where request_type_code = 'recordTransfer' and status_code in ('lodged', 'requisitioned'));
+
+  -- Make every transferred application unassigned.
+  update application.application set action_code = 'unAssign', assignee_id = null, assigned_datetime = null
+  where id in (select application_id from consolidation.service where request_type_code = 'recordTransfer' and status_code in ('lodged', 'requisitioned'));
   
   -- Make sola accessible from all users.
   update system.appuser set active = false where id != admin_user;
@@ -2060,7 +2077,7 @@ END;
 $BODY$
   LANGUAGE plpgsql;
 
-COMMENT ON FUNCTION system.consolidation_extract(character varying) IS 'This function is used to extract in a script the consolidated records that are marked to be transferred.';
+COMMENT ON FUNCTION system.consolidation_extract(varchar, boolean) IS 'This function is used to extract in a script the consolidated records that are marked to be transferred.';
 
 CREATE OR REPLACE FUNCTION system.script_to_schema(extraction_script text)
   RETURNS varchar AS
