@@ -1,3 +1,47 @@
+SET client_encoding = 'UTF8';
+
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES ('application-on-approve-check-public-display', 'sql', 'The publication period must be completed.::::Период публикации должен быть завершен.::::يجب استكمال فترة النشر::::La période de publication doit être exécutée.', 'Checks the completion of the public display period for all instances of systematic registration service related to the application');
+
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES ('application-on-approve-check-public-display', now(), 'infinity', '  SELECT (COUNT(*) = 0)  AS vl
+   FROM cadastre.land_use_type lu, cadastre.cadastre_object co, cadastre.spatial_value_area sa, administrative.ba_unit_contains_spatial_unit su, 
+   application.application_property ap, application.application aa, application.service s, source.source ss
+  WHERE sa.spatial_unit_id::text = co.id::text AND sa.type_code::text = ''officialArea''::text AND su.spatial_unit_id::text = sa.spatial_unit_id::text 
+  AND ap.ba_unit_id::text = su.ba_unit_id::text AND aa.id::text = ap.application_id::text AND s.application_id::text = aa.id::text 
+  AND s.request_type_code::text = ''systematicRegn''::text AND s.status_code::text = ''completed''::text
+   AND COALESCE(co.land_use_code, ''residential''::character varying)::text = lu.code::text
+  and ss.reference_nr = co.name_lastpart
+  and ss.reference_nr = co.name_lastpart and ss.expiration_date >= now() 
+  and s.application_id = #{id};');
+
+INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
+VALUES ('application-on-approve-check-public-display', 'application', 'approve', NULL, NULL, NULL, NULL, 'critical', 601);
+
+----------------------------------------------------------------------------------------------------
+
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES ('app-check-title-ref', 'sql', 'Invalid identifier for title::::Неверный идентификатор права собственности::::معرف السند غير صحيح::::Identifiant invalide pour le titre', '');
+
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES ('app-check-title-ref', now(), 'infinity', 'WITH 	convertTitleApp	AS	(SELECT se.id FROM application.service se
+				WHERE se.application_id = #{id}
+				AND se.request_type_code = ''newDigitalTitle''),
+	titleRefChk	AS	(SELECT aprp.application_id FROM application.application_property aprp
+				WHERE aprp.application_id= #{id} 
+				AND SUBSTR(aprp.name_firstpart, 1) != ''N''
+				AND NOT(aprp.name_lastpart ~ ''^[0-9]+$''))--isnumeric test
+	
+SELECT CASE 	WHEN (SELECT (COUNT(*) = 0) FROM convertTitleApp) THEN NULL
+		WHEN (SELECT (COUNT(*) = 0) FROM titleRefChk) THEN TRUE
+		ELSE FALSE
+	END AS vl');
+
+INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
+VALUES ('app-check-title-ref', 'application', 'validate', NULL, NULL, NULL, NULL, 'medium', 750);
+
+----------------------------------------------------------------------------------------------------
+
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
 VALUES ('application-br7-check-sources-have-documents', 'sql', 'Documents lodged with an application should have a scanned image file (or other source file) attached::::Документы присутствующие в заявлении должны иметь прикрепленную отсканированную копию.::::الوثائق المرتبطة بالطلب يجب ان يكون لها صور ممسوحة ومرفقة::::Documents lodged with an application should have a scanned image file (or other source file) attached', 'Checks that each document lodged with the application has a scanned image file (or other digital source file) stored in the SOLA database. To remedy the failure of the business rule add the scanned image to the document record through the Document Tab in the Application form or use the Document Toolbar item in the Main form.');
 
@@ -81,26 +125,6 @@ SELECT CASE WHEN fhCheck IS TRUE THEN ((SELECT cancelSequence FROM orderCancel) 
 
 INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
 VALUES ('application-cancel-property-service-before-new-title', 'application', 'validate', NULL, NULL, NULL, NULL, 'critical', 390);
-
-----------------------------------------------------------------------------------------------------
-
-INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('application-on-approve-check-public-display', 'sql', 'The publication period must be completed.::::Период публикации должен быть завершен.::::يجب استكمال فترة النشر::::La période de publication doit être exécutée.', 'Checks the completion of the public display period for all instances of systematic registration service related to the application');
-
-INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
-VALUES ('application-on-approve-check-public-display', now(), 'infinity', '  SELECT (COUNT(*) = 0)  AS vl
-   FROM cadastre.land_use_type lu, cadastre.cadastre_object co, cadastre.spatial_value_area sa, administrative.ba_unit_contains_spatial_unit su, 
-   application.application_property ap, application.application aa, application.service s, source.source ss
-  WHERE sa.spatial_unit_id::text = co.id::text AND sa.type_code::text = ''officialArea''::text AND su.spatial_unit_id::text = sa.spatial_unit_id::text 
-  AND ap.ba_unit_id::text = su.ba_unit_id::text AND aa.id::text = ap.application_id::text AND s.application_id::text = aa.id::text 
-  AND s.request_type_code::text = ''systematicRegn''::text AND s.status_code::text = ''completed''::text
-   AND COALESCE(co.land_use_code, ''residential''::character varying)::text = lu.code::text
-  and ss.reference_nr = co.name_lastpart
-  and ss.reference_nr = co.name_lastpart and ss.expiration_date >= now() 
-  and s.application_id = #{id};');
-
-INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
-VALUES ('application-on-approve-check-public-display', 'application', 'approve', NULL, NULL, NULL, NULL, 'critical', 601);
 
 ----------------------------------------------------------------------------------------------------
 
@@ -289,28 +313,6 @@ AND sv.status_code != ''cancelled''');
 
 INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
 VALUES ('application-br8-check-has-services', 'application', 'validate', NULL, NULL, NULL, NULL, 'critical', 260);
-
-----------------------------------------------------------------------------------------------------
-
-INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('app-check-title-ref', 'sql', 'Invalid identifier for title::::Неверный идентификатор права собственности::::معرف السند غير صحيح::::Identifiant invalide pour le titre', '');
-
-INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
-VALUES ('app-check-title-ref', now(), 'infinity', 'WITH 	convertTitleApp	AS	(SELECT se.id FROM application.service se
-				WHERE se.application_id = #{id}
-				AND se.request_type_code = ''newDigitalTitle''),
-	titleRefChk	AS	(SELECT aprp.application_id FROM application.application_property aprp
-				WHERE aprp.application_id= #{id} 
-				AND SUBSTR(aprp.name_firstpart, 1) != ''N''
-				AND NOT(aprp.name_lastpart ~ ''^[0-9]+$''))--isnumeric test
-	
-SELECT CASE 	WHEN (SELECT (COUNT(*) = 0) FROM convertTitleApp) THEN NULL
-		WHEN (SELECT (COUNT(*) = 0) FROM titleRefChk) THEN TRUE
-		ELSE FALSE
-	END AS vl');
-
-INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
-VALUES ('app-check-title-ref', 'application', 'validate', NULL, NULL, NULL, NULL, 'medium', 750);
 
 ----------------------------------------------------------------------------------------------------
 

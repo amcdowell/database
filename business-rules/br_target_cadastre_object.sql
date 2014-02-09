@@ -1,3 +1,20 @@
+SET client_encoding = 'UTF8';
+
+INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
+VALUES ('cadastre-redefinition-target-geometries-dont-overlap', 'sql', 'New polygons do not overlap with each other.::::Новые полигоны не пересекаются друг с другом.::::المضلعات الجديدة لا يجب ان تتداخل::::Les nouveaux polygones ne doivent pas se superposer.', '#{id} is the parameter asked. It is the transaction id.');
+
+INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
+VALUES ('cadastre-redefinition-target-geometries-dont-overlap', now(), 'infinity', 'select coalesce(st_area(st_union(co.geom_polygon)) = sum(st_area(co.geom_polygon)), true) as vl
+from cadastre.cadastre_object_target co where transaction_id = #{id}');
+
+INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
+VALUES ('cadastre-redefinition-target-geometries-dont-overlap', 'cadastre_object', NULL, NULL, 'current', 'redefineCadastre', NULL, 'critical', 120);
+
+INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
+VALUES ('cadastre-redefinition-target-geometries-dont-overlap', 'cadastre_object', NULL, NULL, 'pending', 'redefineCadastre', NULL, 'warning', 430);
+
+----------------------------------------------------------------------------------------------------
+
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
 VALUES ('area-check-percentage-newareas-oldareas', 'sql', 'The difference between the total of the new parcels official areas and the total of the old parcels official areas should not be greater than 0.1%::::Разница между общей официальной площадью новых участков и площадью старых участков не должна превышать 0.1%.::::الفرق بين مجموع مساحات  القطع الجديدة الرسمية  ومجموع المساحات السابقة للقطع القديمة يجب ان لا يتجاوز 0.1 %::::La différence entre la superficie totale officielle des nouvelles parcelles et la superficie totale officielle des anciennes parcelles ne doit pas être supérieur à 0.1%.', '');
 
@@ -31,21 +48,6 @@ VALUES ('area-check-percentage-newareas-oldareas', 'cadastre_object', NULL, NULL
 
 INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
 VALUES ('area-check-percentage-newareas-oldareas', 'cadastre_object', NULL, NULL, 'current', 'cadastreChange', NULL, 'warning', 630);
-
-----------------------------------------------------------------------------------------------------
-
-INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
-VALUES ('cadastre-redefinition-target-geometries-dont-overlap', 'sql', 'New polygons do not overlap with each other.::::Новые полигоны не пересекаются друг с другом.::::المضلعات الجديدة لا يجب ان تتداخل::::Les nouveaux polygones ne doivent pas se superposer.', '#{id} is the parameter asked. It is the transaction id.');
-
-INSERT INTO system.br_definition(br_id, active_from, active_until, body) 
-VALUES ('cadastre-redefinition-target-geometries-dont-overlap', now(), 'infinity', 'select coalesce(st_area(st_union(co.geom_polygon)) = sum(st_area(co.geom_polygon)), true) as vl
-from cadastre.cadastre_object_target co where transaction_id = #{id}');
-
-INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
-VALUES ('cadastre-redefinition-target-geometries-dont-overlap', 'cadastre_object', NULL, NULL, 'current', 'redefineCadastre', NULL, 'critical', 120);
-
-INSERT INTO system.br_validation(br_id, target_code, target_application_moment, target_service_moment, target_reg_moment, target_request_type_code, target_rrr_type_code, severity_code, order_of_execution) 
-VALUES ('cadastre-redefinition-target-geometries-dont-overlap', 'cadastre_object', NULL, NULL, 'pending', 'redefineCadastre', NULL, 'warning', 430);
 
 ----------------------------------------------------------------------------------------------------
 

@@ -1,3 +1,5 @@
+SET client_encoding = 'UTF8';
+
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
 VALUES ('spatial-unit-group-not-overlap', 'sql', 'Spatial unit groups of the same hierarchy must not overlap with each other. Tolerance of 0.5 m is applied.::::Пространственные группы одной и той же иерархии не должны пересекаться друг с другом. Погрешность не должна превышать 0.5 м', 'There is no parameter required.');
 

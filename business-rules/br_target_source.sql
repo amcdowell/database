@@ -1,3 +1,5 @@
+SET client_encoding = 'UTF8';
+
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
 VALUES ('source-attach-in-transaction-no-pendings', 'sql', 'Document (source file) must not be duplicated::::Документ не должен дублироваться.::::يجب عدم تكرار الوثيقة  (ملف المصدر)::::Le document (fichier source) ne doit pas être dupliqué.', '#{id}(source.source.id) is requested. It checks if the source has already a record with the status pending.');
 

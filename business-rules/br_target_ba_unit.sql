@@ -1,3 +1,5 @@
+SET client_encoding = 'UTF8';
+
 INSERT INTO system.br(id, technical_type_code, feedback, technical_description) 
 VALUES ('target-ba_unit-check-if-pending', 'sql', 'Pending registration actions (from other applications) affecting the title to be cancelled should be cancelled::::Все незавершенные действия из других заявлений по регистрации прав с данной недвижимостью, которая будет ликвидирована должны быть отменены.::::حركات التسجيل المعلقة والتي تؤثر على سند الملكية من الطلبات الاخرى يجب الغاؤها::::Les actions d''enregistrement en attente (provenant d''autres demandes) affectant le titre à annuler doivent être annulées.', '#{id}(baunit_id) is requested. It checks if there is no pending transaction for target ba_unit (a ba_unit flagged for cancellation).
  It checks if the administrative.ba_unit_target table has a record of this ba_unit which is different
