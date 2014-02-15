@@ -36,9 +36,11 @@ psql --host=$host --port=$port --username=$username --dbname=$dbname --file=$scr
 psql --host=$host --port=$port --username=$username --dbname=$dbname --file=$script_folder"business-rules/br_target_cadastre_object.sql"
 psql --host=$host --port=$port --username=$username --dbname=$dbname --file=$script_folder"business-rules/br_target_rrr.sql"
 psql --host=$host --port=$port --username=$username --dbname=$dbname --file=$script_folder"business-rules/br_target_source.sql"
-psql --host=$host --port=$port --username=$username --dbname=$dbname --file=$script_folder"business-rules/br_target-bulkOperationSpatial.sql"
+psql --host=$host --port=$port --username=$username --dbname=$dbname --file=$script_folder"business-rules/br_target_bulkOperationSpatial.sql"
 psql --host=$host --port=$port --username=$username --dbname=$dbname --file=$script_folder"business-rules/br_target_spatial_unit_group.sql"
 psql --host=$host --port=$port --username=$username --dbname=$dbname --file=$script_folder"business-rules/br_target_public_display.sql"
+psql --host=$host --port=$port --username=$username --dbname=$dbname --file=$script_folder"business-rules/br_target_consolidation.sql"
+psql --host=$host --port=$port --username=$username --dbname=$dbname --file=$script_folder"business-rules/br_consolidation.sql"
 
 echo Loading Waiheke Shapefile Data - this can take up to 7 minutes…
 

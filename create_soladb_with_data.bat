@@ -47,6 +47,8 @@ echo Loading SOLA business rules... >> build.log 2>&1
 %psql_path% --host=%host% --port=%port% --username=%username% --dbname=%dbname% --file=business-rules\br_target_bulkOperationSpatial.sql >> build.log 2>&1
 %psql_path% --host=%host% --port=%port% --username=%username% --dbname=%dbname% --file=business-rules\br_target_spatial_unit_group.sql >> build.log 2>&1
 %psql_path% --host=%host% --port=%port% --username=%username% --dbname=%dbname% --file=business-rules\br_target_public_display.sql >> build.log 2>&1
+%psql_path% --host=%host% --port=%port% --username=%username% --dbname=%dbname% --file=business-rules\br_target_consolidation.sql >> build.log 2>&1
+%psql_path% --host=%host% --port=%port% --username=%username% --dbname=%dbname% --file=business-rules\br_consolidation.sql >> build.log 2>&1
 
 echo Loading Waiheke Shape Data...
 echo Loading Waiheke Shape Data... >> build.log 2>&1
